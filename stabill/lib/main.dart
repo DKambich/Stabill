@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stabill/account_dialog.dart';
 
 void main() {
   runApp(MyApp());
@@ -55,7 +56,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: index == 0
           ? FloatingActionButton(
-              onPressed: null,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return NewAccountDialog(
+                      onCreateAccount: (acc) {},
+                    );
+                  },
+                );
+              },
               tooltip: 'Increment',
               child: Icon(Icons.add),
             )
