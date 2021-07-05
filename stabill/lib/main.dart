@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stabill/account_dialog.dart';
+import 'package:stabill/pages/account_list.dart';
 
 void main() {
   runApp(MyApp());
@@ -41,9 +42,9 @@ class _MyHomePageState extends State<MyHomePage> {
       body: PageView(
         controller: controller,
         children: [
-          Icon(Icons.savings),
+          AccountList(),
           Icon(Icons.insights),
-          Icon(Icons.book),
+          Icon(Icons.repeat),
         ],
         onPageChanged: (int index) {
           if (this.index != index) {
@@ -81,8 +82,8 @@ class _MyHomePageState extends State<MyHomePage> {
             label: "Insights",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: "Accounts",
+            icon: Icon(Icons.repeat),
+            label: "Recurring Transactions",
           ),
         ],
         currentIndex: this.index,

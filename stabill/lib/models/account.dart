@@ -1,7 +1,7 @@
 class Account {
   String name;
   double availableBalance;
-  double pendingBalance;
+  double currentBalance;
 
-  Account({this.name = "", this.availableBalance = 0, this.pendingBalance = 0});
+  Account({this.name = "", this.availableBalance = 0, this.currentBalance = 0});
 }
