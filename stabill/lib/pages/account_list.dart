@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:stabill/models/account.dart';
 
 class AccountList extends StatefulWidget {
-  const AccountList({Key? key}) : super(key: key);
+  final List<Account> accounts;
+
+  const AccountList({Key? key, required this.accounts}) : super(key: key);
 
   @override
   _AccountListState createState() => _AccountListState();
@@ -20,20 +22,10 @@ class _AccountListState extends State<AccountList> {
 
   @override
   Widget build(BuildContext context) {
-    List<Account> accounts = [];
-    accounts.add(
-      Account(
-          name: "Checking", availableBalance: 100.00, currentBalance: 100.00),
-    );
-    accounts.add(
-      Account(
-          name: "TCF Checking", availableBalance: 200.0, currentBalance: 200.0),
-    );
-
     double totalCurrentBalance = 0;
     double totalAvailableBalance = 0;
 
-    accounts.forEach((element) {
+    widget.accounts.forEach((element) {
       totalCurrentBalance += element.currentBalance;
       totalAvailableBalance += element.availableBalance;
     });
@@ -90,9 +82,9 @@ class _AccountListState extends State<AccountList> {
         ),
         Expanded(
           child: ListView.builder(
-              itemCount: accounts.length,
+              itemCount: widget.accounts.length,
               itemBuilder: (ctx, index) {
-                final Account account = accounts[index];
+                final Account account = widget.accounts[index];
 
                 String accountName = account.name;
                 String availableBalance =

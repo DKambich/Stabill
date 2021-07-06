@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stabill/account_dialog.dart';
+import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/account_list.dart';
 
 void main() {
@@ -35,6 +36,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    List<Account> accounts = [];
+    accounts.add(
+      Account(
+          name: "Checking", availableBalance: 100.00, currentBalance: 100.00),
+    );
+    accounts.add(
+      Account(
+          name: "TCF Checking", availableBalance: 200.0, currentBalance: 200.0),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -42,7 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
       body: PageView(
         controller: controller,
         children: [
-          AccountList(),
+          AccountList(
+            accounts: accounts,
+          ),
           Icon(Icons.insights),
           Icon(Icons.repeat),
         ],
