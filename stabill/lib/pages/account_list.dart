@@ -10,23 +10,43 @@ class AccountList extends StatefulWidget {
 }
 
 class _AccountListState extends State<AccountList> {
+  Color getBalanceColor(double balance) {
+    return balance > 0
+        ? Colors.green
+        : balance < 0
+            ? Colors.red
+            : Colors.black;
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Account> accounts = [];
     accounts.add(
-      Account(name: "Checking", availableBalance: 100, currentBalance: 100),
+      Account(
+          name: "Checking", availableBalance: 100.00, currentBalance: 100.00),
     );
     accounts.add(
-      Account(name: "TCF Checking", availableBalance: 200, currentBalance: 200),
+      Account(
+          name: "TCF Checking", availableBalance: 200.0, currentBalance: 200.0),
     );
+
+    double totalCurrentBalance = 0;
+    double totalAvailableBalance = 0;
+
+    accounts.forEach((element) {
+      totalCurrentBalance += element.currentBalance;
+      totalAvailableBalance += element.availableBalance;
+    });
 
     return Column(
       children: [
         Container(
           decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                  bottom: BorderSide(color: Colors.grey.shade300, width: 1))),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(blurRadius: 0.25),
+            ],
+          ),
           padding: EdgeInsets.symmetric(vertical: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -40,9 +60,11 @@ class _AccountListState extends State<AccountList> {
                   children: <TextSpan>[
                     new TextSpan(text: 'Current: '),
                     new TextSpan(
-                        text: '\$200',
-                        style: new TextStyle(
-                            color: 200 >= 0 ? Colors.green : Colors.red)),
+                      text: '\$${totalCurrentBalance.toStringAsFixed(2)}',
+                      style: new TextStyle(
+                        color: getBalanceColor(totalCurrentBalance),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -55,9 +77,11 @@ class _AccountListState extends State<AccountList> {
                   children: <TextSpan>[
                     new TextSpan(text: 'Available: '),
                     new TextSpan(
-                        text: '\$300',
-                        style: new TextStyle(
-                            color: 300 >= 0 ? Colors.green : Colors.red)),
+                      text: '\$${totalAvailableBalance.toStringAsFixed(2)}',
+                      style: new TextStyle(
+                        color: getBalanceColor(totalCurrentBalance),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -69,9 +93,12 @@ class _AccountListState extends State<AccountList> {
               itemCount: accounts.length,
               itemBuilder: (ctx, index) {
                 final Account account = accounts[index];
+
                 String accountName = account.name;
-                double availableBalance = account.availableBalance;
-                double currentBalance = account.currentBalance;
+                String availableBalance =
+                    account.availableBalance.toStringAsFixed(2);
+                String currentBalance =
+                    account.currentBalance.toStringAsFixed(2);
 
                 RichText availableText = new RichText(
                   text: new TextSpan(
@@ -82,11 +109,11 @@ class _AccountListState extends State<AccountList> {
                     children: <TextSpan>[
                       new TextSpan(text: 'Available: '),
                       new TextSpan(
-                          text: '\$$availableBalance',
-                          style: new TextStyle(
-                              color: availableBalance >= 0
-                                  ? Colors.green
-                                  : Colors.red)),
+                        text: '\$$availableBalance',
+                        style: new TextStyle(
+                          color: getBalanceColor(totalCurrentBalance),
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -100,11 +127,11 @@ class _AccountListState extends State<AccountList> {
                     children: <TextSpan>[
                       new TextSpan(text: 'Current: '),
                       new TextSpan(
-                          text: '\$$currentBalance',
-                          style: new TextStyle(
-                              color: currentBalance >= 0
-                                  ? Colors.green
-                                  : Colors.red)),
+                        text: '\$$currentBalance',
+                        style: new TextStyle(
+                          color: getBalanceColor(totalCurrentBalance),
+                        ),
+                      ),
                     ],
                   ),
                 );
