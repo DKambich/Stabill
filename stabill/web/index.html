@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -26,6 +27,7 @@
   <title>stabill</title>
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
@@ -94,5 +96,21 @@
       loadMainDartJs();
     }
   </script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.7.1/firebase-app.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyAm8R7p8Ltw5mosAAH7grpm0mG_wTy1VFc",
+      authDomain: "stabill-da6e7.firebaseapp.com",
+      projectId: "stabill-da6e7",
+      storageBucket: "stabill-da6e7.appspot.com",
+      messagingSenderId: "1051611826170",
+      appId: "1:1051611826170:web:27e54775b52e080dd14643"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </body>
+
 </html>

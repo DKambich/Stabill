@@ -49,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
       ),
       body: PageView(
         controller: controller,
@@ -60,12 +61,9 @@ class _MyHomePageState extends State<MyHomePage> {
           Icon(Icons.repeat),
         ],
         onPageChanged: (int index) {
-          if (this.index != index) {
-            print("Changed to " + index.toString());
-            setState(() {
-              this.index = index;
-            });
-          }
+          setState(() {
+            this.index = index;
+          });
         },
       ),
       floatingActionButton: index == 0
@@ -104,8 +102,6 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             this.index = index;
             controller.jumpToPage(index);
-            // controller.animateToPage(index,
-            //     duration: Duration(milliseconds: 200), curve: Curves.easeIn);
           });
         },
       ),
