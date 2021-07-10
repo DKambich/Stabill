@@ -1,143 +1,24 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:stabill/account_dialog.dart';
-import 'package:stabill/models/account.dart';
-import 'package:stabill/pages/account_list.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:stabill/pages/home_page.dart';
+import 'package:stabill/pages/splash_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(Stabill());
 }
 
-class MyApp extends StatelessWidget {
+class Stabill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final Future<FirebaseApp> _initialization = Firebase.initializeApp();
-    return FutureBuilder(
-        future: _initialization,
-        builder: (context, snapshot) {
-          // Check for errors
-          if (snapshot.hasError) {
-            return Text("Error");
-          }
-
-          // Once complete, show your application
-          if (snapshot.connectionState == ConnectionState.done) {
-            return MaterialApp(
-              title: 'Stabill',
-              theme: ThemeData(
-                primarySwatch: Colors.green,
-                accentColor: Colors.red,
-              ),
-              home: MyHomePage(title: 'Stabill'),
-            );
-          }
-
-          // Otherwise, show something whilst waiting for initialization to complete
-          return Container(
-            color: Colors.red,
-          );
-        });
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int index = 0;
-  PageController controller = new PageController();
-
-  @override
-  void initState() {
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user == null) {
-        print('User is currently signed out!');
-        FirebaseAuth.instance.signInAnonymously();
-      } else {
-        print('User is signed in!');
-      }
-    });
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<Account> accounts = [];
-    accounts.add(
-      Account(
-          name: "Checking", availableBalance: 100.00, currentBalance: 100.00),
-    );
-    accounts.add(
-      Account(
-          name: "TCF Checking", availableBalance: 200.0, currentBalance: 200.0),
-    );
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
+    return MaterialApp(
+      title: 'Stabill',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+        accentColor: Colors.red,
       ),
-      body: PageView(
-        controller: controller,
-        children: [
-          AccountList(
-            accounts: accounts,
-          ),
-          Icon(Icons.insights),
-          Icon(Icons.repeat),
-        ],
-        onPageChanged: (int index) {
-          setState(() {
-            this.index = index;
-          });
-        },
-      ),
-      floatingActionButton: index == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return NewAccountDialog(
-                      onCreateAccount: (acc) {},
-                    );
-                  },
-                );
-              },
-              tooltip: 'Increment',
-              child: Icon(Icons.add),
-            )
-          : null,
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.savings),
-            label: "Accounts",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.insights),
-            label: "Insights",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.repeat),
-            label: "Recurring Transactions",
-          ),
-        ],
-        currentIndex: this.index,
-        onTap: (int index) {
-          setState(() {
-            this.index = index;
-            controller.jumpToPage(index);
-          });
-        },
-      ),
+      home: SplashPage(),
+      routes: <String, WidgetBuilder>{
+        '/home': (BuildContext context) => HomePage(title: 'Stabill'),
+      },
     );
   }
 }

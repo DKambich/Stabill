@@ -1,0 +1,92 @@
+import 'package:flutter/material.dart';
+import 'package:stabill/models/account.dart';
+import 'package:stabill/widgets/account_dialog.dart';
+import 'package:stabill/widgets/account_list.dart';
+
+class HomePage extends StatefulWidget {
+  HomePage({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int index = 0;
+  PageController controller = new PageController();
+
+  @override
+  Widget build(BuildContext context) {
+    List<Account> accounts = [];
+    accounts.add(
+      Account(
+          name: "Checking", availableBalance: 100.00, currentBalance: 100.00),
+    );
+    accounts.add(
+      Account(
+          name: "TCF Checking", availableBalance: 200.0, currentBalance: 200.0),
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
+      ),
+      body: PageView(
+        controller: controller,
+        children: [
+          AccountList(
+            accounts: accounts,
+          ),
+          Icon(Icons.insights),
+          Icon(Icons.repeat),
+        ],
+        onPageChanged: (int index) {
+          setState(() {
+            this.index = index;
+          });
+        },
+      ),
+      floatingActionButton: index == 0
+          ? FloatingActionButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return NewAccountDialog(
+                      onCreateAccount: (acc) {},
+                    );
+                  },
+                );
+              },
+              tooltip: 'Increment',
+              child: Icon(Icons.add),
+            )
+          : null,
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.savings),
+            label: "Accounts",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.insights),
+            label: "Insights",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.repeat),
+            label: "Recurring Transactions",
+          ),
+        ],
+        currentIndex: this.index,
+        onTap: (int index) {
+          setState(() {
+            this.index = index;
+            controller.jumpToPage(index);
+          });
+        },
+      ),
+    );
+  }
+}
