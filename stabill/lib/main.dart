@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stabill/pages/home_page.dart';
+import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/splash_page.dart';
 
 void main() {
@@ -17,7 +18,9 @@ class Stabill extends StatelessWidget {
       ),
       home: SplashPage(),
       routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => HomePage(title: 'Stabill'),
+        HomePage.routeName: (BuildContext context) =>
+            HomePage(title: 'Stabill'),
+        LoginPage.routeName: (BuildContext context) => LoginPage(),
       },
     );
   }

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/pages/home_page.dart';
+import 'package:stabill/pages/login_page.dart';
 
 class SplashPage extends StatefulWidget {
   SplashPage({Key? key}) : super(key: key);
@@ -11,26 +14,37 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  StreamSubscription<User?>? stream;
+
   @override
   void initState() {
     Firebase.initializeApp().then((FirebaseApp firebaseApp) {
       print("${firebaseApp.name} Initialized");
-      FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      stream = FirebaseAuth.instance.authStateChanges().listen((User? user) {
         if (user == null) {
-          print('User is currently signed out!');
-          FirebaseAuth.instance.signInAnonymously();
+          toLogin();
         } else {
-          print('User is signed in!');
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomePage(title: "Stabill"),
-            ),
-          );
+          toHome();
         }
-      }).onError((err) => print(err));
+      });
+    }).onError((err, stack) {
+      print(err);
     });
     super.initState();
+  }
+
+  void toHome() {
+    // Deregister the stream
+    stream?.onData((data) {});
+    print('User is signed in!');
+    Navigator.pushReplacementNamed(context, HomePage.routeName);
+  }
+
+  void toLogin() {
+    // Deregister the stream
+    stream?.onData((data) {});
+    print('User is currently signed out!');
+    Navigator.pushReplacementNamed(context, LoginPage.routeName);
   }
 
   @override

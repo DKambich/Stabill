@@ -1,9 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/widgets/account_dialog.dart';
 import 'package:stabill/widgets/account_list.dart';
 
 class HomePage extends StatefulWidget {
+  static final String routeName = "/home";
+
   HomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
@@ -39,7 +43,19 @@ class _HomePageState extends State<HomePage> {
           AccountList(
             accounts: accounts,
           ),
-          Icon(Icons.insights),
+          Center(
+            child: ElevatedButton(
+              child: Text("Logout"),
+              onPressed: () {
+                FirebaseAuth.instance.signOut().then(
+                      (value) => Navigator.pushReplacementNamed(
+                        context,
+                        LoginPage.routeName,
+                      ),
+                    );
+              },
+            ),
+          ),
           Icon(Icons.repeat),
         ],
         onPageChanged: (int index) {
