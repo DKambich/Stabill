@@ -1,7 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/account_dialog.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/account_list.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,14 +12,32 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Stabill',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        accentColor: Colors.red,
-      ),
-      home: MyHomePage(title: 'Stabill'),
-    );
+    final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+    return FutureBuilder(
+        future: _initialization,
+        builder: (context, snapshot) {
+          // Check for errors
+          if (snapshot.hasError) {
+            return Text("Error");
+          }
+
+          // Once complete, show your application
+          if (snapshot.connectionState == ConnectionState.done) {
+            return MaterialApp(
+              title: 'Stabill',
+              theme: ThemeData(
+                primarySwatch: Colors.green,
+                accentColor: Colors.red,
+              ),
+              home: MyHomePage(title: 'Stabill'),
+            );
+          }
+
+          // Otherwise, show something whilst waiting for initialization to complete
+          return Container(
+            color: Colors.red,
+          );
+        });
   }
 }
 
@@ -33,6 +53,19 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int index = 0;
   PageController controller = new PageController();
+
+  @override
+  void initState() {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user == null) {
+        print('User is currently signed out!');
+        FirebaseAuth.instance.signInAnonymously();
+      } else {
+        print('User is signed in!');
+      }
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
