@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/widgets/balance_text.dart';
 
 class AccountList extends StatefulWidget {
   final List<Account> accounts;
@@ -69,40 +70,13 @@ class _AccountListState extends State<AccountList> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    RichText(
-                      text: new TextSpan(
-                        style: new TextStyle(
-                          fontSize: 20.0,
-                          color: Colors.black,
-                        ),
-                        children: <TextSpan>[
-                          new TextSpan(text: 'Current: '),
-                          new TextSpan(
-                            text: '\$${totalCurrentBalance.toStringAsFixed(2)}',
-                            style: new TextStyle(
-                              color: getBalanceColor(totalCurrentBalance),
-                            ),
-                          ),
-                        ],
-                      ),
+                    BalanceText(
+                      text: "Current: ",
+                      balance: totalCurrentBalance,
                     ),
-                    RichText(
-                      text: new TextSpan(
-                        style: new TextStyle(
-                          fontSize: 20.0,
-                          color: Colors.black,
-                        ),
-                        children: <TextSpan>[
-                          new TextSpan(text: 'Available: '),
-                          new TextSpan(
-                            text:
-                                '\$${totalAvailableBalance.toStringAsFixed(2)}',
-                            style: new TextStyle(
-                              color: getBalanceColor(totalCurrentBalance),
-                            ),
-                          ),
-                        ],
-                      ),
+                    BalanceText(
+                      text: "Available: ",
+                      balance: totalAvailableBalance,
                     ),
                   ],
                 ),
@@ -115,46 +89,8 @@ class _AccountListState extends State<AccountList> {
                           data[index].data() as Map<String, dynamic>);
 
                       String accountName = account.name;
-                      String availableBalance =
-                          account.availableBalance.toStringAsFixed(2);
-                      String currentBalance =
-                          account.currentBalance.toStringAsFixed(2);
-
-                      RichText availableText = new RichText(
-                        text: new TextSpan(
-                          style: new TextStyle(
-                            fontSize: 20.0,
-                            color: Colors.black,
-                          ),
-                          children: <TextSpan>[
-                            new TextSpan(text: 'Available: '),
-                            new TextSpan(
-                              text: '\$$availableBalance',
-                              style: new TextStyle(
-                                color: getBalanceColor(totalCurrentBalance),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-
-                      RichText currentText = new RichText(
-                        text: new TextSpan(
-                          style: new TextStyle(
-                            fontSize: 20.0,
-                            color: Colors.black,
-                          ),
-                          children: <TextSpan>[
-                            new TextSpan(text: 'Current: '),
-                            new TextSpan(
-                              text: '\$$currentBalance',
-                              style: new TextStyle(
-                                color: getBalanceColor(totalCurrentBalance),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+                      double availableBalance = account.availableBalance;
+                      double currentBalance = account.currentBalance;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -171,7 +107,16 @@ class _AccountListState extends State<AccountList> {
                                   ),
                                 ),
                                 Column(
-                                  children: [availableText, currentText],
+                                  children: [
+                                    BalanceText(
+                                      text: "Available: ",
+                                      balance: availableBalance,
+                                    ),
+                                    BalanceText(
+                                      text: "Current: ",
+                                      balance: currentBalance,
+                                    ),
+                                  ],
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   mainAxisSize: MainAxisSize.max,
