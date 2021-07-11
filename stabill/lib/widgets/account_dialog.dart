@@ -120,7 +120,7 @@ class _NewAccountDialogState extends State<NewAccountDialog> {
                       .doc(uid)
                       .collection("accounts")
                       .add({
-                        "accountName": accountName,
+                        "name": accountName,
                         "currentBalance": currentBalance,
                         "availableBalance": currentBalance,
                       })
