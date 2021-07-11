@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
 
@@ -111,7 +113,19 @@ class _NewAccountDialogState extends State<NewAccountDialog> {
                     currentBalance: currentBalance,
                     availableBalance: currentBalance,
                   ));
-                  Navigator.pop(context);
+                  String uid = FirebaseAuth.instance.currentUser!.uid;
+
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(uid)
+                      .collection("accounts")
+                      .add({
+                        "accountName": accountName,
+                        "currentBalance": currentBalance,
+                        "availableBalance": currentBalance,
+                      })
+                      .then((value) => Navigator.pop(context))
+                      .onError((error, stackTrace) => print(error));
                 });
               }
             },
