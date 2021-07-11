@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stabill/models/account.dart';
@@ -12,6 +14,8 @@ class AccountList extends StatefulWidget {
 }
 
 class _AccountListState extends State<AccountList> {
+  late Stream<QuerySnapshot> _accountsStream;
+
   Color getBalanceColor(double balance) {
     return balance > 0
         ? Colors.green
@@ -21,141 +25,167 @@ class _AccountListState extends State<AccountList> {
   }
 
   @override
+  void initState() {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    _accountsStream = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection("accounts")
+        .snapshots();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    double totalCurrentBalance = 0;
-    double totalAvailableBalance = 0;
+    return StreamBuilder<QuerySnapshot>(
+        stream: _accountsStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text('Something went wrong');
+          }
 
-    widget.accounts.forEach((element) {
-      totalCurrentBalance += element.currentBalance;
-      totalAvailableBalance += element.availableBalance;
-    });
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Text("Loading");
+          }
 
-    return Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(blurRadius: 0.25),
-            ],
-          ),
-          padding: EdgeInsets.symmetric(vertical: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          var data = snapshot.data!.docs;
+          double totalCurrentBalance = 0;
+          double totalAvailableBalance = 0;
+
+          widget.accounts.forEach((element) {
+            totalCurrentBalance += element.currentBalance;
+            totalAvailableBalance += element.availableBalance;
+          });
+          return Column(
             children: [
-              RichText(
-                text: new TextSpan(
-                  style: new TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.black,
-                  ),
-                  children: <TextSpan>[
-                    new TextSpan(text: 'Current: '),
-                    new TextSpan(
-                      text: '\$${totalCurrentBalance.toStringAsFixed(2)}',
-                      style: new TextStyle(
-                        color: getBalanceColor(totalCurrentBalance),
-                      ),
-                    ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(blurRadius: 0.25),
                   ],
                 ),
-              ),
-              RichText(
-                text: new TextSpan(
-                  style: new TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.black,
-                  ),
-                  children: <TextSpan>[
-                    new TextSpan(text: 'Available: '),
-                    new TextSpan(
-                      text: '\$${totalAvailableBalance.toStringAsFixed(2)}',
-                      style: new TextStyle(
-                        color: getBalanceColor(totalCurrentBalance),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-              itemCount: widget.accounts.length,
-              itemBuilder: (ctx, index) {
-                final Account account = widget.accounts[index];
-
-                String accountName = account.name;
-                String availableBalance =
-                    account.availableBalance.toStringAsFixed(2);
-                String currentBalance =
-                    account.currentBalance.toStringAsFixed(2);
-
-                RichText availableText = new RichText(
-                  text: new TextSpan(
-                    style: new TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.black,
-                    ),
-                    children: <TextSpan>[
-                      new TextSpan(text: 'Available: '),
-                      new TextSpan(
-                        text: '\$$availableBalance',
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    RichText(
+                      text: new TextSpan(
                         style: new TextStyle(
-                          color: getBalanceColor(totalCurrentBalance),
+                          fontSize: 20.0,
+                          color: Colors.black,
                         ),
-                      ),
-                    ],
-                  ),
-                );
-
-                RichText currentText = new RichText(
-                  text: new TextSpan(
-                    style: new TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.black,
-                    ),
-                    children: <TextSpan>[
-                      new TextSpan(text: 'Current: '),
-                      new TextSpan(
-                        text: '\$$currentBalance',
-                        style: new TextStyle(
-                          color: getBalanceColor(totalCurrentBalance),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              accountName,
-                              style: TextStyle(fontSize: 24),
+                        children: <TextSpan>[
+                          new TextSpan(text: 'Current: '),
+                          new TextSpan(
+                            text: '\$${totalCurrentBalance.toStringAsFixed(2)}',
+                            style: new TextStyle(
+                              color: getBalanceColor(totalCurrentBalance),
                             ),
                           ),
-                          Column(
-                            children: [availableText, currentText],
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                          )
                         ],
                       ),
                     ),
-                  ),
-                );
-              }),
-        ),
-      ],
-    );
+                    RichText(
+                      text: new TextSpan(
+                        style: new TextStyle(
+                          fontSize: 20.0,
+                          color: Colors.black,
+                        ),
+                        children: <TextSpan>[
+                          new TextSpan(text: 'Available: '),
+                          new TextSpan(
+                            text:
+                                '\$${totalAvailableBalance.toStringAsFixed(2)}',
+                            style: new TextStyle(
+                              color: getBalanceColor(totalCurrentBalance),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                    itemCount: data.length,
+                    itemBuilder: (ctx, index) {
+                      final Account account = Account.fromJson(
+                          data[index].data() as Map<String, dynamic>);
+
+                      String accountName = account.name;
+                      String availableBalance =
+                          account.availableBalance.toStringAsFixed(2);
+                      String currentBalance =
+                          account.currentBalance.toStringAsFixed(2);
+
+                      RichText availableText = new RichText(
+                        text: new TextSpan(
+                          style: new TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.black,
+                          ),
+                          children: <TextSpan>[
+                            new TextSpan(text: 'Available: '),
+                            new TextSpan(
+                              text: '\$$availableBalance',
+                              style: new TextStyle(
+                                color: getBalanceColor(totalCurrentBalance),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      RichText currentText = new RichText(
+                        text: new TextSpan(
+                          style: new TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.black,
+                          ),
+                          children: <TextSpan>[
+                            new TextSpan(text: 'Current: '),
+                            new TextSpan(
+                              text: '\$$currentBalance',
+                              style: new TextStyle(
+                                color: getBalanceColor(totalCurrentBalance),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4, horizontal: 8),
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    accountName,
+                                    style: TextStyle(fontSize: 24),
+                                  ),
+                                ),
+                                Column(
+                                  children: [availableText, currentText],
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+            ],
+          );
+        });
   }
 }
