@@ -22,7 +22,7 @@ class BalanceText extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        style: TextStyle(fontSize: fontSize),
+        style: TextStyle(fontSize: fontSize, color: Colors.black),
         children: <TextSpan>[
           TextSpan(text: text),
           TextSpan(

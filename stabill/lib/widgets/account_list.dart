@@ -15,7 +15,7 @@ class AccountList extends StatefulWidget {
 }
 
 class _AccountListState extends State<AccountList> {
-  late Stream<QuerySnapshot> _accountsStream;
+  late Stream<QuerySnapshot<Account>> _accountsStream;
 
   Color getBalanceColor(double balance) {
     return balance > 0
@@ -28,17 +28,23 @@ class _AccountListState extends State<AccountList> {
   @override
   void initState() {
     String uid = FirebaseAuth.instance.currentUser!.uid;
+    // Get a stream for the accounts list to listen to
     _accountsStream = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .collection("accounts")
+        .withConverter<Account>(
+          fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
+          toFirestore: (acc, _) => acc.toJson(),
+        )
         .snapshots();
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<QuerySnapshot<Account>>(
         stream: _accountsStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -46,88 +52,123 @@ class _AccountListState extends State<AccountList> {
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Text("Loading");
+            return Column(
+              children: [
+                Card(
+                  margin: EdgeInsets.zero,
+                  elevation: 2,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        BalanceText(
+                          text: "Current: ",
+                          balance: 0,
+                        ),
+                        BalanceText(
+                          text: "Available: ",
+                          balance: 0,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(child: Center(child: CircularProgressIndicator())),
+              ],
+            );
           }
 
-          var data = snapshot.data!.docs;
+          var accountData = snapshot.data!.docs;
           double totalCurrentBalance = 0;
           double totalAvailableBalance = 0;
 
-          widget.accounts.forEach((element) {
-            totalCurrentBalance += element.currentBalance;
-            totalAvailableBalance += element.availableBalance;
+          accountData.forEach((element) {
+            Account account = element.data();
+            totalCurrentBalance += account.currentBalance;
+            totalAvailableBalance += account.availableBalance;
           });
+
           return Column(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(blurRadius: 0.25),
-                  ],
-                ),
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    BalanceText(
-                      text: "Current: ",
-                      balance: totalCurrentBalance,
-                    ),
-                    BalanceText(
-                      text: "Available: ",
-                      balance: totalAvailableBalance,
-                    ),
-                  ],
+              Card(
+                margin: EdgeInsets.zero,
+                elevation: 2,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      BalanceText(
+                        text: "Current: ",
+                        balance: totalCurrentBalance,
+                      ),
+                      BalanceText(
+                        text: "Available: ",
+                        balance: totalAvailableBalance,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Expanded(
-                child: ListView.builder(
-                    itemCount: data.length,
-                    itemBuilder: (ctx, index) {
-                      final Account account = Account.fromJson(
-                          data[index].data() as Map<String, dynamic>);
+                child: NotificationListener<OverscrollIndicatorNotification>(
+                  onNotification: (overScroll) {
+                    overScroll.disallowGlow();
+                    return false;
+                  },
+                  child: ListView.builder(
+                      itemCount: accountData.length,
+                      itemBuilder: (ctx, index) {
+                        final Account account = accountData[index].data();
 
-                      String accountName = account.name;
-                      double availableBalance = account.availableBalance;
-                      double currentBalance = account.currentBalance;
+                        String accountName = account.name;
+                        double availableBalance = account.availableBalance;
+                        double currentBalance = account.currentBalance;
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 8),
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    accountName,
-                                    style: TextStyle(fontSize: 24),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 4,
+                            horizontal: 8,
+                          ),
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      accountName,
+                                      style: TextStyle(fontSize: 24),
+                                    ),
                                   ),
-                                ),
-                                Column(
-                                  children: [
-                                    BalanceText(
-                                      text: "Available: ",
-                                      balance: availableBalance,
-                                    ),
-                                    BalanceText(
-                                      text: "Current: ",
-                                      balance: currentBalance,
-                                    ),
-                                  ],
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                )
-                              ],
+                                  Column(
+                                    children: [
+                                      BalanceText(
+                                        text: "Available: ",
+                                        balance: availableBalance,
+                                      ),
+                                      BalanceText(
+                                        text: "Current: ",
+                                        balance: currentBalance,
+                                      ),
+                                    ],
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                  )
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
+                ),
               ),
             ],
           );
