@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/widgets/balance_text.dart';
 
+// TODO: Implement user preferred order from https://pub.dev/packages/streaming_shared_preferences
 class AccountList extends StatefulWidget {
   const AccountList({Key? key}) : super(key: key);
 
@@ -113,7 +114,15 @@ class _AccountListState extends State<AccountList> {
                 ),
               ),
               Expanded(
-                child: ListView.builder(
+                child: ReorderableListView.builder(
+                  onReorder: (int oldIndex, int newIndex) async {
+                    if (oldIndex < newIndex) {
+                      newIndex -= 1;
+                    }
+                    final item = accountData.removeAt(oldIndex);
+                    accountData.insert(newIndex, item);
+                  },
+                  buildDefaultDragHandles: false,
                   itemCount: accountData.length,
                   itemBuilder: (ctx, index) {
                     final Account account = accountData[index].data();
@@ -122,12 +131,12 @@ class _AccountListState extends State<AccountList> {
                     double availableBalance = account.availableBalance;
                     double currentBalance = account.currentBalance;
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 8,
-                      ),
+                    return ReorderableDelayedDragStartListener(
+                      key: Key(accountData[index].id),
+                      index: index,
                       child: Card(
+                        margin:
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                         child: Padding(
                           padding: const EdgeInsets.all(24.0),
                           child: Row(
