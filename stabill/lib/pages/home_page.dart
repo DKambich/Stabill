@@ -22,16 +22,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Account> accounts = [];
-    accounts.add(
-      Account(
-          name: "Checking", availableBalance: 100.00, currentBalance: 100.00),
-    );
-    accounts.add(
-      Account(
-          name: "TCF Checking", availableBalance: 200.0, currentBalance: 200.0),
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -40,9 +30,7 @@ class _HomePageState extends State<HomePage> {
       body: PageView(
         controller: controller,
         children: [
-          AccountList(
-            accounts: accounts,
-          ),
+          AccountList(),
           Center(
             child: ElevatedButton(
               child: Text("Logout"),
@@ -69,11 +57,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder: (context) {
-                    return NewAccountDialog(
-                      onCreateAccount: (acc) {},
-                    );
-                  },
+                  builder: (context) => NewAccountDialog(),
                 );
               },
               tooltip: 'Increment',

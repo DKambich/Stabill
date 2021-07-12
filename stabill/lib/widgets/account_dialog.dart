@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
 
 class NewAccountDialog extends StatefulWidget {
-  final Function(Account) onCreateAccount;
-
-  const NewAccountDialog({Key? key, required this.onCreateAccount})
-      : super(key: key);
+  const NewAccountDialog({Key? key}) : super(key: key);
 
   @override
   _NewAccountDialogState createState() => _NewAccountDialogState();
@@ -108,11 +105,6 @@ class _NewAccountDialogState extends State<NewAccountDialog> {
                     _balanceController.text.replaceAll(r"$", "");
                 double currentBalance = double.parse(balanceStr);
                 setState(() {
-                  widget.onCreateAccount(new Account(
-                    name: accountName,
-                    currentBalance: currentBalance,
-                    availableBalance: currentBalance,
-                  ));
                   String uid = FirebaseAuth.instance.currentUser!.uid;
 
                   FirebaseFirestore.instance
