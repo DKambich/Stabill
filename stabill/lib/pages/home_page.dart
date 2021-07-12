@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:stabill/models/account.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/widgets/account_dialog.dart';
 import 'package:stabill/widgets/account_list.dart';
@@ -53,21 +53,37 @@ class _HomePageState extends State<HomePage> {
         },
       ),
       floatingActionButton: index == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => NewAccountDialog(),
-                );
-              },
-              tooltip: 'Increment',
-              child: Icon(Icons.add),
-            )
+          ? SpeedDial(
+              animatedIcon: AnimatedIcons.menu_close,
+              tooltip: 'Actions',
+              child: Icon(Icons.account_balance),
+              spacing: 8,
+              spaceBetweenChildren: 8,
+              children: [
+                  SpeedDialChild(
+                    child: Icon(Icons.savings),
+                    label: "Add Account",
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => NewAccountDialog(),
+                      );
+                    },
+                  ),
+                  SpeedDialChild(
+                    child: Icon(Icons.swap_horiz),
+                    label: "Make Transfer",
+                  ),
+                  SpeedDialChild(
+                    child: Icon(Icons.repeat),
+                    label: "Recurring Transactions",
+                  ),
+                ])
           : null,
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.savings),
+            icon: Icon(Icons.account_balance),
             label: "Accounts",
           ),
           BottomNavigationBarItem(
