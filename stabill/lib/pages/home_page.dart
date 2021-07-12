@@ -44,7 +44,6 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
-          Icon(Icons.repeat),
         ],
         onPageChanged: (int index) {
           setState(() {
@@ -89,10 +88,6 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.insights),
             label: "Insights",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.repeat),
-            label: "Recurring Transactions",
           ),
         ],
         currentIndex: this.index,
