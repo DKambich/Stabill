@@ -4,6 +4,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/widgets/account_dialog.dart';
 import 'package:stabill/widgets/account_list.dart';
+import 'package:stabill/widgets/transfer_dialog.dart';
 
 class HomePage extends StatefulWidget {
   static final String routeName = "/home";
@@ -23,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(widget.title),
         actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
@@ -72,6 +74,18 @@ class _HomePageState extends State<HomePage> {
                   SpeedDialChild(
                     child: Icon(Icons.swap_horiz),
                     label: "Make Transfer",
+                    onTap: () {
+                      showModalBottomSheet(
+                        isScrollControlled: true,
+                        context: context,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25)),
+                        ),
+                        builder: (_) => TransferDialog(),
+                      );
+                    },
                   ),
                   SpeedDialChild(
                     child: Icon(Icons.repeat),
