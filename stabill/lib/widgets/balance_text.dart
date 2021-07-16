@@ -20,13 +20,21 @@ class BalanceText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String balanceText = "";
+    if (balance < 0) {
+      balanceText += "-";
+    }
+
+    balanceText += r"$";
+    balanceText += "${balance.abs().toStringAsFixed(2)}";
+
     return RichText(
       text: TextSpan(
         style: TextStyle(fontSize: fontSize, color: Colors.black),
         children: <TextSpan>[
           TextSpan(text: text),
           TextSpan(
-            text: '\$${balance.toStringAsFixed(2)}',
+            text: balanceText,
             style: TextStyle(
               color: getBalanceColor(balance),
             ),
