@@ -14,26 +14,53 @@ class TransferDialog extends StatefulWidget {
 class _TransferDialogState extends State<TransferDialog> {
   late Future<QuerySnapshot<Account>> _accountsFuture;
   late CollectionReference<Account> _accountsCollection;
+  final TextEditingController _balanceController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
   String fromAccount = "", toAccount = "";
-  String errorText = "";
+  String? errorText = "";
 
-  void transferFunds(String fromID, String toID, double amount) async {
-    var fromAccountRef = _accountsCollection.doc(fromID);
-    var fromAccount = (await fromAccountRef.get()).data();
+  Future<void> transferFunds(String fromID, String toID, double amount) async {
+    WriteBatch batch = FirebaseFirestore.instance.batch();
 
-    var toAccountRef = _accountsCollection.doc(toID);
-    var toAccount = (await toAccountRef.get()).data();
+    return _accountsCollection.get().then((querySnapshot) {
+      querySnapshot.docs.forEach((document) {
+        if (document.id == fromID) {
+          double availableBalance = document.data().availableBalance - amount;
+          double currentBalance = document.data().currentBalance - amount;
+          batch.update(document.reference, {
+            "availableBalance": availableBalance,
+            "currentBalance": currentBalance
+          });
+        } else if (document.id == toID) {
+          double availableBalance = document.data().availableBalance + amount;
+          double currentBalance = document.data().currentBalance + amount;
+          batch.update(document.reference, {
+            "availableBalance": availableBalance,
+            "currentBalance": currentBalance
+          });
+        }
+      });
 
-    if (fromAccount != null && toAccount != null) {
-      fromAccount.availableBalance -= amount;
-      fromAccount.currentBalance -= amount;
+      return batch.commit();
+    });
 
-      toAccount.availableBalance += amount;
-      toAccount.currentBalance += amount;
+    // var fromAccountRef = _accountsCollection.doc(fromID);
+    // var fromAccount = (await fromAccountRef.get()).data();
 
-      fromAccountRef.set(fromAccount);
-      toAccountRef.set(toAccount);
-    }
+    // var toAccountRef = _accountsCollection.doc(toID);
+    // var toAccount = (await toAccountRef.get()).data();
+
+    // if (fromAccount != null && toAccount != null) {
+    //   fromAccount.availableBalance -= amount;
+    //   fromAccount.currentBalance -= amount;
+
+    //   toAccount.availableBalance += amount;
+    //   toAccount.currentBalance += amount;
+
+    //   fromAccountRef.set(fromAccount);
+    //   toAccountRef.set(toAccount);
+    // }
 
     // TODO: Create transactions for the transfer
   }
@@ -52,6 +79,19 @@ class _TransferDialogState extends State<TransferDialog> {
         );
 
     _accountsFuture = _accountsCollection.get();
+
+    _balanceController.addListener(() {
+      String dollarStr = Account.formatDollarStr(_balanceController.text);
+
+      _balanceController.value = _balanceController.value.copyWith(
+        text: dollarStr,
+        selection: TextSelection(
+          baseOffset: dollarStr.length,
+          extentOffset: dollarStr.length,
+        ),
+        composing: TextRange.empty,
+      );
+    });
     super.initState();
   }
 
@@ -61,10 +101,9 @@ class _TransferDialogState extends State<TransferDialog> {
         future: _accountsFuture,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Text('Something went wrong');
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
+            // TODO: Notify user there was an error
+            Navigator.pop(context);
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -77,16 +116,18 @@ class _TransferDialogState extends State<TransferDialog> {
           }
 
           if (!snapshot.hasData) {
+            // TODO: Notify user there are no accounts
             Navigator.pop(context);
-            // TODO: Show message that no accounts exist
           }
 
+          // Retrieve the accounts from the collection
           List<QueryDocumentSnapshot<Account>> accounts = snapshot.data!.docs;
           if (fromAccount == "" || toAccount == "") {
             fromAccount = accounts[0].id;
             toAccount = accounts[0].id;
           }
 
+          // Create menu items from the accounts
           List<DropdownMenuItem<String>> dropdownItems = accounts.map(
             (value) {
               return DropdownMenuItem(
@@ -119,65 +160,77 @@ class _TransferDialogState extends State<TransferDialog> {
                     decoration: InputDecoration(
                       labelText: "Transfer from",
                       border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
                     ),
                     child: DropdownButton(
                       value: fromAccount,
+                      items: dropdownItems,
                       isExpanded: true,
                       onChanged: (String? newValue) {
                         setState(() {
                           fromAccount = newValue ?? "";
-                          print(fromAccount);
                         });
                       },
-                      items: dropdownItems,
                     ),
                   ),
                   InputDecorator(
                     decoration: InputDecoration(
+                      errorText: errorText != "" ? errorText : null,
                       labelText: "Transfer to",
                       border: InputBorder.none,
                     ),
                     child: DropdownButton<String>(
                       value: toAccount,
+                      items: dropdownItems,
+                      menuMaxHeight: 200,
                       isExpanded: true,
                       onChanged: (String? newValue) {
                         setState(() {
                           toAccount = newValue ?? "";
                         });
                       },
-                      items: dropdownItems,
                     ),
                   ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: "Amount",
-                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  Form(
+                    key: _formKey,
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: "Amount",
+                        floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      ),
+                      controller: _balanceController,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value == "" || value == "\$0.00") {
+                          return 'Transfer amount cannot be zero';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
-                    child: (errorText != "")
-                        ? Text(
-                            errorText,
-                            style: TextStyle(color: Colors.red),
-                          )
-                        : null,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (fromAccount != toAccount) {
-                        transferFunds(fromAccount, toAccount, 100);
-                        Navigator.pop(context);
-                        setState(() {
-                          errorText = "";
-                        });
-                      } else {
-                        setState(() {
-                          errorText = "Accounts must be different";
-                        });
-                      }
-                    },
-                    child: Text("Complete Transfer"),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (fromAccount != toAccount &&
+                            _formKey.currentState!.validate()) {
+                          double transferAmount = double.parse(
+                              _balanceController.text.substring(1));
+                          await transferFunds(
+                              fromAccount, toAccount, transferAmount);
+                          Navigator.pop(context);
+                          setState(() {
+                            errorText = null;
+                          });
+                        } else {
+                          _formKey.currentState!.validate();
+                          setState(() {
+                            errorText = "Transfer accounts cannot be the same";
+                          });
+                        }
+                      },
+                      child: Text("Complete Transfer"),
+                    ),
                   )
                 ],
               ),

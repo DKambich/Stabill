@@ -19,4 +19,29 @@ class Account {
       'currentBalance': currentBalance,
     };
   }
+
+  static String formatDollarStr(String input) {
+    // Remove all non-numeric characters
+    String text = input.replaceAll(RegExp(r"[^\d]"), "");
+
+    // Pad front of text with 0 until it is 3 characters
+    if (text.length < 3) {
+      text = text.padLeft(3, "0");
+    }
+
+    // Remove a zero from the front of the text if the length is 4
+    if (text.startsWith("0") && text.length == 4) {
+      text = text.substring(1);
+    }
+
+    // Insert the dollar sign
+    text = "\$" + text;
+
+    // Insert the decimal point
+    text = text.substring(0, text.length - 2) +
+        "." +
+        text.substring(text.length - 2);
+
+    return text;
+  }
 }

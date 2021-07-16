@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:stabill/models/account.dart';
 
 class NewAccountDialog extends StatefulWidget {
   const NewAccountDialog({Key? key}) : super(key: key);
@@ -15,36 +16,11 @@ class _NewAccountDialogState extends State<NewAccountDialog> {
   final TextEditingController _balanceController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  String formatDollarStr(String input) {
-    // Remove all non-numeric characters
-    String text = input.replaceAll(RegExp(r"[^\d]"), "");
-
-    // Pad front of text with 0 until it is 3 characters
-    if (text.length < 3) {
-      text = text.padLeft(3, "0");
-    }
-
-    // Remove a zero from the front of the text if the length is 4
-    if (text.startsWith("0") && text.length == 4) {
-      text = text.substring(1);
-    }
-
-    // Insert the dollar sign
-    text = "\$" + text;
-
-    // Insert the decimal point
-    text = text.substring(0, text.length - 2) +
-        "." +
-        text.substring(text.length - 2);
-
-    return text;
-  }
-
   @override
   void initState() {
     super.initState();
     _balanceController.addListener(() {
-      String dollarStr = formatDollarStr(_balanceController.text);
+      String dollarStr = Account.formatDollarStr(_balanceController.text);
 
       _balanceController.value = _balanceController.value.copyWith(
         text: dollarStr,
