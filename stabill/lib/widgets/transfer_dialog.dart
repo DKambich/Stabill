@@ -18,7 +18,7 @@ class _TransferDialogState extends State<TransferDialog> {
   final _formKey = GlobalKey<FormState>();
 
   String fromAccount = "", toAccount = "";
-  String? errorText = "";
+  String? errorText;
 
   Future<void> transferFunds(String fromID, String toID, double amount) async {
     WriteBatch batch = FirebaseFirestore.instance.batch();
@@ -44,25 +44,6 @@ class _TransferDialogState extends State<TransferDialog> {
 
       return batch.commit();
     });
-
-    // var fromAccountRef = _accountsCollection.doc(fromID);
-    // var fromAccount = (await fromAccountRef.get()).data();
-
-    // var toAccountRef = _accountsCollection.doc(toID);
-    // var toAccount = (await toAccountRef.get()).data();
-
-    // if (fromAccount != null && toAccount != null) {
-    //   fromAccount.availableBalance -= amount;
-    //   fromAccount.currentBalance -= amount;
-
-    //   toAccount.availableBalance += amount;
-    //   toAccount.currentBalance += amount;
-
-    //   fromAccountRef.set(fromAccount);
-    //   toAccountRef.set(toAccount);
-    // }
-
-    // TODO: Create transactions for the transfer
   }
 
   @override
@@ -128,14 +109,14 @@ class _TransferDialogState extends State<TransferDialog> {
           }
 
           // Create menu items from the accounts
-          List<DropdownMenuItem<String>> dropdownItems = accounts.map(
-            (value) {
-              return DropdownMenuItem(
-                value: value.id,
-                child: Text(value.data().name),
-              );
-            },
-          ).toList();
+          List<DropdownMenuItem<String>> dropdownItems = accounts
+              .map(
+                (value) => DropdownMenuItem(
+                  value: value.id,
+                  child: Text(value.data().name),
+                ),
+              )
+              .toList();
 
           return SingleChildScrollView(
             child: Padding(
@@ -165,6 +146,7 @@ class _TransferDialogState extends State<TransferDialog> {
                     child: DropdownButton(
                       value: fromAccount,
                       items: dropdownItems,
+                      menuMaxHeight: 200,
                       isExpanded: true,
                       onChanged: (String? newValue) {
                         setState(() {
@@ -175,11 +157,11 @@ class _TransferDialogState extends State<TransferDialog> {
                   ),
                   InputDecorator(
                     decoration: InputDecoration(
-                      errorText: errorText != "" ? errorText : null,
+                      errorText: errorText,
                       labelText: "Transfer to",
                       border: InputBorder.none,
                     ),
-                    child: DropdownButton<String>(
+                    child: DropdownButton(
                       value: toAccount,
                       items: dropdownItems,
                       menuMaxHeight: 200,
