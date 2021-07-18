@@ -13,7 +13,8 @@ class NewAccountDialog extends StatefulWidget {
 // TODO: https://api.flutter.dev/flutter/widgets/TextEditingController-class.html
 class _NewAccountDialogState extends State<NewAccountDialog> {
   final TextEditingController _accountController = TextEditingController();
-  final TextEditingController _balanceController = TextEditingController();
+  final TextEditingController _balanceController =
+      TextEditingController(text: r"$0.00");
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -62,6 +63,7 @@ class _NewAccountDialogState extends State<NewAccountDialog> {
                 labelText: "Starting Balance",
                 floatingLabelBehavior: FloatingLabelBehavior.auto,
               ),
+              enableInteractiveSelection: false,
             ),
           ],
         ),

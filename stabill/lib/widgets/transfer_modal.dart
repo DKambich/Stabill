@@ -13,11 +13,12 @@ class TransferDialog extends StatefulWidget {
 
 class _TransferDialogState extends State<TransferDialog> {
   late CollectionReference<Account> _accountsCollection;
-  late AsyncMemoizer<QuerySnapshot<Account>> _accountsMemoizer;
+  late Future<QuerySnapshot<Account>> _accountsFuture;
   late String fromAccount, toAccount = "";
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _balanceController = TextEditingController();
+  final TextEditingController _balanceController =
+      TextEditingController(text: r"$0.00");
 
   String? errorText;
 
@@ -47,11 +48,6 @@ class _TransferDialogState extends State<TransferDialog> {
     });
   }
 
-  Future<QuerySnapshot<Account>> getAccounts(
-      CollectionReference<Account> accountsCollection) async {
-    return _accountsMemoizer.runOnce(() => accountsCollection.get());
-  }
-
   @override
   void initState() {
     String uid = FirebaseAuth.instance.currentUser!.uid;
@@ -64,7 +60,7 @@ class _TransferDialogState extends State<TransferDialog> {
           toFirestore: (acc, _) => acc.toJson(),
         );
 
-    _accountsMemoizer = AsyncMemoizer();
+    _accountsFuture = _accountsCollection.get();
 
     fromAccount = toAccount = "";
 
@@ -86,7 +82,7 @@ class _TransferDialogState extends State<TransferDialog> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<QuerySnapshot<Account>>(
-        future: getAccounts(_accountsCollection),
+        future: _accountsFuture,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             // TODO: Notify user there was an error
@@ -195,6 +191,8 @@ class _TransferDialogState extends State<TransferDialog> {
                         }
                         return null;
                       },
+                      textInputAction: TextInputAction.go,
+                      enableInteractiveSelection: false,
                     ),
                   ),
                   Padding(

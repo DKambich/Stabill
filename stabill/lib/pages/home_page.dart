@@ -20,6 +20,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int index = 0;
   PageController controller = new PageController();
+  bool hideFAB = false;
+
+  void shouldHideFAB(bool hide) {
+    if (hide != hideFAB) {
+      setState(() {
+        hideFAB = hide;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +41,9 @@ class _HomePageState extends State<HomePage> {
       body: PageView(
         controller: controller,
         children: [
-          AccountList(),
+          AccountList(
+            shouldHideFAB: shouldHideFAB,
+          ),
           Center(
             child: ElevatedButton(
               child: Text("Logout"),
@@ -53,7 +64,7 @@ class _HomePageState extends State<HomePage> {
           });
         },
       ),
-      floatingActionButton: index == 0
+      floatingActionButton: index == 0 && !hideFAB
           ? SpeedDial(
               animatedIcon: AnimatedIcons.menu_close,
               tooltip: 'Actions',

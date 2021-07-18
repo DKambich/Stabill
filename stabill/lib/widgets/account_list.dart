@@ -1,21 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/widgets/balance_text.dart';
 
 // TODO: Implement user preferred order from https://pub.dev/packages/streaming_shared_preferences
 class AccountList extends StatefulWidget {
-  const AccountList({Key? key}) : super(key: key);
+  final Function(bool) shouldHideFAB;
+
+  const AccountList({Key? key, required this.shouldHideFAB}) : super(key: key);
 
   @override
   _AccountListState createState() => _AccountListState();
 }
 
 class _AccountListState extends State<AccountList> {
+  final ScrollController _scrollController = ScrollController();
   late CollectionReference<Account> _accountsCollection;
-
+  late Stream<QuerySnapshot<Account>> _accountsStream;
   Color getBalanceColor(double balance) {
     return balance > 0
         ? Colors.green
@@ -36,13 +40,27 @@ class _AccountListState extends State<AccountList> {
           fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
           toFirestore: (acc, _) => acc.toJson(),
         );
+
+    _accountsStream = _accountsCollection.snapshots();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        print("Show");
+        widget.shouldHideFAB(true);
+      } else if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
+        print("Hide");
+        widget.shouldHideFAB(false);
+      }
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Account>>(
-        stream: _accountsCollection.snapshots(),
+        stream: _accountsStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Text('Something went wrong');
@@ -115,6 +133,7 @@ class _AccountListState extends State<AccountList> {
               ),
               Expanded(
                 child: ReorderableListView.builder(
+                  scrollController: _scrollController,
                   onReorder: (int oldIndex, int newIndex) async {
                     if (oldIndex < newIndex) {
                       newIndex -= 1;
