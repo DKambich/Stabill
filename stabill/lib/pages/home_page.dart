@@ -4,7 +4,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/widgets/account_dialog.dart';
 import 'package:stabill/widgets/account_list.dart';
-import 'package:stabill/widgets/transfer_dialog.dart';
+import 'package:stabill/widgets/transfer_modal.dart';
 
 class HomePage extends StatefulWidget {
   static final String routeName = "/home";

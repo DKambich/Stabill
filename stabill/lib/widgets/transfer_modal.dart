@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
-import 'dart:async';
+import 'package:async/async.dart';
 
 class TransferDialog extends StatefulWidget {
   const TransferDialog({Key? key}) : super(key: key);
@@ -12,12 +12,13 @@ class TransferDialog extends StatefulWidget {
 }
 
 class _TransferDialogState extends State<TransferDialog> {
-  late Future<QuerySnapshot<Account>> _accountsFuture;
   late CollectionReference<Account> _accountsCollection;
-  final TextEditingController _balanceController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  late AsyncMemoizer<QuerySnapshot<Account>> _accountsMemoizer;
+  late String fromAccount, toAccount = "";
 
-  String fromAccount = "", toAccount = "";
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _balanceController = TextEditingController();
+
   String? errorText;
 
   Future<void> transferFunds(String fromID, String toID, double amount) async {
@@ -46,10 +47,14 @@ class _TransferDialogState extends State<TransferDialog> {
     });
   }
 
+  Future<QuerySnapshot<Account>> getAccounts(
+      CollectionReference<Account> accountsCollection) async {
+    return _accountsMemoizer.runOnce(() => accountsCollection.get());
+  }
+
   @override
   void initState() {
     String uid = FirebaseAuth.instance.currentUser!.uid;
-    // Get a stream for the accounts list to listen to
     _accountsCollection = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -59,7 +64,9 @@ class _TransferDialogState extends State<TransferDialog> {
           toFirestore: (acc, _) => acc.toJson(),
         );
 
-    _accountsFuture = _accountsCollection.get();
+    _accountsMemoizer = AsyncMemoizer();
+
+    fromAccount = toAccount = "";
 
     _balanceController.addListener(() {
       String dollarStr = Account.formatDollarStr(_balanceController.text);
@@ -79,7 +86,7 @@ class _TransferDialogState extends State<TransferDialog> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<QuerySnapshot<Account>>(
-        future: _accountsFuture,
+        future: getAccounts(_accountsCollection),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             // TODO: Notify user there was an error
