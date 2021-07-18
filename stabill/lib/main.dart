@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/splash_page.dart';
+import 'package:stabill/pages/transactions_page.dart';
 
 void main() {
   runApp(Stabill());
@@ -18,9 +20,10 @@ class Stabill extends StatelessWidget {
       ),
       home: SplashPage(),
       routes: <String, WidgetBuilder>{
-        HomePage.routeName: (BuildContext context) =>
-            HomePage(title: 'Stabill'),
-        LoginPage.routeName: (BuildContext context) => LoginPage(),
+        HomePage.routeName: (_ctx) => HomePage(title: 'Stabill'),
+        LoginPage.routeName: (_ctx) => LoginPage(),
+        TransactionsPage.routeName: (_ctx) =>
+            TransactionsPage(accountID: "Test ID")
       },
     );
   }

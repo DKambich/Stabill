@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/pages/transactions_page.dart';
 import 'package:stabill/widgets/balance_text.dart';
 
 // TODO: Implement user preferred order from https://pub.dev/packages/streaming_shared_preferences
@@ -46,11 +47,9 @@ class _AccountListState extends State<AccountList> {
     _scrollController.addListener(() {
       if (_scrollController.position.userScrollDirection ==
           ScrollDirection.reverse) {
-        print("Show");
         widget.shouldHideFAB(true);
       } else if (_scrollController.position.userScrollDirection ==
           ScrollDirection.forward) {
-        print("Hide");
         widget.shouldHideFAB(false);
       }
     });
@@ -156,33 +155,42 @@ class _AccountListState extends State<AccountList> {
                       child: Card(
                         margin:
                             EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  accountName,
-                                  style: TextStyle(fontSize: 24),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                              TransactionsPage.routeName,
+                              arguments:
+                                  TransactionArguments(accountData[index].id),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    accountName,
+                                    style: TextStyle(fontSize: 24),
+                                  ),
                                 ),
-                              ),
-                              Column(
-                                children: [
-                                  BalanceText(
-                                    text: "Available: ",
-                                    balance: availableBalance,
-                                  ),
-                                  BalanceText(
-                                    text: "Current: ",
-                                    balance: currentBalance,
-                                  ),
-                                ],
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                              )
-                            ],
+                                Column(
+                                  children: [
+                                    BalanceText(
+                                      text: "Available: ",
+                                      balance: availableBalance,
+                                    ),
+                                    BalanceText(
+                                      text: "Current: ",
+                                      balance: currentBalance,
+                                    ),
+                                  ],
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
