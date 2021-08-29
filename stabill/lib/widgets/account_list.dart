@@ -159,8 +159,10 @@ class _AccountListState extends State<AccountList> {
                           onTap: () {
                             Navigator.of(context).pushNamed(
                               TransactionsPage.routeName,
-                              arguments:
-                                  TransactionArguments(accountData[index].id),
+                              arguments: TransactionArguments(
+                                accountData[index].id,
+                                account,
+                              ),
                             );
                           },
                           child: Padding(
