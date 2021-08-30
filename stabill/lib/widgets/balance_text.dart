@@ -30,7 +30,10 @@ class BalanceText extends StatelessWidget {
 
     return RichText(
       text: TextSpan(
-        style: TextStyle(fontSize: fontSize, color: Colors.black),
+        style: TextStyle(
+          fontSize: fontSize,
+          color: Theme.of(context).textTheme.caption!.color,
+        ),
         children: <TextSpan>[
           TextSpan(text: text),
           TextSpan(

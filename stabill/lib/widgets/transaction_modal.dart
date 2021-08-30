@@ -20,6 +20,8 @@ class TransactionModal extends StatefulWidget {
 }
 
 class _TransactionModalState extends State<TransactionModal> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   late bool isCleared;
   late TransactionType method = TransactionType.Withdrawal;
   late TextEditingController nameController,
@@ -84,22 +86,21 @@ class _TransactionModalState extends State<TransactionModal> {
         actions: [
           IconButton(
               onPressed: () {
-                //TODO: Form field validation
-                int checkNumber = checkNumberController.text.length > 0
-                    ? int.parse(checkNumberController.text)
-                    : -1;
-                Transaction savedTransaction = Transaction(
-                  amount: double.parse(amountController.text.substring(1)),
-                  checkNumber: checkNumber,
-                  cleared: isCleared,
-                  memo: memoController.text,
-                  name: nameController.text,
-                  method: method,
-                  timestamp: timestamp,
-                );
-                print(DateFormat('MM/dd/yyyy hh:mm a')
-                    .format(savedTransaction.timestamp));
-                Navigator.of(context).pop<Transaction>(savedTransaction);
+                if (_formKey.currentState!.validate()) {
+                  int checkNumber = checkNumberController.text.length > 0
+                      ? int.parse(checkNumberController.text)
+                      : -1;
+                  Transaction savedTransaction = Transaction(
+                    amount: double.parse(amountController.text.substring(1)),
+                    checkNumber: checkNumber,
+                    cleared: isCleared,
+                    memo: memoController.text,
+                    name: nameController.text,
+                    method: method,
+                    timestamp: timestamp,
+                  );
+                  Navigator.of(context).pop<Transaction>(savedTransaction);
+                }
               },
               icon: Icon(Icons.check))
         ],
@@ -110,90 +111,109 @@ class _TransactionModalState extends State<TransactionModal> {
           highlightColor: Colors.transparent,
         ),
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                child: TextFormField(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                  child: TextFormField(
                     controller: nameController,
                     decoration: InputDecoration(labelText: "Name"),
-                    keyboardType: TextInputType.text),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                child: TextFormField(
-                  controller: amountController,
-                  decoration: InputDecoration(labelText: "Amount"),
-                  keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.text,
+                    validator: (String? text) {
+                      if (text != null && text.length > 0) {
+                        return null;
+                      }
+                      return "Name must be at least one character";
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                child: TextFormField(
-                  controller: dateController,
-                  decoration: InputDecoration(labelText: "Date"),
-                  readOnly: true,
-                  onTap: showDateTime,
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                  child: TextFormField(
+                    controller: amountController,
+                    decoration: InputDecoration(labelText: "Amount"),
+                    keyboardType: TextInputType.number,
+                    validator: (String? text) {
+                      if (text != null && double.parse(text.substring(1)) > 0) {
+                        return null;
+                      }
+                      return "Amount must be greater than 0";
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                child: TextFormField(
-                  controller: checkNumberController,
-                  decoration: InputDecoration(labelText: "Check Number"),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                  child: TextFormField(
+                    controller: dateController,
+                    decoration: InputDecoration(labelText: "Date"),
+                    readOnly: true,
+                    onTap: showDateTime,
+                  ),
                 ),
-              ),
-              CheckboxListTile(
-                value: isCleared,
-                onChanged: (_) {
-                  setState(() {
-                    isCleared = !isCleared;
-                  });
-                },
-                title: Text("Transaction is Cleared"),
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
-              Row(
-                children: [
-                  Flexible(
-                    child: RadioListTile<TransactionType>(
-                      title: Text("Withdrawal"),
-                      value: TransactionType.Withdrawal,
-                      groupValue: method,
-                      onChanged: (TransactionType? value) => setState(
-                        () => method = TransactionType.Withdrawal,
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                  child: TextFormField(
+                    controller: checkNumberController,
+                    decoration: InputDecoration(labelText: "Check Number"),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                ),
+                CheckboxListTile(
+                  value: isCleared,
+                  activeColor: Theme.of(context).accentColor,
+                  onChanged: (_) {
+                    setState(() {
+                      isCleared = !isCleared;
+                    });
+                  },
+                  title: Text("Mark as cleared"),
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: RadioListTile<TransactionType>(
+                        title: Text("Withdrawal"),
+                        value: TransactionType.Withdrawal,
+                        groupValue: method,
+                        onChanged: (TransactionType? value) => setState(
+                          () => method = TransactionType.Withdrawal,
+                        ),
+                        activeColor: Theme.of(context).accentColor,
                       ),
                     ),
-                  ),
-                  Flexible(
-                    child: RadioListTile<TransactionType>(
-                      title: Text("Deposit"),
-                      value: TransactionType.Deposit,
-                      groupValue: method,
-                      onChanged: (TransactionType? value) => setState(
-                        () => method = TransactionType.Deposit,
+                    Flexible(
+                      child: RadioListTile<TransactionType>(
+                        title: Text("Deposit"),
+                        value: TransactionType.Deposit,
+                        groupValue: method,
+                        onChanged: (TransactionType? value) => setState(
+                          () => method = TransactionType.Deposit,
+                        ),
+                        activeColor: Theme.of(context).accentColor,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                child: TextFormField(
-                  controller: memoController,
-                  decoration: InputDecoration(labelText: "Memo"),
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
+                  ],
                 ),
-              ),
-            ],
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                  child: TextFormField(
+                    controller: memoController,
+                    decoration: InputDecoration(labelText: "Memo"),
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
