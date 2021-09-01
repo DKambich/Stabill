@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/transactions_page.dart';
+import 'package:stabill/widgets/account_card.dart';
+import 'package:stabill/widgets/account_summary_card.dart';
 import 'package:stabill/widgets/balance_text.dart';
 
 // TODO: Implement user preferred order from https://pub.dev/packages/streaming_shared_preferences
@@ -68,27 +70,9 @@ class _AccountListState extends State<AccountList> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Column(
               children: [
-                Card(
-                  margin: EdgeInsets.zero,
-                  elevation: 2,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 12,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        BalanceText(
-                          text: "Current: ",
-                          balance: 0,
-                        ),
-                        BalanceText(
-                          text: "Available: ",
-                          balance: 0,
-                        ),
-                      ],
-                    ),
-                  ),
+                AccountSummaryCard(
+                  totalCurrentBalance: 0,
+                  totalAvailableBalance: 0,
                 ),
                 Expanded(child: Center(child: CircularProgressIndicator())),
               ],
@@ -108,92 +92,25 @@ class _AccountListState extends State<AccountList> {
 
           return Column(
             children: [
-              Card(
-                margin: EdgeInsets.zero,
-                elevation: 2,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      BalanceText(
-                        text: "Current: ",
-                        balance: totalCurrentBalance,
-                      ),
-                      BalanceText(
-                        text: "Available: ",
-                        balance: totalAvailableBalance,
-                      ),
-                    ],
-                  ),
-                ),
+              AccountSummaryCard(
+                totalCurrentBalance: totalCurrentBalance,
+                totalAvailableBalance: totalAvailableBalance,
               ),
               Expanded(
-                child: ReorderableListView.builder(
-                  scrollController: _scrollController,
-                  onReorder: (int oldIndex, int newIndex) async {
-                    if (oldIndex < newIndex) {
-                      newIndex -= 1;
-                    }
-                    final item = accountData.removeAt(oldIndex);
-                    accountData.insert(newIndex, item);
-                  },
-                  buildDefaultDragHandles: false,
+                child: ListView.builder(
+                  controller: _scrollController,
                   itemCount: accountData.length,
                   itemBuilder: (ctx, index) {
                     final Account account = accountData[index].data();
-
-                    String accountName = account.name;
-                    double availableBalance = account.availableBalance;
-                    double currentBalance = account.currentBalance;
-
-                    return ReorderableDelayedDragStartListener(
-                      key: Key(accountData[index].id),
-                      index: index,
-                      child: Card(
-                        margin:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.of(context).pushNamed(
-                              TransactionsPage.routeName,
-                              arguments: TransactionArguments(
-                                accountData[index].id,
-                                account,
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    accountName,
-                                    style: TextStyle(fontSize: 24),
-                                  ),
-                                ),
-                                Column(
-                                  children: [
-                                    BalanceText(
-                                      text: "Available: ",
-                                      balance: availableBalance,
-                                    ),
-                                    BalanceText(
-                                      text: "Current: ",
-                                      balance: currentBalance,
-                                    ),
-                                  ],
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                )
-                              ],
-                            ),
-                          ),
+                    final String accountID = accountData[index].id;
+                    return AccountCard(
+                      key: Key(accountID),
+                      account: account,
+                      onTap: () => Navigator.of(context).pushNamed(
+                        TransactionsPage.routeName,
+                        arguments: TransactionArguments(
+                          accountData[index].id,
+                          account,
                         ),
                       ),
                     );

@@ -1,0 +1,50 @@
+import 'package:flutter/material.dart';
+import 'package:stabill/models/transaction.dart';
+import 'package:stabill/widgets/balance_text.dart';
+import 'package:intl/intl.dart';
+
+class TransactionCard extends StatelessWidget {
+  final Transaction transaction;
+
+  const TransactionCard({Key? key, required this.transaction})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    double amount = transaction.method == TransactionType.Withdrawal
+        ? -transaction.amount
+        : transaction.amount;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.name,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "Check Number: ${transaction.checkNumber == -1 ? "None" : transaction.checkNumber}",
+                  ),
+                  Text(
+                    "Date: ${DateFormat('MM/dd/yyyy hh:mm a').format(transaction.timestamp)}",
+                  ),
+                  Text(
+                    "Memo: ${transaction.memo}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            BalanceText(text: "", balance: amount)
+          ],
+        ),
+      ),
+    );
+  }
+}
