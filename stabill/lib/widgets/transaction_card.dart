@@ -25,16 +25,29 @@ class TransactionCard extends StatelessWidget {
                 children: [
                   Text(
                     transaction.name,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: transaction.cleared ? Colors.black : Colors.grey,
+                    ),
                   ),
                   Text(
                     "Check Number: ${transaction.checkNumber == -1 ? "None" : transaction.checkNumber}",
+                    style: TextStyle(
+                      color: transaction.cleared ? Colors.black : Colors.grey,
+                    ),
                   ),
                   Text(
                     "Date: ${DateFormat('MM/dd/yyyy hh:mm a').format(transaction.timestamp)}",
+                    style: TextStyle(
+                      color: transaction.cleared ? Colors.black : Colors.grey,
+                    ),
                   ),
                   Text(
                     "Memo: ${transaction.memo}",
+                    style: TextStyle(
+                      color: transaction.cleared ? Colors.black : Colors.grey,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

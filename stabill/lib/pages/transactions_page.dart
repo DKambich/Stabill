@@ -31,11 +31,27 @@ class TransactionsPage extends StatefulWidget {
 class _TransactionsPageState extends State<TransactionsPage> {
   late CollectionReference<Stabill.Transaction> _transactionsCollection;
   late Stream<QuerySnapshot<Stabill.Transaction>> _transactionsStream;
+  late Stream<DocumentSnapshot<Account>> _accountStream;
 
   @override
   void initState() {
     String uid = FirebaseAuth.instance.currentUser!.uid;
-    // Get a stream for the accounts list to listen to
+
+    // Get a reference to the account document
+    DocumentReference<Account> accountDoc = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection("accounts")
+        .withConverter<Account>(
+          fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
+          toFirestore: (acc, _) => acc.toJson(),
+        )
+        .doc(widget.accountID);
+
+    // Get a stream for the account
+    _accountStream = accountDoc.snapshots();
+
+    // Get a stream for the account's transaction list to listen to
     _transactionsCollection = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
@@ -68,70 +84,159 @@ class _TransactionsPageState extends State<TransactionsPage> {
       appBar: AppBar(
         title: Text(widget.account.name),
       ),
-      body: StreamBuilder<QuerySnapshot<Stabill.Transaction>>(
-        stream: _transactionsStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text('Something went wrong');
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Column(
-              children: [
-                AccountSummaryCard(
+      body: Column(
+        children: [
+          StreamBuilder<DocumentSnapshot<Account>>(
+              stream: _accountStream,
+              builder: (context, snapshot) {
+                var accountCard = AccountSummaryCard(
                   totalCurrentBalance: 0,
                   totalAvailableBalance: 0,
-                ),
-                Expanded(child: Center(child: CircularProgressIndicator())),
-              ],
-            );
-          }
+                );
+                if (snapshot.hasError ||
+                    snapshot.connectionState == ConnectionState.waiting) {
+                  return accountCard;
+                }
 
-          var transactionData = snapshot.data!.docs;
+                print(snapshot.data);
+                Account? account = snapshot.data!.data();
 
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) {
-              Stabill.Transaction transaction =
-                  snapshot.data!.docs[index].data();
-              return GestureDetector(
-                child: TransactionCard(transaction: transaction),
-                onLongPress: () {},
-              );
-            },
-          );
-        },
+                if (account != null) {
+                  accountCard = AccountSummaryCard(
+                    totalCurrentBalance: account.currentBalance,
+                    totalAvailableBalance: account.availableBalance,
+                  );
+                }
+                return accountCard;
+              }),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot<Stabill.Transaction>>(
+              stream: _transactionsStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Something went wrong');
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                var transactionData = snapshot.data!.docs;
+                transactionData.sort(
+                    (a, b) => b.data().timestamp.compareTo(a.data().timestamp));
+                return ListView.builder(
+                  itemCount: transactionData.length,
+                  itemBuilder: (context, index) {
+                    Stabill.Transaction transaction =
+                        transactionData[index].data();
+                    String transactionID = transactionData[index].id;
+
+                    List<PopupMenuItem> clearedOption = [];
+                    if (!transaction.cleared) {
+                      clearedOption.add(PopupMenuItem(
+                        child: ListTile(
+                          leading: Icon(Icons.check),
+                          title: Text("Mark Cleared"),
+                          contentPadding: EdgeInsets.zero,
+                          onTap: () async {
+                            await markClearTransaction(
+                                transactionID, transaction);
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ));
+                    }
+
+                    return GestureDetector(
+                      child: TransactionCard(transaction: transaction),
+                      onLongPressStart: (LongPressStartDetails details) {
+                        double left = details.globalPosition.dx;
+                        double top = details.globalPosition.dy;
+                        showMenu(
+                          context: context,
+                          position: RelativeRect.fromLTRB(
+                              left, top, left + 1, top + 1),
+                          items: [
+                            ...clearedOption,
+                            PopupMenuItem(
+                              child: ListTile(
+                                leading: Icon(Icons.edit),
+                                title: Text("Edit"),
+                                contentPadding: EdgeInsets.zero,
+                                onTap: () async {
+                                  await editTransaction(
+                                      transactionID, transaction);
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ),
+                            PopupMenuItem(
+                              child: ListTile(
+                                leading: Icon(Icons.delete),
+                                title: Text("Delete"),
+                                contentPadding: EdgeInsets.zero,
+                                onTap: () async {
+                                  await deleteTransaction(transactionID);
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          var newTransaction = await Navigator.of(context).push(
+          Stabill.Transaction? createdTransaction =
+              await Navigator.of(context).push(
             MaterialPageRoute<Stabill.Transaction>(
               builder: (BuildContext context) => TransactionModal(),
               fullscreenDialog: true,
             ),
           );
 
-          if (newTransaction != null) {
-            String uid = FirebaseAuth.instance.currentUser!.uid;
-
-            FirebaseFirestore.instance
-                .collection('users')
-                .doc(uid)
-                .collection("accounts")
-                .doc(widget.accountID)
-                .collection("transactions")
-                .withConverter<Stabill.Transaction>(
-                  fromFirestore: (snapshot, _) =>
-                      Stabill.Transaction.fromJson(snapshot.data()!),
-                  toFirestore: (acc, _) => acc.toJson(),
-                )
-                .add(newTransaction)
-                .then((_) => print("Sucess"))
-                .onError((error, stackTrace) => print(error));
+          if (createdTransaction != null) {
+            addTransaction(createdTransaction);
           }
         },
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> addTransaction(Stabill.Transaction transaction) {
+    return _transactionsCollection.add(transaction);
+  }
+
+  Future<void> editTransaction(
+      String transactionID, Stabill.Transaction transaction) async {
+    Stabill.Transaction? editedTransaction = await Navigator.of(context).push(
+      MaterialPageRoute<Stabill.Transaction>(
+        builder: (BuildContext context) =>
+            TransactionModal(transaction: transaction),
+        fullscreenDialog: true,
+      ),
+    );
+
+    if (editedTransaction != null) {
+      _transactionsCollection.doc(transactionID).set(editedTransaction);
+    }
+  }
+
+  Future<void> deleteTransaction(String transactionID) {
+    return _transactionsCollection.doc(transactionID).delete();
+  }
+
+  Future<void> markClearTransaction(
+      String transactionID, Stabill.Transaction transaction) {
+    transaction.cleared = true;
+    return _transactionsCollection.doc(transactionID).set(transaction);
   }
 }
