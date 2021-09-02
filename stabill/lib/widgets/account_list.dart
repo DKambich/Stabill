@@ -5,11 +5,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/transactions_page.dart';
-import 'package:stabill/widgets/account_card.dart';
-import 'package:stabill/widgets/account_summary_card.dart';
-import 'package:stabill/widgets/balance_text.dart';
+import 'package:stabill/widgets/cards/account_card.dart';
+import 'package:stabill/widgets/cards/account_summary_card.dart';
 
-// TODO: Implement user preferred order from https://pub.dev/packages/streaming_shared_preferences
 class AccountList extends StatefulWidget {
   final Function(bool) shouldHideFAB;
 

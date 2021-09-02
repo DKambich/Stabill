@@ -1,21 +1,42 @@
 # **Tasks**
 ## General
+- Screens
+	- Login 🚧
+	- Create Account
+	- Home
+		- Account List 🚧
+		- Insights
+	- Settings
+	- Transactions 🚧
 - Feature: Dark mode and improved themeing
-- Feature: Login and create account page and flow
 - Feature: Import data from Checkbook
 - Feature: Export data to CSV
+- Improvement: Use proper capitalization and keyboard type for TextInputs
 ## Accounts
-- Action: Delete account
+- UI: Display Account List ✅
+	- Show list of accounts ✅
+	- Show cumulative balance of accounts ✅
+- Action: Create account 🚧
+	- Improvement: Convert the new account dialog to bottom sheet 
+- Action: Delete account ✅
+- Action: Rename account
 - Action: Reorder accounts
-- Improvement: When transfering between accounts, create a seperate withdrawal/depoist transaction for each account respectively, rather than modifying the accounts directly
-- Improvement: Convert the new account dialog to bottom sheet
+- Action: Transfer funds between accounts 🚧
+	- Improvement: Create a withdrawal/deposit transaction for each account respectively, rather than directly modifying
 ## Transactions
-- Feature: Create Popup menu when long pressing TransactionCards
-	- Action: Delete transaction
-	- Action: Edit transaction
-	- Action: Mark transaction as cleared (show only if not cleared)
-- Feature: Sort transactions by date (Allow future sorting by other properties?)
-- Feature: Search transactions by transaction name
-- Feature: Balance correction (create a transaction that will update account to given balance)
-- Improvement: OnCreate, OnDelete, and OnChange of a transaction should update the balance of the parent account
+- UI: Display Transaction List ✅
+	- Show list of transactions ✅
+	- Show balance of account ✅
+		- Improvement: Add OnCreate, OnDelete, and OnChange of a transaction to update the balance of the parent account dynamically
+- Feature: Popup menu when long pressing transactions ✅
+	- Action: Delete transaction ✅
+	- Action: Edit transaction ✅
+	- Action: Mark transaction as cleared (show only if not cleared) ✅
+- Feature: Searching transactions by  name
+- Feature: Sorting transaction
+	- Default sort by date ✅
+	- Sorting by other properties 
+- Feature: Balance correction
 - Feature: Scheduled transactions
+- Feature: Transfer transactions to another account
+- Feature: Hide transactions

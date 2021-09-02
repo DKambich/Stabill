@@ -3,7 +3,7 @@ import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/splash_page.dart';
 import 'package:stabill/pages/transactions_page.dart';
-import 'package:stabill/widgets/transaction_modal.dart';
+import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 
 void main() {
   runApp(Stabill());

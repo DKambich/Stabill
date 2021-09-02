@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart' as Stabill;
-import 'package:stabill/widgets/account_summary_card.dart';
-import 'package:stabill/widgets/transaction_card.dart';
-import 'package:stabill/widgets/transaction_modal.dart';
+import 'package:stabill/widgets/cards/account_summary_card.dart';
+import 'package:stabill/widgets/cards/transaction_card.dart';
+import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 
 class TransactionArguments {
   final String accountID;

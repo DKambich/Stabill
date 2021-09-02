@@ -10,7 +10,6 @@ class NewAccountDialog extends StatefulWidget {
   _NewAccountDialogState createState() => _NewAccountDialogState();
 }
 
-// TODO: https://api.flutter.dev/flutter/widgets/TextEditingController-class.html
 class _NewAccountDialogState extends State<NewAccountDialog> {
   final TextEditingController _accountController = TextEditingController();
   final TextEditingController _balanceController =

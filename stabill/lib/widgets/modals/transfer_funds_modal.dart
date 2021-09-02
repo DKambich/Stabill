@@ -3,14 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
 
-class TransferDialog extends StatefulWidget {
-  const TransferDialog({Key? key}) : super(key: key);
+class TransferFundsDialog extends StatefulWidget {
+  const TransferFundsDialog({Key? key}) : super(key: key);
 
   @override
-  _TransferDialogState createState() => _TransferDialogState();
+  _TransferFundsDialogState createState() => _TransferFundsDialogState();
 }
 
-class _TransferDialogState extends State<TransferDialog> {
+class _TransferFundsDialogState extends State<TransferFundsDialog> {
   late CollectionReference<Account> _accountsCollection;
   late Future<QuerySnapshot<Account>> _accountsFuture;
   late String fromAccount, toAccount = "";

@@ -2,9 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:stabill/pages/login_page.dart';
-import 'package:stabill/widgets/account_dialog.dart';
+import 'package:stabill/widgets/dialogs/account_dialog.dart';
 import 'package:stabill/widgets/account_list.dart';
-import 'package:stabill/widgets/transfer_modal.dart';
+import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
 
 class HomePage extends StatefulWidget {
   static final String routeName = "/home";
@@ -91,10 +91,11 @@ class _HomePageState extends State<HomePage> {
                         context: context,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(25),
-                              topRight: Radius.circular(25)),
+                            topLeft: Radius.circular(25),
+                            topRight: Radius.circular(25),
+                          ),
                         ),
-                        builder: (_) => TransferDialog(),
+                        builder: (_) => TransferFundsDialog(),
                       );
                     },
                   ),
