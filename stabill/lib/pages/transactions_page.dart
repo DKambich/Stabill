@@ -13,6 +13,8 @@ class TransactionArguments {
   TransactionArguments(this.accountID, this.account);
 }
 
+enum TransactionAction { Clear, Hide, Move, Edit, Delete }
+
 class TransactionsPage extends StatefulWidget {
   static final String routeName = "/transactions";
   final String accountID;
@@ -138,58 +140,35 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         transactionData[index].data();
                     String transactionID = transactionData[index].id;
 
-                    List<PopupMenuItem> clearedOption = [];
-                    if (!transaction.cleared) {
-                      clearedOption.add(PopupMenuItem(
-                        child: ListTile(
-                          leading: Icon(Icons.check),
-                          title: Text("Mark Cleared"),
-                          contentPadding: EdgeInsets.zero,
-                          onTap: () async {
-                            await markClearTransaction(
-                                transactionID, transaction);
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ));
-                    }
-
-                    return GestureDetector(
-                      child: TransactionCard(transaction: transaction),
-                      onLongPressStart: (LongPressStartDetails details) {
+                    return TransactionCard(
+                      transaction: transaction,
+                      onLongPress: (LongPressStartDetails details) async {
                         double left = details.globalPosition.dx;
                         double top = details.globalPosition.dy;
-                        showMenu(
-                          context: context,
-                          position: RelativeRect.fromLTRB(
-                              left, top, left + 1, top + 1),
-                          items: [
-                            ...clearedOption,
-                            PopupMenuItem(
-                              child: ListTile(
-                                leading: Icon(Icons.edit),
-                                title: Text("Edit"),
-                                contentPadding: EdgeInsets.zero,
-                                onTap: () async {
-                                  await editTransaction(
-                                      transactionID, transaction);
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ),
-                            PopupMenuItem(
-                              child: ListTile(
-                                leading: Icon(Icons.delete),
-                                title: Text("Delete"),
-                                contentPadding: EdgeInsets.zero,
-                                onTap: () async {
-                                  await deleteTransaction(transactionID);
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ),
-                          ],
-                        );
+                        RelativeRect tapPoint =
+                            RelativeRect.fromLTRB(left, top, left + 1, top + 1);
+                        TransactionAction? selectedAction =
+                            await showTransactionActions(transaction, tapPoint);
+
+                        switch (selectedAction) {
+                          case TransactionAction.Hide:
+                            await hideTransaction(transactionID, transaction);
+                            break;
+                          case TransactionAction.Clear:
+                            await clearTransaction(transactionID, transaction);
+                            break;
+                          case TransactionAction.Move:
+                            await moveTransaction(transactionID, transaction);
+                            break;
+                          case TransactionAction.Edit:
+                            await editTransaction(transactionID, transaction);
+                            break;
+                          case TransactionAction.Delete:
+                            await deleteTransaction(transactionID);
+                            break;
+                          case null:
+                            break;
+                        }
                       },
                     );
                   },
@@ -247,9 +226,77 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return _transactionsCollection.doc(transactionID).delete();
   }
 
-  Future<void> markClearTransaction(
+  Future<void> clearTransaction(
       String transactionID, Stabill.Transaction transaction) {
     transaction.cleared = true;
     return _transactionsCollection.doc(transactionID).set(transaction);
+  }
+
+  Future<void> hideTransaction(
+      String transactionID, Stabill.Transaction transaction) {
+    return Future.delayed(Duration(milliseconds: 100));
+  }
+
+  Future<void> moveTransaction(
+      String transactionID, Stabill.Transaction transaction) {
+    return Future.delayed(Duration(milliseconds: 100));
+  }
+
+  Future<TransactionAction?> showTransactionActions(
+      Stabill.Transaction transaction, RelativeRect tapPoint) {
+    // Define the conditional option
+    var conditionalOption;
+    if (transaction.cleared) {
+      conditionalOption = PopupMenuItem<TransactionAction>(
+        child: ListTile(
+          leading: Icon(Icons.visibility_off),
+          title: Text("Hide"),
+          contentPadding: EdgeInsets.zero,
+        ),
+        value: TransactionAction.Hide,
+      );
+    } else {
+      conditionalOption = PopupMenuItem<TransactionAction>(
+        child: ListTile(
+          leading: Icon(Icons.check),
+          title: Text("Mark Cleared"),
+          contentPadding: EdgeInsets.zero,
+        ),
+        value: TransactionAction.Clear,
+      );
+    }
+
+    // Show the transaction actions
+    return showMenu<TransactionAction>(
+      context: context,
+      position: tapPoint,
+      items: [
+        conditionalOption,
+        PopupMenuItem<TransactionAction>(
+          child: ListTile(
+            leading: Icon(Icons.swap_horiz),
+            title: Text("Move"),
+            contentPadding: EdgeInsets.zero,
+          ),
+          value: TransactionAction.Move,
+        ),
+        PopupMenuItem<TransactionAction>(
+          child: ListTile(
+            leading: Icon(Icons.edit),
+            title: Text("Edit"),
+            contentPadding: EdgeInsets.zero,
+          ),
+          value: TransactionAction.Edit,
+        ),
+        PopupMenuItem<TransactionAction>(
+          child: ListTile(
+            leading: Icon(Icons.delete),
+            title: Text("Delete"),
+            contentPadding: EdgeInsets.zero,
+          ),
+          value: TransactionAction.Delete,
+        ),
+      ],
+    );
   }
 }

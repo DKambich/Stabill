@@ -40,3 +40,4 @@
 - Feature: Scheduled transactions
 - Feature: Transfer transactions to another account
 - Feature: Hide transactions
+- Enhancement: Hide FAB onScroll
