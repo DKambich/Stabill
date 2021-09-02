@@ -17,6 +17,8 @@ class AccountList extends StatefulWidget {
   _AccountListState createState() => _AccountListState();
 }
 
+enum AccountAction { Edit, Delete }
+
 class _AccountListState extends State<AccountList> {
   final ScrollController _scrollController = ScrollController();
   late CollectionReference<Account> _accountsCollection;
@@ -52,67 +54,116 @@ class _AccountListState extends State<AccountList> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Account>>(
-        stream: _accountsStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text('Something went wrong');
-          }
+      stream: _accountsStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text('Something went wrong');
+        }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Column(
-              children: [
-                AccountSummaryCard(
-                  totalCurrentBalance: 0,
-                  totalAvailableBalance: 0,
-                ),
-                Expanded(child: Center(child: CircularProgressIndicator())),
-              ],
-            );
-          }
-
-          var accountData = snapshot.data!.docs;
-
-          double totalCurrentBalance = 0;
-          double totalAvailableBalance = 0;
-
-          accountData.forEach((element) {
-            Account account = element.data();
-            totalCurrentBalance += account.currentBalance;
-            totalAvailableBalance += account.availableBalance;
-          });
-
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(
             children: [
               AccountSummaryCard(
-                totalCurrentBalance: totalCurrentBalance,
-                totalAvailableBalance: totalAvailableBalance,
+                totalCurrentBalance: 0,
+                totalAvailableBalance: 0,
               ),
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: accountData.length,
-                  itemBuilder: (ctx, index) {
-                    final Account account = accountData[index].data();
-                    final String accountID = accountData[index].id;
-                    return AccountCard(
-                      key: Key(accountID),
-                      account: account,
-                      onTap: () {
-                        widget.shouldHideFAB(false);
-                        Navigator.of(context).pushNamed(
-                          TransactionsPage.routeName,
-                          arguments: TransactionArguments(
-                            accountData[index].id,
-                            account,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
+              Expanded(child: Center(child: CircularProgressIndicator())),
             ],
           );
+        }
+
+        var accountData = snapshot.data!.docs;
+
+        double totalCurrentBalance = 0;
+        double totalAvailableBalance = 0;
+
+        accountData.forEach((element) {
+          Account account = element.data();
+          totalCurrentBalance += account.currentBalance;
+          totalAvailableBalance += account.availableBalance;
         });
+
+        return Column(
+          children: [
+            AccountSummaryCard(
+              totalCurrentBalance: totalCurrentBalance,
+              totalAvailableBalance: totalAvailableBalance,
+            ),
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: accountData.length,
+                itemBuilder: (ctx, index) {
+                  final Account account = accountData[index].data();
+                  final String accountID = accountData[index].id;
+                  return AccountCard(
+                    key: Key(accountID),
+                    account: account,
+                    onTap: () {
+                      widget.shouldHideFAB(false);
+                      Navigator.of(context).pushNamed(
+                        TransactionsPage.routeName,
+                        arguments: TransactionArguments(
+                          accountData[index].id,
+                          account,
+                        ),
+                      );
+                    },
+                    onLongPress: (LongPressStartDetails details) async {
+                      double left = details.globalPosition.dx;
+                      double top = details.globalPosition.dy;
+                      RelativeRect tapPoint =
+                          RelativeRect.fromLTRB(left, top, left + 1, top + 1);
+                      AccountAction? selectedAction =
+                          await showAccountActions(tapPoint);
+                      switch (selectedAction) {
+                        case AccountAction.Edit:
+                          // TODO: Handle this case.
+                          break;
+                        case AccountAction.Delete:
+                          await deleteAccount(accountID);
+                          break;
+                        case null:
+                          break;
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> deleteAccount(String accountID) {
+    return _accountsCollection.doc(accountID).delete();
+  }
+
+  Future<AccountAction?> showAccountActions(RelativeRect tapPoint) {
+    // Show the account actions
+    return showMenu<AccountAction>(
+      context: context,
+      position: tapPoint,
+      items: [
+        PopupMenuItem<AccountAction>(
+          child: ListTile(
+            leading: Icon(Icons.edit),
+            title: Text("Edit"),
+            contentPadding: EdgeInsets.zero,
+          ),
+          value: AccountAction.Edit,
+        ),
+        PopupMenuItem<AccountAction>(
+          child: ListTile(
+            leading: Icon(Icons.delete),
+            title: Text("Delete"),
+            contentPadding: EdgeInsets.zero,
+          ),
+          value: AccountAction.Delete,
+        ),
+      ],
+    );
   }
 }
