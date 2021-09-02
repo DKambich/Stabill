@@ -23,13 +23,6 @@ class _AccountListState extends State<AccountList> {
   final ScrollController _scrollController = ScrollController();
   late CollectionReference<Account> _accountsCollection;
   late Stream<QuerySnapshot<Account>> _accountsStream;
-  Color getBalanceColor(double balance) {
-    return balance > 0
-        ? Colors.green
-        : balance < 0
-            ? Colors.red
-            : Colors.black;
-  }
 
   @override
   void initState() {
@@ -106,13 +99,16 @@ class _AccountListState extends State<AccountList> {
                     return AccountCard(
                       key: Key(accountID),
                       account: account,
-                      onTap: () => Navigator.of(context).pushNamed(
-                        TransactionsPage.routeName,
-                        arguments: TransactionArguments(
-                          accountData[index].id,
-                          account,
-                        ),
-                      ),
+                      onTap: () {
+                        widget.shouldHideFAB(false);
+                        Navigator.of(context).pushNamed(
+                          TransactionsPage.routeName,
+                          arguments: TransactionArguments(
+                            accountData[index].id,
+                            account,
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart' as Stabill;
 import 'package:stabill/widgets/account_summary_card.dart';
-import 'package:stabill/widgets/balance_text.dart';
 import 'package:stabill/widgets/transaction_card.dart';
 import 'package:stabill/widgets/transaction_modal.dart';
-import 'package:intl/intl.dart';
 
 class TransactionArguments {
   final String accountID;
@@ -29,16 +27,18 @@ class TransactionsPage extends StatefulWidget {
 }
 
 class _TransactionsPageState extends State<TransactionsPage> {
+  late DocumentReference<Account> _accountDocument;
+  late Stream<DocumentSnapshot<Account>> _accountStream;
+
   late CollectionReference<Stabill.Transaction> _transactionsCollection;
   late Stream<QuerySnapshot<Stabill.Transaction>> _transactionsStream;
-  late Stream<DocumentSnapshot<Account>> _accountStream;
 
   @override
   void initState() {
     String uid = FirebaseAuth.instance.currentUser!.uid;
 
     // Get a reference to the account document
-    DocumentReference<Account> accountDoc = FirebaseFirestore.instance
+    _accountDocument = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .collection("accounts")
@@ -49,7 +49,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         .doc(widget.accountID);
 
     // Get a stream for the account
-    _accountStream = accountDoc.snapshots();
+    _accountStream = _accountDocument.snapshots();
 
     // Get a stream for the account's transaction list to listen to
     _transactionsCollection = FirebaseFirestore.instance
@@ -83,6 +83,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.account.name),
+        actions: [
+          IconButton(
+              onPressed: () async {
+                await deleteAccount();
+                Navigator.of(context).pop();
+              },
+              icon: Icon(Icons.delete))
+        ],
       ),
       body: Column(
         children: [
@@ -98,7 +106,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   return accountCard;
                 }
 
-                print(snapshot.data);
                 Account? account = snapshot.data!.data();
 
                 if (account != null) {
@@ -209,6 +216,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> deleteAccount() {
+    return _accountDocument
+        .delete()
+        .onError((error, stackTrace) => print(error.toString()));
   }
 
   Future<void> addTransaction(Stabill.Transaction transaction) {
