@@ -17,6 +17,8 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+enum HomePageAction { Export, Import, Settings }
+
 class _HomePageState extends State<HomePage> {
   int index = 0;
   PageController controller = new PageController();
@@ -36,7 +38,45 @@ class _HomePageState extends State<HomePage> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
+        actions: [
+          PopupMenuButton(onSelected: (HomePageAction selected) {
+            switch (selected) {
+              case HomePageAction.Export:
+                break;
+              case HomePageAction.Import:
+                break;
+              case HomePageAction.Settings:
+                break;
+            }
+          }, itemBuilder: (ctx) {
+            return <PopupMenuEntry<HomePageAction>>[
+              const PopupMenuItem<HomePageAction>(
+                value: HomePageAction.Import,
+                child: ListTile(
+                  leading: Icon(Icons.upload_file),
+                  title: Text("Import Data"),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem<HomePageAction>(
+                value: HomePageAction.Import,
+                child: ListTile(
+                  leading: Icon(Icons.cloud_download),
+                  title: Text("Export Data"),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem<HomePageAction>(
+                value: HomePageAction.Settings,
+                child: ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text("Settings"),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ];
+          })
+        ],
       ),
       body: PageView(
         controller: controller,
