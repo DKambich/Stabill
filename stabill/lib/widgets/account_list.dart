@@ -109,21 +109,14 @@ class _AccountListState extends State<AccountList> {
                         ),
                       );
                     },
-                    onLongPress: (LongPressStartDetails details) async {
-                      double left = details.globalPosition.dx;
-                      double top = details.globalPosition.dy;
-                      RelativeRect tapPoint =
-                          RelativeRect.fromLTRB(left, top, left + 1, top + 1);
-                      AccountAction? selectedAction =
-                          await showAccountActions(tapPoint);
+                    actions: getAccountActions(),
+                    onSelected: (AccountAction selectedAction) async {
                       switch (selectedAction) {
                         case AccountAction.Edit:
                           // TODO: Handle this case.
                           break;
                         case AccountAction.Delete:
                           await deleteAccount(accountID);
-                          break;
-                        case null:
                           break;
                       }
                     },
@@ -141,29 +134,25 @@ class _AccountListState extends State<AccountList> {
     return _accountsCollection.doc(accountID).delete();
   }
 
-  Future<AccountAction?> showAccountActions(RelativeRect tapPoint) {
-    // Show the account actions
-    return showMenu<AccountAction>(
-      context: context,
-      position: tapPoint,
-      items: [
-        PopupMenuItem<AccountAction>(
-          child: ListTile(
-            leading: Icon(Icons.edit),
-            title: Text("Edit"),
-            contentPadding: EdgeInsets.zero,
-          ),
-          value: AccountAction.Edit,
+  List<PopupMenuItem<AccountAction>> getAccountActions() {
+    // Create the account actions
+    return [
+      PopupMenuItem<AccountAction>(
+        child: ListTile(
+          leading: Icon(Icons.edit),
+          title: Text("Edit"),
+          contentPadding: EdgeInsets.zero,
         ),
-        PopupMenuItem<AccountAction>(
-          child: ListTile(
-            leading: Icon(Icons.delete),
-            title: Text("Delete"),
-            contentPadding: EdgeInsets.zero,
-          ),
-          value: AccountAction.Delete,
+        value: AccountAction.Edit,
+      ),
+      PopupMenuItem<AccountAction>(
+        child: ListTile(
+          leading: Icon(Icons.delete),
+          title: Text("Delete"),
+          contentPadding: EdgeInsets.zero,
         ),
-      ],
-    );
+        value: AccountAction.Delete,
+      ),
+    ];
   }
 }

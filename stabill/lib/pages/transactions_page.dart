@@ -13,8 +13,6 @@ class TransactionArguments {
   TransactionArguments(this.accountID, this.account);
 }
 
-enum TransactionAction { Clear, Hide, Move, Edit, Delete }
-
 class TransactionsPage extends StatefulWidget {
   static final String routeName = "/transactions";
   final String accountID;
@@ -142,14 +140,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
                     return TransactionCard(
                       transaction: transaction,
-                      onLongPress: (LongPressStartDetails details) async {
-                        double left = details.globalPosition.dx;
-                        double top = details.globalPosition.dy;
-                        RelativeRect tapPoint =
-                            RelativeRect.fromLTRB(left, top, left + 1, top + 1);
-                        TransactionAction? selectedAction =
-                            await showTransactionActions(transaction, tapPoint);
-
+                      actions: getActions(transaction),
+                      onSelected: (selectedAction) async {
                         switch (selectedAction) {
                           case TransactionAction.Hide:
                             await hideTransaction(transactionID, transaction);
@@ -165,8 +157,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             break;
                           case TransactionAction.Delete:
                             await deleteTransaction(transactionID);
-                            break;
-                          case null:
                             break;
                         }
                       },
@@ -240,6 +230,57 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Future<void> moveTransaction(
       String transactionID, Stabill.Transaction transaction) {
     return Future.delayed(Duration(milliseconds: 100));
+  }
+
+  List<PopupMenuItem<TransactionAction>> getActions(
+      Stabill.Transaction transaction) {
+    var conditionalOption;
+    if (transaction.cleared) {
+      conditionalOption = PopupMenuItem<TransactionAction>(
+        child: ListTile(
+          leading: Icon(Icons.visibility_off),
+          title: Text("Hide"),
+          contentPadding: EdgeInsets.zero,
+        ),
+        value: TransactionAction.Hide,
+      );
+    } else {
+      conditionalOption = PopupMenuItem<TransactionAction>(
+        child: ListTile(
+          leading: Icon(Icons.check),
+          title: Text("Mark Cleared"),
+          contentPadding: EdgeInsets.zero,
+        ),
+        value: TransactionAction.Clear,
+      );
+    }
+    return [
+      conditionalOption,
+      PopupMenuItem<TransactionAction>(
+        child: ListTile(
+          leading: Icon(Icons.swap_horiz),
+          title: Text("Move"),
+          contentPadding: EdgeInsets.zero,
+        ),
+        value: TransactionAction.Move,
+      ),
+      PopupMenuItem<TransactionAction>(
+        child: ListTile(
+          leading: Icon(Icons.edit),
+          title: Text("Edit"),
+          contentPadding: EdgeInsets.zero,
+        ),
+        value: TransactionAction.Edit,
+      ),
+      PopupMenuItem<TransactionAction>(
+        child: ListTile(
+          leading: Icon(Icons.delete),
+          title: Text("Delete"),
+          contentPadding: EdgeInsets.zero,
+        ),
+        value: TransactionAction.Delete,
+      ),
+    ];
   }
 
   Future<TransactionAction?> showTransactionActions(
