@@ -83,14 +83,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.account.name),
-        actions: [
-          IconButton(
-              onPressed: () async {
-                await deleteAccount();
-                Navigator.of(context).pop();
-              },
-              icon: Icon(Icons.delete))
-        ],
+        actions: [],
       ),
       body: Column(
         children: [
