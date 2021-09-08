@@ -19,6 +19,8 @@
 - Action: Create account 🚧
 	- Improvement: Convert the new account dialog to bottom sheet 
 - Action: Delete account ✅
+	- Improvement: Add OnDelete to delete the transactions subcollection
+
 - Action: Rename account
 - Action: Reorder accounts
 - Action: Transfer funds between accounts 🚧
