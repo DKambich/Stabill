@@ -11,14 +11,11 @@ exports.recursiveAccountDelete = functions.firestore
   .document("/users/{userID}/accounts/{accountID}")
   .onDelete(async (snap, context) => {
     // Only allow admin users to execute this function.
-    const userID = context.params.userID, accountID = context.params.accountID;
-    console.log(
-      `User ${userID} has requested to delete account ${accountID}`
-    );
+    const userID = context.params.userID,
+      accountID = context.params.accountID;
+    console.log(`User ${userID} has requested to delete account ${accountID}`);
 
-    console.log(
-      `Deleting transaction subcollection of account ${accountID}`
-    );
+    console.log(`Deleting transaction subcollection of account ${accountID}`);
 
     // Run a recursive delete on the given document or collection path.
     // The 'token' must be set in the functions config, and can be generated
@@ -32,4 +29,38 @@ exports.recursiveAccountDelete = functions.firestore
         token: functions.config().fb.token,
       }
     );
+  });
+
+exports.onTransactionCreate = functions.firestore
+  .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
+  .onCreate(async (snap, context) => {
+    const transaction = snap.data();
+    const amount =
+      transaction.method == "TransactionType.Withdrawal"
+        ? -transaction.amount
+        : transaction.amount;
+    const accountRef = snap.ref.parent.parent;
+    const account = (await accountRef.get()).data();
+    await accountRef.update({
+      currentBalance: amount + account.currentBalance,
+      availableBalance:
+        account.availableBalance + (transaction.cleared ? amount : 0),
+    });
+  });
+
+exports.onTransactionDelete = functions.firestore
+  .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
+  .onDelete(async (snap, context) => {
+    const transaction = snap.data();
+    const amount =
+      transaction.method == "TransactionType.Withdrawal"
+        ? transaction.amount
+        : -transaction.amount;
+    const accountRef = snap.ref.parent.parent;
+    const account = (await accountRef.get()).data();
+    await accountRef.update({
+      currentBalance: amount + account.currentBalance,
+      availableBalance:
+        account.availableBalance + (transaction.cleared ? 0 : amount),
+    });
   });
