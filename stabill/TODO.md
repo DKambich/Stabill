@@ -29,7 +29,7 @@
 - UI: Display Transaction List ✅
 	- Show list of transactions ✅
 	- Show balance of account ✅
-		- Improvement: Add OnCreate, OnDelete, and OnChange of a transaction to update the balance of the parent account dynamically
+		- Improvement: OnCreate, OnDelete, and OnChange of a transaction to update the balance of the account 🚧
 - Feature: Popup menu when long pressing transactions ✅
 	- Action: Delete transaction ✅
 	- Action: Edit transaction ✅

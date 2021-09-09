@@ -28,30 +28,51 @@ function updateAccountBalance(accountRef, currentDelta, availableDelta) {
     .catch((error) => console.log(error));
 }
 
+function getSignFromMethod(method) {
+  return method == "TransactionType.Withdrawal" ? -1 : 1;
+}
+
 exports.onCreateTransaction = functions.firestore
   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
   .onCreate(async (snap, context) => {
     const transaction = snap.data();
-    const amount =
-      transaction.method == "TransactionType.Withdrawal"
-        ? -transaction.amount
-        : transaction.amount;
+
+    let amount = transaction.amount * getSignFromMethod(transaction.method);
+
     const accountRef = snap.ref.parent.parent;
     updateAccountBalance(accountRef, amount, transaction.cleared ? amount : 0);
   });
 
+exports.onUpdateTransaction = functions.firestore
+  .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
+  .onUpdate(async (change, context) => {
+    const oldTransaction = change.before.data();
+    const newTransaction = change.after.data();
+    const accountRef = change.after.ref.parent.parent;
+
+    const oldAmount =
+      oldTransaction.amount * getSignFromMethod(oldTransaction.method) * -1;
+    const newAmount =
+      newTransaction.amount * getSignFromMethod(newTransaction.method);
+    updateAccountBalance(
+      accountRef,
+      oldAmount + newAmount,
+      (oldTransaction.cleared ? oldAmount : 0) +
+        (newTransaction.cleared ? newAmount : 0)
+    );
+
+    updateAccountBalance(accountRef, newAmount);
+  });
 exports.onDeleteTransaction = functions.firestore
   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
   .onDelete(async (snap, context) => {
     const transaction = snap.data();
-    const amount =
-      transaction.method == "TransactionType.Withdrawal"
-        ? transaction.amount
-        : -transaction.amount;
+
+    let amount =
+      transaction.amount * getSignFromMethod(transaction.method) * -1;
+
     const accountRef = snap.ref.parent.parent;
-    const account = (await accountRef.get()).data();
-    if (account == null || account == undefined) {
-      return;
-    }
-    updateAccountBalance(accountRef, amount, transaction.cleared ? 0 : amount);
+    const account = await accountRef.get();
+    if (account == undefined || account == null) return;
+    updateAccountBalance(accountRef, amount, transaction.cleared ? amount : 0);
   });
