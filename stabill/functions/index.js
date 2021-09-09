@@ -7,7 +7,7 @@ const firebase_tools = require("firebase-tools");
 //   functions.logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
-exports.recursiveAccountDelete = functions.firestore
+exports.onDeleteAccount = functions.firestore
   .document("/users/{userID}/accounts/{accountID}")
   .onDelete(async (snap, context) => {
     // Only allow admin users to execute this function.
@@ -31,7 +31,7 @@ exports.recursiveAccountDelete = functions.firestore
     );
   });
 
-exports.onTransactionCreate = functions.firestore
+exports.onCreateTransaction = functions.firestore
   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
   .onCreate(async (snap, context) => {
     const transaction = snap.data();
@@ -48,7 +48,7 @@ exports.onTransactionCreate = functions.firestore
     });
   });
 
-exports.onTransactionDelete = functions.firestore
+exports.onDeleteTransaction = functions.firestore
   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
   .onDelete(async (snap, context) => {
     const transaction = snap.data();
