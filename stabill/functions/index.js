@@ -1,35 +1,32 @@
 const functions = require("firebase-functions");
-const firebase_tools = require("firebase-tools");
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const admin = require("firebase-admin");
+admin.initializeApp();
+
 exports.onDeleteAccount = functions.firestore
   .document("/users/{userID}/accounts/{accountID}")
   .onDelete(async (snap, context) => {
     // Only allow admin users to execute this function.
     const userID = context.params.userID,
       accountID = context.params.accountID;
-    console.log(`User ${userID} has requested to delete account ${accountID}`);
-
-    console.log(`Deleting transaction subcollection of account ${accountID}`);
-
-    // Run a recursive delete on the given document or collection path.
-    // The 'token' must be set in the functions config, and can be generated
-    // at the command line by running 'firebase login:ci'.
-    await firebase_tools.firestore.delete(
-      `/users/$${userID}/accounts/${accountID}/transactions`,
-      {
-        project: process.env.GCLOUD_PROJECT,
-        recursive: true,
-        yes: true,
-        token: functions.config().fb.token,
-      }
+    console.log(
+      `User ${userID} has requested to delete account ${accountID} and it's subcollection`
     );
+
+    const deletedDocs = (
+      await snap.ref.collection("/transactions").get()
+    ).docs.map((doc) => doc.ref.delete());
+
+    await Promise.allSettled(deletedDocs);
   });
+
+function updateAccountBalance(accountRef, currentDelta, availableDelta) {
+  accountRef
+    .update({
+      currentBalance: admin.firestore.FieldValue.increment(currentDelta),
+      availableBalance: admin.firestore.FieldValue.increment(availableDelta),
+    })
+    .catch((error) => console.log(error));
+}
 
 exports.onCreateTransaction = functions.firestore
   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
@@ -40,12 +37,7 @@ exports.onCreateTransaction = functions.firestore
         ? -transaction.amount
         : transaction.amount;
     const accountRef = snap.ref.parent.parent;
-    const account = (await accountRef.get()).data();
-    await accountRef.update({
-      currentBalance: amount + account.currentBalance,
-      availableBalance:
-        account.availableBalance + (transaction.cleared ? amount : 0),
-    });
+    updateAccountBalance(accountRef, amount, transaction.cleared ? amount : 0);
   });
 
 exports.onDeleteTransaction = functions.firestore
@@ -58,9 +50,8 @@ exports.onDeleteTransaction = functions.firestore
         : -transaction.amount;
     const accountRef = snap.ref.parent.parent;
     const account = (await accountRef.get()).data();
-    await accountRef.update({
-      currentBalance: amount + account.currentBalance,
-      availableBalance:
-        account.availableBalance + (transaction.cleared ? 0 : amount),
-    });
+    if (account == null || account == undefined) {
+      return;
+    }
+    updateAccountBalance(accountRef, amount, transaction.cleared ? 0 : amount);
   });
