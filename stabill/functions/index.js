@@ -32,47 +32,82 @@ function getSignFromMethod(method) {
   return method == "TransactionType.Withdrawal" ? -1 : 1;
 }
 
-exports.onCreateTransaction = functions.firestore
+exports.onChangeTransaction = functions.firestore
   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
-  .onCreate(async (snap, context) => {
-    const transaction = snap.data();
+  .onWrite(async (change, context) => {
+    let accountRef;
 
-    let amount = transaction.amount * getSignFromMethod(transaction.method);
+    let oldCurrDelta = 0,
+      oldAvailDelta = 0;
+    if (change.before.exists) {
+      const transaction = change.before.data();
+      oldCurrDelta =
+        -transaction.amount * getSignFromMethod(transaction.method);
+      oldAvailDelta = transaction.cleared ? oldCurrDelta : 0;
 
-    const accountRef = snap.ref.parent.parent;
-    updateAccountBalance(accountRef, amount, transaction.cleared ? amount : 0);
+      accountRef = change.before.ref.parent.parent;
+    }
+
+    let newCurrDelta = 0,
+      newAvailDelta = 0;
+    if (change.after.exists) {
+      const transaction = change.after.data();
+      newCurrDelta = transaction.amount * getSignFromMethod(transaction.method);
+      newAvailDelta = transaction.cleared ? newCurrDelta : 0;
+
+      accountRef = change.after.ref.parent.parent;
+    }
+
+    const currDelta = newCurrDelta + oldCurrDelta;
+    const availDelta = newAvailDelta + oldAvailDelta;
+
+    accountRef.update({
+      currentBalance: admin.firestore.FieldValue.increment(currDelta),
+      availableBalance: admin.firestore.FieldValue.increment(availDelta),
+    });
   });
 
-exports.onUpdateTransaction = functions.firestore
-  .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
-  .onUpdate(async (change, context) => {
-    const oldTransaction = change.before.data();
-    const newTransaction = change.after.data();
-    const accountRef = change.after.ref.parent.parent;
+// exports.onCreateTransaction = functions.firestore
+//   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
+//   .onCreate(async (snap, context) => {
+//     const transaction = snap.data();
 
-    const oldAmount =
-      oldTransaction.amount * getSignFromMethod(oldTransaction.method) * -1;
-    const newAmount =
-      newTransaction.amount * getSignFromMethod(newTransaction.method);
-    updateAccountBalance(
-      accountRef,
-      oldAmount + newAmount,
-      (oldTransaction.cleared ? oldAmount : 0) +
-        (newTransaction.cleared ? newAmount : 0)
-    );
+//     let amount = transaction.amount * getSignFromMethod(transaction.method);
 
-    updateAccountBalance(accountRef, newAmount);
-  });
-exports.onDeleteTransaction = functions.firestore
-  .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
-  .onDelete(async (snap, context) => {
-    const transaction = snap.data();
+//     const accountRef = snap.ref.parent.parent;
+//     updateAccountBalance(accountRef, amount, transaction.cleared ? amount : 0);
+//   });
 
-    let amount =
-      transaction.amount * getSignFromMethod(transaction.method) * -1;
+// exports.onUpdateTransaction = functions.firestore
+//   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
+//   .onUpdate(async (change, context) => {
+//     const oldTransaction = change.before.data();
+//     const newTransaction = change.after.data();
+//     const accountRef = change.after.ref.parent.parent;
 
-    const accountRef = snap.ref.parent.parent;
-    const account = await accountRef.get();
-    if (account == undefined || account == null) return;
-    updateAccountBalance(accountRef, amount, transaction.cleared ? amount : 0);
-  });
+//     const oldAmount =
+//       oldTransaction.amount * getSignFromMethod(oldTransaction.method) * -1;
+//     const newAmount =
+//       newTransaction.amount * getSignFromMethod(newTransaction.method);
+//     updateAccountBalance(
+//       accountRef,
+//       oldAmount + newAmount,
+//       (oldTransaction.cleared ? oldAmount : 0) +
+//         (newTransaction.cleared ? newAmount : 0)
+//     );
+
+//     updateAccountBalance(accountRef, newAmount);
+//   });
+// exports.onDeleteTransaction = functions.firestore
+//   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
+//   .onDelete(async (snap, context) => {
+//     const transaction = snap.data();
+
+//     let amount =
+//       transaction.amount * getSignFromMethod(transaction.method) * -1;
+
+//     const accountRef = snap.ref.parent.parent;
+//     const account = await accountRef.get();
+//     if (account == undefined || account == null) return;
+//     updateAccountBalance(accountRef, amount, transaction.cleared ? amount : 0);
+//   });
