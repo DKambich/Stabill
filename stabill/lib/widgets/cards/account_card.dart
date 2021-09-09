@@ -57,7 +57,6 @@ class AccountCard extends StatelessWidget {
                 onSelected: onSelected,
                 padding: EdgeInsets.zero,
                 tooltip: "Show Actions",
-                child: Icon(Icons.more_vert),
               )
             ],
           ),

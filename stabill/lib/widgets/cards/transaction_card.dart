@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stabill/models/transaction.dart';
-import 'package:stabill/pages/transactions_page.dart';
 import 'package:stabill/widgets/balance_text.dart';
 import 'package:intl/intl.dart';
 
@@ -71,7 +70,6 @@ class TransactionCard extends StatelessWidget {
               onSelected: onSelected,
               padding: EdgeInsets.zero,
               tooltip: "Show Actions",
-              child: Icon(Icons.more_vert),
             )
           ],
         ),
