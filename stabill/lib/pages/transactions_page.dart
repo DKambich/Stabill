@@ -26,6 +26,8 @@ class TransactionsPage extends StatefulWidget {
   _TransactionsPageState createState() => _TransactionsPageState();
 }
 
+enum TransactionPageAction { Correction, Transfer, Reveal, Recurring }
+
 class _TransactionsPageState extends State<TransactionsPage> {
   late DocumentReference<Account> _accountDocument;
   late Stream<DocumentSnapshot<Account>> _accountStream;
@@ -83,7 +85,63 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.account.name),
-        actions: [],
+        actions: [
+          PopupMenuButton(onSelected: (TransactionPageAction selected) {
+            switch (selected) {
+              case TransactionPageAction.Correction:
+                // TODO: Handle this case.
+                break;
+              case TransactionPageAction.Transfer:
+                // TODO: Handle this case.
+                break;
+              case TransactionPageAction.Reveal:
+                // TODO: Handle this case.
+                break;
+              case TransactionPageAction.Recurring:
+                // TODO: Handle this case.
+                break;
+            }
+          }, itemBuilder: (ctx) {
+            return <PopupMenuEntry<TransactionPageAction>>[
+              const PopupMenuItem<TransactionPageAction>(
+                value: TransactionPageAction.Correction,
+                child: ListTile(
+                  leading: Icon(Icons.price_change),
+                  title: Text("Balance Correction"),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              const PopupMenuItem<TransactionPageAction>(
+                value: TransactionPageAction.Reveal,
+                child: ListTile(
+                  leading: Icon(Icons.visibility),
+                  title: Text("Reveal Transactions"),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              const PopupMenuItem<TransactionPageAction>(
+                value: TransactionPageAction.Transfer,
+                child: ListTile(
+                  leading: Icon(Icons.swap_horiz),
+                  title: Text("Transfer Funds"),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              const PopupMenuItem<TransactionPageAction>(
+                value: TransactionPageAction.Recurring,
+                child: ListTile(
+                  leading: Icon(Icons.repeat),
+                  title: Text("Recurring Transactions"),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ];
+          })
+        ],
       ),
       body: Column(
         children: [
@@ -299,6 +357,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           leading: Icon(Icons.visibility_off),
           title: Text("Hide"),
           contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
         ),
         value: TransactionAction.Hide,
       );
@@ -308,6 +367,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           leading: Icon(Icons.check),
           title: Text("Mark Cleared"),
           contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
         ),
         value: TransactionAction.Clear,
       );
@@ -324,6 +384,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             leading: Icon(Icons.swap_horiz),
             title: Text("Move"),
             contentPadding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
           ),
           value: TransactionAction.Move,
         ),
@@ -332,6 +393,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             leading: Icon(Icons.edit),
             title: Text("Edit"),
             contentPadding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
           ),
           value: TransactionAction.Edit,
         ),
@@ -340,6 +402,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             leading: Icon(Icons.delete),
             title: Text("Delete"),
             contentPadding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
           ),
           value: TransactionAction.Delete,
         ),

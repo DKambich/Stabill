@@ -53,17 +53,19 @@ class _HomePageState extends State<HomePage> {
               const PopupMenuItem<HomePageAction>(
                 value: HomePageAction.Import,
                 child: ListTile(
-                  leading: Icon(Icons.upload_file),
+                  leading: Icon(Icons.file_download_outlined),
                   title: Text("Import Data"),
                   contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
                 ),
               ),
               const PopupMenuItem<HomePageAction>(
                 value: HomePageAction.Import,
                 child: ListTile(
-                  leading: Icon(Icons.cloud_download),
+                  leading: Icon(Icons.file_upload_outlined),
                   title: Text("Export Data"),
                   contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
                 ),
               ),
               const PopupMenuItem<HomePageAction>(
@@ -72,6 +74,7 @@ class _HomePageState extends State<HomePage> {
                   leading: Icon(Icons.settings),
                   title: Text("Settings"),
                   contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
                 ),
               ),
             ];
