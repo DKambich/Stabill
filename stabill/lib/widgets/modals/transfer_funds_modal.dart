@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/models/transaction.dart' as Stabill;
 
 class TransferFundsDialog extends StatefulWidget {
   const TransferFundsDialog({Key? key}) : super(key: key);
@@ -21,30 +22,52 @@ class _TransferFundsDialogState extends State<TransferFundsDialog> {
 
   String? errorText;
 
-  Future<void> transferFunds(String fromID, String toID, double amount) async {
+  Future<void> transferFunds(QueryDocumentSnapshot<Account> fromAccount,
+      QueryDocumentSnapshot<Account> toAccount, double amount) async {
     WriteBatch batch = FirebaseFirestore.instance.batch();
 
-    return _accountsCollection.get().then((querySnapshot) {
-      querySnapshot.docs.forEach((document) {
-        if (document.id == fromID) {
-          double availableBalance = document.data().availableBalance - amount;
-          double currentBalance = document.data().currentBalance - amount;
-          batch.update(document.reference, {
-            "availableBalance": availableBalance,
-            "currentBalance": currentBalance
-          });
-        } else if (document.id == toID) {
-          double availableBalance = document.data().availableBalance + amount;
-          double currentBalance = document.data().currentBalance + amount;
-          batch.update(document.reference, {
-            "availableBalance": availableBalance,
-            "currentBalance": currentBalance
-          });
-        }
-      });
+    var fromAccountTransactions = _accountsCollection
+        .doc(fromAccount.id)
+        .collection("/transactions")
+        .withConverter<Stabill.Transaction>(
+          fromFirestore: (snapshot, _) =>
+              Stabill.Transaction.fromJson(snapshot.data()!),
+          toFirestore: (acc, _) => acc.toJson(),
+        );
 
-      return batch.commit();
-    });
+    var toAccountTransactions = _accountsCollection
+        .doc(toAccount.id)
+        .collection("/transactions")
+        .withConverter<Stabill.Transaction>(
+          fromFirestore: (snapshot, _) =>
+              Stabill.Transaction.fromJson(snapshot.data()!),
+          toFirestore: (acc, _) => acc.toJson(),
+        );
+
+    DateTime now = DateTime.now();
+
+    var fromTransaction = Stabill.Transaction(
+      timestamp: now,
+      amount: amount,
+      cleared: true,
+      memo: "SYSTEM GENERATED",
+      method: Stabill.TransactionType.Withdrawal,
+      name: "Transfer To ${toAccount.data().name}",
+    );
+    var toTransaction = Stabill.Transaction(
+      timestamp: now,
+      amount: amount,
+      cleared: true,
+      memo: "SYSTEM GENERATED",
+      method: Stabill.TransactionType.Deposit,
+      name: "Transfer From ${fromAccount.data().name}",
+    );
+
+    batch.set<Stabill.Transaction>(
+        fromAccountTransactions.doc(), fromTransaction);
+    batch.set<Stabill.Transaction>(toAccountTransactions.doc(), toTransaction);
+
+    return batch.commit();
   }
 
   @override
@@ -86,6 +109,7 @@ class _TransferFundsDialogState extends State<TransferFundsDialog> {
           if (snapshot.hasError) {
             // TODO: Notify user there was an error
             Navigator.pop(context);
+            return SizedBox.shrink();
           } else if (snapshot.connectionState == ConnectionState.waiting) {
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -204,7 +228,11 @@ class _TransferFundsDialogState extends State<TransferFundsDialog> {
                           double transferAmount = double.parse(
                               _balanceController.text.substring(1));
                           await transferFunds(
-                              fromAccount, toAccount, transferAmount);
+                              accounts.firstWhere(
+                                  (element) => element.id == fromAccount),
+                              accounts.firstWhere(
+                                  (element) => element.id == toAccount),
+                              transferAmount);
                           Navigator.pop(context);
                           setState(() {
                             errorText = null;
