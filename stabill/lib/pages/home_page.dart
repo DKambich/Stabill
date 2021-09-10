@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:stabill/pages/login_page.dart';
-import 'package:stabill/widgets/dialogs/account_dialog.dart';
+import 'package:stabill/widgets/dialogs/create_account_dialog.dart';
 import 'package:stabill/widgets/account_list.dart';
 import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
 
@@ -118,30 +118,12 @@ class _HomePageState extends State<HomePage> {
                   SpeedDialChild(
                     child: Icon(Icons.savings),
                     label: "Add Account",
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => NewAccountDialog(),
-                      );
-                    },
+                    onTap: () => CreateAccountModal.show(context),
                   ),
                   SpeedDialChild(
-                    child: Icon(Icons.swap_horiz),
-                    label: "Make Transfer",
-                    onTap: () {
-                      showModalBottomSheet(
-                        isScrollControlled: true,
-                        context: context,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(25),
-                            topRight: Radius.circular(25),
-                          ),
-                        ),
-                        builder: (_) => TransferFundsDialog(),
-                      );
-                    },
-                  ),
+                      child: Icon(Icons.swap_horiz),
+                      label: "Make Transfer",
+                      onTap: () => TransferFundsModal.show(context)),
                   SpeedDialChild(
                     child: Icon(Icons.repeat),
                     label: "Recurring Transactions",

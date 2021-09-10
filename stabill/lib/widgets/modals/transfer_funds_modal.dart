@@ -4,14 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart' as Stabill;
 
-class TransferFundsDialog extends StatefulWidget {
-  const TransferFundsDialog({Key? key}) : super(key: key);
+class TransferFundsModal extends StatefulWidget {
+  const TransferFundsModal({Key? key}) : super(key: key);
 
   @override
-  _TransferFundsDialogState createState() => _TransferFundsDialogState();
+  _TransferFundsModalState createState() => _TransferFundsModalState();
+
+  static void show(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
+      ),
+      builder: (_) => TransferFundsModal(),
+    );
+  }
 }
 
-class _TransferFundsDialogState extends State<TransferFundsDialog> {
+class _TransferFundsModalState extends State<TransferFundsModal> {
   late CollectionReference<Account> _accountsCollection;
   late Future<QuerySnapshot<Account>> _accountsFuture;
   late String fromAccount, toAccount = "";

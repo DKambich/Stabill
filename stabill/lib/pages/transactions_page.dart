@@ -5,7 +5,9 @@ import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart' as Stabill;
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/cards/transaction_card.dart';
+import 'package:stabill/widgets/modals/balance_correction_modal.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
+import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
 
 class TransactionArguments {
   final String accountID;
@@ -89,10 +91,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
           PopupMenuButton(onSelected: (TransactionPageAction selected) {
             switch (selected) {
               case TransactionPageAction.Correction:
-                // TODO: Handle this case.
+                BalanceCorrectionModal.show(context, widget.accountID);
                 break;
               case TransactionPageAction.Transfer:
-                // TODO: Handle this case.
+                TransferFundsModal.show(context);
                 break;
               case TransactionPageAction.Reveal:
                 // TODO: Handle this case.

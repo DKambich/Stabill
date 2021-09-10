@@ -3,14 +3,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
 
-class NewAccountDialog extends StatefulWidget {
-  const NewAccountDialog({Key? key}) : super(key: key);
+class CreateAccountModal extends StatefulWidget {
+  const CreateAccountModal({Key? key}) : super(key: key);
 
   @override
-  _NewAccountDialogState createState() => _NewAccountDialogState();
+  _CreateAccountModalState createState() => _CreateAccountModalState();
+
+  static void show(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => CreateAccountModal(),
+    );
+  }
 }
 
-class _NewAccountDialogState extends State<NewAccountDialog> {
+class _CreateAccountModalState extends State<CreateAccountModal> {
   final TextEditingController _accountController = TextEditingController();
   final TextEditingController _balanceController =
       TextEditingController(text: r"$0.00");
