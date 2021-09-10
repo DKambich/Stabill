@@ -122,6 +122,19 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 }
 
                 var transactionData = snapshot.data!.docs;
+                if (transactionData.length == 0) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.payment,
+                        size: 64,
+                      ),
+                      Text("Add a new transaction!"),
+                    ],
+                  );
+                }
+
                 transactionData.sort(
                     (a, b) => b.data().timestamp.compareTo(a.data().timestamp));
                 return ListView.builder(

@@ -98,9 +98,10 @@ class _TransferFundsDialogState extends State<TransferFundsDialog> {
             );
           }
 
-          if (!snapshot.hasData) {
-            // TODO: Notify user there are no accounts
+          if (!snapshot.hasData || snapshot.data!.docs.length < 2) {
+            // TODO: Notify user there are not enough accounts to transfer between
             Navigator.pop(context);
+            return SizedBox.shrink();
           }
 
           // Retrieve the accounts from the collection

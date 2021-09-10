@@ -83,6 +83,28 @@ class _AccountListState extends State<AccountList> {
           totalAvailableBalance += account.availableBalance;
         });
 
+        if (accountData.length == 0) {
+          return Column(children: [
+            AccountSummaryCard(
+              totalCurrentBalance: totalCurrentBalance,
+              totalAvailableBalance: totalAvailableBalance,
+            ),
+            Expanded(
+                child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.savings,
+                    size: 64,
+                  ),
+                  Text("Get started by adding a new account!"),
+                ],
+              ),
+            )),
+          ]);
+        }
+
         return Column(
           children: [
             AccountSummaryCard(

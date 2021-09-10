@@ -9,13 +9,13 @@ class BalanceText extends StatelessWidget {
       {Key? key, this.fontSize = 20, required this.text, required this.balance})
       : super(key: key);
 
-  Color getBalanceColor(double balance) {
+  Color? getBalanceColor(BuildContext context, double balance) {
     if (balance > 0)
       return Colors.green;
     else if (balance < 0)
       return Colors.red;
     else
-      return Colors.black;
+      return Theme.of(context).textTheme.bodyText1!.color;
   }
 
   @override
@@ -39,7 +39,7 @@ class BalanceText extends StatelessWidget {
           TextSpan(
             text: balanceText,
             style: TextStyle(
-              color: getBalanceColor(balance),
+              color: getBalanceColor(context, balance),
             ),
           ),
         ],
