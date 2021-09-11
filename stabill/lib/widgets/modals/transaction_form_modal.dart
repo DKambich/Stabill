@@ -90,14 +90,17 @@ class _TransactionModalState extends State<TransactionModal> {
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
                   if (widget.transaction != null) {
-                    if (!await showDialog(
-                      context: context,
-                      builder: (_) => ConfirmDialog(
-                        title: "Update Transaction",
-                        message:
-                            "Are you sure you want to update the transaction '${widget.transaction!.name}'?",
-                      ),
-                    )) {
+                    bool confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => ConfirmDialog(
+                            title: "Update Transaction",
+                            message:
+                                "Are you sure you want to update the transaction '${widget.transaction!.name}'?",
+                          ),
+                        ) ??
+                        false;
+
+                    if (!confirm) {
                       return;
                     }
                   }

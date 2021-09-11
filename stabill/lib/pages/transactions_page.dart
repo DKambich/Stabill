@@ -223,14 +223,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             await editTransaction(transactionID, transaction);
                             break;
                           case TransactionAction.Delete:
-                            if (await showDialog(
-                              context: context,
-                              builder: (_) => ConfirmDialog(
-                                title: "Delete Transaction",
-                                message:
-                                    "Are you sure you want to delete the transaction '${transaction.name}'?",
-                              ),
-                            )) {
+                            bool confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (_) => ConfirmDialog(
+                                    title: "Delete Transaction",
+                                    message:
+                                        "Are you sure you want to delete the transaction '${transaction.name}'?",
+                                  ),
+                                ) ??
+                                false;
+                            if (confirm) {
                               await deleteTransaction(transactionID);
                             }
                             break;
