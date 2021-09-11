@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:stabill/pages/login_page.dart';
-import 'package:stabill/widgets/dialogs/create_account_dialog.dart';
+import 'package:stabill/widgets/modals/create_account_modal.dart';
 import 'package:stabill/widgets/account_list.dart';
 import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
 

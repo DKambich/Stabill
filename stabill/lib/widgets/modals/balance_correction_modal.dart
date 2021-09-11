@@ -100,7 +100,7 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              "Balance Correction Funds",
+              "Balance Correction",
               style: TextStyle(fontSize: 20),
               textAlign: TextAlign.center,
             ),
@@ -132,28 +132,22 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: TextButton(
-                        child: Text("Cancel"),
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                    child: TextButton(
+                      child: Text("Cancel"),
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ),
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: ElevatedButton(
-                        child: Text("Confirm"),
-                        onPressed: () async {
-                          String newBalanceStr =
-                              _balanceController.text.replaceAll(r"$", "");
-                          double newBalance = double.parse(newBalanceStr);
+                    child: TextButton(
+                      child: Text("Confirm"),
+                      onPressed: () async {
+                        String newBalanceStr =
+                            _balanceController.text.replaceAll(r"$", "");
+                        double newBalance = double.parse(newBalanceStr);
 
-                          if (await correctBalance(newBalance))
-                            Navigator.pop(context);
-                        },
-                      ),
+                        if (await correctBalance(newBalance))
+                          Navigator.pop(context);
+                      },
                     ),
                   ),
                 ],
