@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:intl/intl.dart';
+import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 
 class TransactionModal extends StatefulWidget {
   static final String routeName = "/transaction";
@@ -86,8 +87,20 @@ class _TransactionModalState extends State<TransactionModal> {
         title: Text('$action Transaction'),
         actions: [
           IconButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState!.validate()) {
+                  if (widget.transaction != null) {
+                    if (!await showDialog(
+                      context: context,
+                      builder: (_) => ConfirmDialog(
+                        title: "Update Transaction",
+                        message:
+                            "Are you sure you want to update the transaction '${widget.transaction!.name}'?",
+                      ),
+                    )) {
+                      return;
+                    }
+                  }
                   int checkNumber = checkNumberController.text.length > 0
                       ? int.parse(checkNumberController.text)
                       : -1;

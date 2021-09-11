@@ -7,6 +7,7 @@ import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/transactions_page.dart';
 import 'package:stabill/widgets/cards/account_card.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
+import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 import 'package:stabill/widgets/modals/edit_account_modal.dart';
 
 class AccountList extends StatefulWidget {
@@ -139,7 +140,16 @@ class _AccountListState extends State<AccountList> {
                           EditAccountModal.show(context, accountID);
                           break;
                         case AccountAction.Delete:
-                          await deleteAccount(accountID);
+                          if (await showDialog(
+                            context: context,
+                            builder: (_) => ConfirmDialog(
+                              title: "Delete Account",
+                              message:
+                                  "Are you sure you want to delete the account '${account.name}'?",
+                            ),
+                          )) {
+                            await deleteAccount(accountID);
+                          }
                           break;
                       }
                     },

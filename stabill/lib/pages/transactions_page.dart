@@ -5,6 +5,7 @@ import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart' as Stabill;
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/cards/transaction_card.dart';
+import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 import 'package:stabill/widgets/modals/balance_correction_modal.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
@@ -222,7 +223,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             await editTransaction(transactionID, transaction);
                             break;
                           case TransactionAction.Delete:
-                            await deleteTransaction(transactionID);
+                            if (await showDialog(
+                              context: context,
+                              builder: (_) => ConfirmDialog(
+                                title: "Delete Transaction",
+                                message:
+                                    "Are you sure you want to delete the transaction '${transaction.name}'?",
+                              ),
+                            )) {
+                              await deleteTransaction(transactionID);
+                            }
                             break;
                         }
                       },
