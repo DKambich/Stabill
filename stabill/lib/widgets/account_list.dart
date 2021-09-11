@@ -7,6 +7,7 @@ import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/transactions_page.dart';
 import 'package:stabill/widgets/cards/account_card.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
+import 'package:stabill/widgets/modals/edit_account_modal.dart';
 
 class AccountList extends StatefulWidget {
   final Function(bool) shouldHideFAB;
@@ -135,7 +136,7 @@ class _AccountListState extends State<AccountList> {
                     onSelected: (AccountAction selectedAction) async {
                       switch (selectedAction) {
                         case AccountAction.Edit:
-                          // TODO: Handle this case.
+                          EditAccountModal.show(context, accountID);
                           break;
                         case AccountAction.Delete:
                           await deleteAccount(accountID);
