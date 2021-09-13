@@ -3,7 +3,7 @@ class Transaction {
   double amount;
   DateTime timestamp;
   int checkNumber;
-  bool cleared;
+  bool cleared, hidden;
   String memo;
   TransactionType method;
 
@@ -13,6 +13,7 @@ class Transaction {
     this.amount = 0,
     this.checkNumber = -1,
     this.cleared = false,
+    this.hidden = false,
     this.method = TransactionType.Withdrawal,
     required this.timestamp,
   });
@@ -24,6 +25,7 @@ class Transaction {
           amount: json['amount'].toDouble(),
           checkNumber: json['checkNumber'],
           cleared: json['cleared'],
+          hidden: json['hidden'],
           method: TransactionType.values
               .firstWhere((element) => element.toString() == json['method']),
           timestamp: json['timestamp'].toDate(),
@@ -36,6 +38,7 @@ class Transaction {
       'amount': amount,
       'checkNumber': checkNumber,
       'cleared': cleared,
+      'hidden': hidden,
       'method': method.toString(),
       'timestamp': timestamp,
     };

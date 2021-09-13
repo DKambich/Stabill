@@ -155,7 +155,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ),
           ),
           PopupMenuButton(
-              onSelected: (TransactionPageAction selected) {
+              onSelected: (TransactionPageAction selected) async {
                 switch (selected) {
                   case TransactionPageAction.Correction:
                     BalanceCorrectionModal.show(context, widget.accountID);
@@ -167,7 +167,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     );
                     break;
                   case TransactionPageAction.Reveal:
-                    // TODO: Handle this case.
+                    final transactionUpdates = await _transactionsCollection
+                        .where("hidden", isEqualTo: true)
+                        .get();
+                    print(transactionUpdates.docs.length);
+                    transactionUpdates.docs.forEach(
+                      (transaction) => transaction.reference.update(
+                        {"hidden": false},
+                      ),
+                    );
                     break;
                   case TransactionPageAction.Recurring:
                     // TODO: Handle this case.
@@ -224,6 +232,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   );
                 }
 
+                transactionData = transactionData
+                    .where((element) => !element.data().hidden)
+                    .toList();
                 if (isSearching) {
                   String query = searchController.text.toLowerCase();
                   transactionData = transactionData
@@ -233,6 +244,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       )
                       .toList();
                 }
+
                 transactionData.sort(
                   (a, b) => b.data().timestamp.compareTo(a.data().timestamp),
                 );
@@ -339,7 +351,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Future<void> hideTransaction(
       String transactionID, Stabill.Transaction transaction) {
-    return Future.delayed(Duration(milliseconds: 100));
+    transaction.hidden = true;
+    return _transactionsCollection.doc(transactionID).set(transaction);
   }
 
   Future<void> moveTransaction(
