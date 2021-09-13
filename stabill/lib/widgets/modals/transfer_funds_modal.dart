@@ -42,7 +42,7 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
 
     var fromAccountTransactions = _accountsCollection
         .doc(fromAccount.id)
-        .collection("/transactions")
+        .collection("transactions")
         .withConverter<Stabill.Transaction>(
           fromFirestore: (snapshot, _) =>
               Stabill.Transaction.fromJson(snapshot.data()!),
@@ -51,7 +51,7 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
 
     var toAccountTransactions = _accountsCollection
         .doc(toAccount.id)
-        .collection("/transactions")
+        .collection("transactions")
         .withConverter<Stabill.Transaction>(
           fromFirestore: (snapshot, _) =>
               Stabill.Transaction.fromJson(snapshot.data()!),

@@ -54,7 +54,7 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
         .doc(widget.accountID);
 
     _transactionCollection = _accountDocument
-        .collection("/transactions")
+        .collection("transactions")
         .withConverter<Stabill.Transaction>(
           fromFirestore: (snapshot, _) =>
               Stabill.Transaction.fromJson(snapshot.data()!),
