@@ -207,7 +207,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
                     return TransactionCard(
                       transaction: transaction,
-                      actions: getActions(transaction),
+                      actions: buildTransactionActions(transaction),
                       onSelected: (selectedAction) async {
                         switch (selectedAction) {
                           case TransactionAction.Hide:
@@ -223,15 +223,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             await editTransaction(transactionID, transaction);
                             break;
                           case TransactionAction.Delete:
-                            bool confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (_) => ConfirmDialog(
-                                    title: "Delete Transaction",
-                                    message:
-                                        "Are you sure you want to delete the transaction '${transaction.name}'?",
-                                  ),
-                                ) ??
-                                false;
+                            bool confirm = await ConfirmDialog.show(
+                              context,
+                              "Delete Transaction",
+                              "Are you sure you want to delete the transaction '${transaction.name}'?",
+                            );
                             if (confirm) {
                               await deleteTransaction(transactionID);
                             }
@@ -310,7 +306,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return Future.delayed(Duration(milliseconds: 100));
   }
 
-  List<PopupMenuItem<TransactionAction>> getActions(
+  List<PopupMenuItem<TransactionAction>> buildTransactionActions(
       Stabill.Transaction transaction) {
     var conditionalOption;
     if (transaction.cleared) {
@@ -359,68 +355,5 @@ class _TransactionsPageState extends State<TransactionsPage> {
         value: TransactionAction.Delete,
       ),
     ];
-  }
-
-  Future<TransactionAction?> showTransactionActions(
-      Stabill.Transaction transaction, RelativeRect tapPoint) {
-    // Define the conditional option
-    var conditionalOption;
-    if (transaction.cleared) {
-      conditionalOption = PopupMenuItem<TransactionAction>(
-        child: ListTile(
-          leading: Icon(Icons.visibility_off),
-          title: Text("Hide"),
-          contentPadding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-        ),
-        value: TransactionAction.Hide,
-      );
-    } else {
-      conditionalOption = PopupMenuItem<TransactionAction>(
-        child: ListTile(
-          leading: Icon(Icons.check),
-          title: Text("Mark Cleared"),
-          contentPadding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-        ),
-        value: TransactionAction.Clear,
-      );
-    }
-
-    // Show the transaction actions
-    return showMenu<TransactionAction>(
-      context: context,
-      position: tapPoint,
-      items: [
-        conditionalOption,
-        PopupMenuItem<TransactionAction>(
-          child: ListTile(
-            leading: Icon(Icons.swap_horiz),
-            title: Text("Move"),
-            contentPadding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-          ),
-          value: TransactionAction.Move,
-        ),
-        PopupMenuItem<TransactionAction>(
-          child: ListTile(
-            leading: Icon(Icons.edit),
-            title: Text("Edit"),
-            contentPadding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-          ),
-          value: TransactionAction.Edit,
-        ),
-        PopupMenuItem<TransactionAction>(
-          child: ListTile(
-            leading: Icon(Icons.delete),
-            title: Text("Delete"),
-            contentPadding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-          ),
-          value: TransactionAction.Delete,
-        ),
-      ],
-    );
   }
 }

@@ -140,15 +140,11 @@ class _AccountListState extends State<AccountList> {
                           EditAccountModal.show(context, accountID);
                           break;
                         case AccountAction.Delete:
-                          bool confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (_) => ConfirmDialog(
-                                  title: "Delete Account",
-                                  message:
-                                      "Are you sure you want to delete the account '${account.name}'?",
-                                ),
-                              ) ??
-                              false;
+                          bool confirm = await ConfirmDialog.show(
+                            context,
+                            "Delete Account",
+                            "Are you sure you want to delete the account '${account.name}'?",
+                          );
                           if (confirm) {
                             await deleteAccount(accountID);
                           }
