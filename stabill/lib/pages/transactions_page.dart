@@ -38,6 +38,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
   late CollectionReference<Stabill.Transaction> _transactionsCollection;
   late Stream<QuerySnapshot<Stabill.Transaction>> _transactionsStream;
 
+  late TextEditingController searchController;
+  late FocusNode searchNode;
+  late bool isSearching;
+
   @override
   void initState() {
     String uid = FirebaseAuth.instance.currentUser!.uid;
@@ -71,79 +75,95 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
     _transactionsStream = _transactionsCollection.snapshots();
 
-    // _scrollController.addListener(() {
-    //   if (_scrollController.position.userScrollDirection ==
-    //       ScrollDirection.reverse) {
-    //     widget.shouldHideFAB(true);
-    //   } else if (_scrollController.position.userScrollDirection ==
-    //       ScrollDirection.forward) {
-    //     widget.shouldHideFAB(false);
-    //   }
-    // });
+    searchController = TextEditingController();
+    searchNode = FocusNode();
+    isSearching = false;
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    searchNode.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.account.name),
+        title: AnimatedSwitcher(
+          transitionBuilder: (child, val) => SizeTransition(
+            child: child,
+            sizeFactor: val,
+          ),
+          duration: Duration(milliseconds: 250),
+          child: isSearching
+              ? TextField(
+                  controller: searchController,
+                  focusNode: searchNode,
+                  style: TextStyle(color: Colors.white),
+                  cursorColor: Colors.white,
+                  decoration: InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                  onSubmitted: (_) {
+                    if (searchController.text.isEmpty) {
+                      searchNode.unfocus();
+                      setState(() => isSearching = !isSearching);
+                    }
+                  },
+                )
+              : Text(widget.account.name),
+        ),
         actions: [
-          PopupMenuButton(onSelected: (TransactionPageAction selected) {
-            switch (selected) {
-              case TransactionPageAction.Correction:
-                BalanceCorrectionModal.show(context, widget.accountID);
-                break;
-              case TransactionPageAction.Transfer:
-                TransferFundsModal.show(context);
-                break;
-              case TransactionPageAction.Reveal:
-                // TODO: Handle this case.
-                break;
-              case TransactionPageAction.Recurring:
-                // TODO: Handle this case.
-                break;
-            }
-          }, itemBuilder: (ctx) {
-            return <PopupMenuEntry<TransactionPageAction>>[
-              const PopupMenuItem<TransactionPageAction>(
-                value: TransactionPageAction.Correction,
-                child: ListTile(
-                  leading: Icon(Icons.price_change),
-                  title: Text("Balance Correction"),
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-              const PopupMenuItem<TransactionPageAction>(
-                value: TransactionPageAction.Reveal,
-                child: ListTile(
-                  leading: Icon(Icons.visibility),
-                  title: Text("Reveal Transactions"),
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-              const PopupMenuItem<TransactionPageAction>(
-                value: TransactionPageAction.Transfer,
-                child: ListTile(
-                  leading: Icon(Icons.swap_horiz),
-                  title: Text("Transfer Funds"),
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-              const PopupMenuItem<TransactionPageAction>(
-                value: TransactionPageAction.Recurring,
-                child: ListTile(
-                  leading: Icon(Icons.repeat),
-                  title: Text("Recurring Transactions"),
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-            ];
-          })
+          IconButton(
+            onPressed: () => setState(() {
+              if (isSearching) {
+                searchController.clear();
+                searchNode.unfocus();
+              } else {
+                searchNode.requestFocus();
+              }
+              isSearching = !isSearching;
+            }),
+            icon: AnimatedSwitcher(
+              duration: Duration(milliseconds: 200),
+              child: isSearching
+                  ? Icon(
+                      Icons.close,
+                      key: ValueKey<IconData>(Icons.close),
+                    )
+                  : Icon(
+                      Icons.search,
+                      key: ValueKey<IconData>(Icons.search),
+                    ),
+            ),
+          ),
+          PopupMenuButton(
+              onSelected: (TransactionPageAction selected) {
+                switch (selected) {
+                  case TransactionPageAction.Correction:
+                    BalanceCorrectionModal.show(context, widget.accountID);
+                    break;
+                  case TransactionPageAction.Transfer:
+                    TransferFundsModal.show(context);
+                    break;
+                  case TransactionPageAction.Reveal:
+                    // TODO: Handle this case.
+                    break;
+                  case TransactionPageAction.Recurring:
+                    // TODO: Handle this case.
+                    break;
+                }
+              },
+              itemBuilder: (_) => buildPageActions())
         ],
       ),
       body: Column(
@@ -187,17 +207,26 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.payment,
-                        size: 64,
-                      ),
+                      Icon(Icons.payment, size: 64),
                       Text("Add a new transaction!"),
                     ],
                   );
                 }
 
+                if (isSearching) {
+                  String query =
+                      searchController.text.replaceAll(" ", " ").toLowerCase();
+                  transactionData = transactionData
+                      .where(
+                        (element) =>
+                            element.data().name.toLowerCase().contains(query),
+                      )
+                      .toList();
+                }
                 transactionData.sort(
-                    (a, b) => b.data().timestamp.compareTo(a.data().timestamp));
+                  (a, b) => b.data().timestamp.compareTo(a.data().timestamp),
+                );
+
                 return ListView.builder(
                   itemCount: transactionData.length,
                   itemBuilder: (context, index) {
@@ -353,6 +382,47 @@ class _TransactionsPageState extends State<TransactionsPage> {
           contentPadding: EdgeInsets.zero,
         ),
         value: TransactionAction.Delete,
+      ),
+    ];
+  }
+
+  List<PopupMenuEntry<TransactionPageAction>> buildPageActions() {
+    return <PopupMenuEntry<TransactionPageAction>>[
+      const PopupMenuItem<TransactionPageAction>(
+        value: TransactionPageAction.Correction,
+        child: ListTile(
+          leading: Icon(Icons.price_change),
+          title: Text("Balance Correction"),
+          contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
+      const PopupMenuItem<TransactionPageAction>(
+        value: TransactionPageAction.Reveal,
+        child: ListTile(
+          leading: Icon(Icons.visibility),
+          title: Text("Reveal Transactions"),
+          contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
+      const PopupMenuItem<TransactionPageAction>(
+        value: TransactionPageAction.Transfer,
+        child: ListTile(
+          leading: Icon(Icons.swap_horiz),
+          title: Text("Transfer Funds"),
+          contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
+      const PopupMenuItem<TransactionPageAction>(
+        value: TransactionPageAction.Recurring,
+        child: ListTile(
+          leading: Icon(Icons.repeat),
+          title: Text("Recurring Transactions"),
+          contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+        ),
       ),
     ];
   }
