@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/widgets/balance_text.dart';
 import 'package:intl/intl.dart';
+import 'package:substring_highlight/substring_highlight.dart';
 
 enum TransactionAction { Clear, Hide, Move, Edit, Delete }
 
@@ -10,14 +11,16 @@ class TransactionCard extends StatelessWidget {
   final GestureTapDownCallback? onMorePress;
   final List<PopupMenuEntry<TransactionAction>> actions;
   final void Function(TransactionAction)? onSelected;
+  final String? query;
 
-  const TransactionCard(
-      {Key? key,
-      required this.transaction,
-      this.onMorePress,
-      required this.actions,
-      this.onSelected})
-      : super(key: key);
+  const TransactionCard({
+    Key? key,
+    required this.transaction,
+    this.onMorePress,
+    required this.actions,
+    this.onSelected,
+    this.query,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +36,16 @@ class TransactionCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    transaction.name,
-                    style: TextStyle(
+                  SubstringHighlight(
+                    term: query ?? "",
+                    text: transaction.name,
+                    textStyle: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: transaction.cleared ? Colors.black : Colors.grey,
+                    ),
+                    textStyleHighlight: TextStyle(
+                      backgroundColor: Colors.yellow,
                     ),
                   ),
                   Text(

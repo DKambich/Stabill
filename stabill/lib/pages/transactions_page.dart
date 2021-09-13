@@ -111,6 +111,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white),
                     ),
+                    hintText: "Search for...",
+                    hintStyle: TextStyle(color: Colors.white54),
                   ),
                   onSubmitted: (_) {
                     if (searchController.text.isEmpty) {
@@ -137,6 +139,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
             }),
             icon: AnimatedSwitcher(
               duration: Duration(milliseconds: 200),
+              transitionBuilder: (child, val) => ScaleTransition(
+                child: RotationTransition(child: child, turns: val),
+                scale: val,
+              ),
               child: isSearching
                   ? Icon(
                       Icons.close,
@@ -216,8 +222,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 }
 
                 if (isSearching) {
-                  String query =
-                      searchController.text.replaceAll(" ", " ").toLowerCase();
+                  String query = searchController.text.toLowerCase();
                   transactionData = transactionData
                       .where(
                         (element) =>
@@ -238,6 +243,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
                     return TransactionCard(
                       transaction: transaction,
+                      query: searchController.text,
                       actions: buildTransactionActions(transaction),
                       onSelected: (selectedAction) async {
                         switch (selectedAction) {
