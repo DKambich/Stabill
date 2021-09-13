@@ -267,6 +267,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               context,
                               "Delete Transaction",
                               "Are you sure you want to delete the transaction '${transaction.name}'?",
+                              confirmColor: Colors.red,
                             );
                             if (confirm) {
                               await deleteTransaction(transactionID);
