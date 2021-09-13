@@ -5,12 +5,14 @@ import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart' as Stabill;
 
 class TransferFundsModal extends StatefulWidget {
-  const TransferFundsModal({Key? key}) : super(key: key);
+  final String? defaultAccountID;
+
+  const TransferFundsModal({Key? key, this.defaultAccountID}) : super(key: key);
 
   @override
   _TransferFundsModalState createState() => _TransferFundsModalState();
 
-  static void show(BuildContext context) {
+  static void show(BuildContext context, {String? defaultAccountID}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -20,72 +22,25 @@ class TransferFundsModal extends StatefulWidget {
           topRight: Radius.circular(25),
         ),
       ),
-      builder: (_) => TransferFundsModal(),
+      builder: (_) => TransferFundsModal(defaultAccountID: defaultAccountID),
     );
   }
 }
 
 class _TransferFundsModalState extends State<TransferFundsModal> {
+  // Firebase Variables
   late CollectionReference<Account> _accountsCollection;
   late Future<QuerySnapshot<Account>> _accountsFuture;
-  late String fromAccount, toAccount = "";
 
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _balanceController =
-      TextEditingController(text: r"$0.00");
-
-  String? errorText;
-
-  Future<void> transferFunds(QueryDocumentSnapshot<Account> fromAccount,
-      QueryDocumentSnapshot<Account> toAccount, double amount) async {
-    WriteBatch batch = FirebaseFirestore.instance.batch();
-
-    var fromAccountTransactions = _accountsCollection
-        .doc(fromAccount.id)
-        .collection("transactions")
-        .withConverter<Stabill.Transaction>(
-          fromFirestore: (snapshot, _) =>
-              Stabill.Transaction.fromJson(snapshot.data()!),
-          toFirestore: (acc, _) => acc.toJson(),
-        );
-
-    var toAccountTransactions = _accountsCollection
-        .doc(toAccount.id)
-        .collection("transactions")
-        .withConverter<Stabill.Transaction>(
-          fromFirestore: (snapshot, _) =>
-              Stabill.Transaction.fromJson(snapshot.data()!),
-          toFirestore: (acc, _) => acc.toJson(),
-        );
-
-    DateTime now = DateTime.now();
-
-    var fromTransaction = Stabill.Transaction(
-      timestamp: now,
-      amount: amount,
-      cleared: true,
-      memo: "SYSTEM GENERATED",
-      method: Stabill.TransactionType.Withdrawal,
-      name: "Transfer To ${toAccount.data().name}",
-    );
-    var toTransaction = Stabill.Transaction(
-      timestamp: now,
-      amount: amount,
-      cleared: true,
-      memo: "SYSTEM GENERATED",
-      method: Stabill.TransactionType.Deposit,
-      name: "Transfer From ${fromAccount.data().name}",
-    );
-
-    batch.set<Stabill.Transaction>(
-        fromAccountTransactions.doc(), fromTransaction);
-    batch.set<Stabill.Transaction>(toAccountTransactions.doc(), toTransaction);
-
-    return batch.commit();
-  }
+  // Form Variables
+  late GlobalKey<FormState> _formKey;
+  late String _fromAccountID, _toAccountID;
+  late String? _dropdownErrorText;
+  late TextEditingController _balanceController;
 
   @override
   void initState() {
+    // Initialize Firebase variables
     String uid = FirebaseAuth.instance.currentUser!.uid;
     _accountsCollection = FirebaseFirestore.instance
         .collection('users')
@@ -98,20 +53,28 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
 
     _accountsFuture = _accountsCollection.get();
 
-    fromAccount = toAccount = "";
+    // Initialize Form variables
+    _formKey = GlobalKey<FormState>();
 
+    _fromAccountID = _toAccountID = "";
+    _dropdownErrorText = null;
+
+    _balanceController = TextEditingController(text: r"$0.00");
     _balanceController.addListener(() {
-      String dollarStr = Account.formatDollarStr(_balanceController.text);
+      // Format the TextField text to be a dollar string
+      String formatStr = Account.formatDollarStr(_balanceController.text);
 
+      // Replace the TextField text with the format string
       _balanceController.value = _balanceController.value.copyWith(
-        text: dollarStr,
+        text: formatStr,
         selection: TextSelection(
-          baseOffset: dollarStr.length,
-          extentOffset: dollarStr.length,
+          baseOffset: formatStr.length,
+          extentOffset: formatStr.length,
         ),
         composing: TextRange.empty,
       );
     });
+
     super.initState();
   }
 
@@ -119,12 +82,16 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
   Widget build(BuildContext context) {
     return FutureBuilder<QuerySnapshot<Account>>(
         future: _accountsFuture,
-        builder: (context, snapshot) {
+        builder: (ctx, snapshot) {
+          // If there is an error, notify the user and pop the prompt
           if (snapshot.hasError) {
             // TODO: Notify user there was an error
             Navigator.pop(context);
             return SizedBox.shrink();
-          } else if (snapshot.connectionState == ConnectionState.waiting) {
+          }
+
+          // If it is loading, show a loading indicator
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -136,6 +103,7 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
             );
           }
 
+          // If there is no data or there are not enough accounts, notify the user and pop the prompt
           if (!snapshot.hasData || snapshot.data!.docs.length < 2) {
             // TODO: Notify user there are not enough accounts to transfer between
             Navigator.pop(context);
@@ -144,12 +112,19 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
 
           // Retrieve the accounts from the collection
           List<QueryDocumentSnapshot<Account>> accounts = snapshot.data!.docs;
-          if (fromAccount == "" || toAccount == "") {
-            fromAccount = accounts[0].id;
-            toAccount = accounts[0].id;
+
+          // Set the default account IDs if they are not initialized
+          if (_fromAccountID == "" || _toAccountID == "") {
+            if (widget.defaultAccountID != null) {
+              _fromAccountID = widget.defaultAccountID!;
+              _toAccountID = widget.defaultAccountID!;
+            } else {
+              _fromAccountID = accounts[0].id;
+              _toAccountID = accounts[0].id;
+            }
           }
 
-          // Create menu items from the accounts
+          // Map each account to a DropdownMenuItem
           List<DropdownMenuItem<String>> dropdownItems = accounts
               .map(
                 (value) => DropdownMenuItem(
@@ -173,9 +148,7 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
                 children: [
                   Text(
                     "Transfer Funds",
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
+                    style: TextStyle(fontSize: 20),
                     textAlign: TextAlign.center,
                   ),
                   InputDecorator(
@@ -185,31 +158,32 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
                       contentPadding: EdgeInsets.zero,
                     ),
                     child: DropdownButton(
-                      value: fromAccount,
+                      value: _fromAccountID,
                       items: dropdownItems,
                       menuMaxHeight: 200,
                       isExpanded: true,
                       onChanged: (String? newValue) {
                         setState(() {
-                          fromAccount = newValue ?? "";
+                          _fromAccountID = newValue ?? "";
                         });
                       },
                     ),
                   ),
                   InputDecorator(
                     decoration: InputDecoration(
-                      errorText: errorText,
+                      errorText: _dropdownErrorText,
                       labelText: "Transfer to",
                       border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
                     ),
                     child: DropdownButton(
-                      value: toAccount,
+                      value: _toAccountID,
                       items: dropdownItems,
                       menuMaxHeight: 200,
                       isExpanded: true,
                       onChanged: (String? newValue) {
                         setState(() {
-                          toAccount = newValue ?? "";
+                          _toAccountID = newValue ?? "";
                         });
                       },
                     ),
@@ -217,47 +191,23 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
                   Form(
                     key: _formKey,
                     child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: "Amount",
-                        floatingLabelBehavior: FloatingLabelBehavior.auto,
-                      ),
                       controller: _balanceController,
+                      decoration: InputDecoration(labelText: "Amount"),
+                      enableInteractiveSelection: false,
                       keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.go,
                       validator: (value) {
                         if (value == null || value == "" || value == "\$0.00") {
                           return 'Transfer amount cannot be zero';
                         }
                         return null;
                       },
-                      textInputAction: TextInputAction.go,
-                      enableInteractiveSelection: false,
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ElevatedButton(
-                      onPressed: () async {
-                        if (fromAccount != toAccount &&
-                            _formKey.currentState!.validate()) {
-                          double transferAmount = double.parse(
-                              _balanceController.text.substring(1));
-                          await transferFunds(
-                              accounts.firstWhere(
-                                  (element) => element.id == fromAccount),
-                              accounts.firstWhere(
-                                  (element) => element.id == toAccount),
-                              transferAmount);
-                          Navigator.pop(context);
-                          setState(() {
-                            errorText = null;
-                          });
-                        } else {
-                          _formKey.currentState!.validate();
-                          setState(() {
-                            errorText = "Transfer accounts cannot be the same";
-                          });
-                        }
-                      },
+                      onPressed: () => initiateTransfer(accounts),
                       child: Text("Complete Transfer"),
                     ),
                   )
@@ -266,5 +216,85 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
             ),
           );
         });
+  }
+
+  Future<void> initiateTransfer(
+      List<QueryDocumentSnapshot<Account>> accounts) async {
+    // Validate the form
+    bool validForm = _fromAccountID != _toAccountID;
+    validForm &= _formKey.currentState!.validate();
+
+    // If the form is valid, transfer the funds
+    if (validForm) {
+      // Get the amount to transfer
+      String amountText = _balanceController.text.substring(1);
+      double amount = double.parse(amountText);
+
+      // Get the accounts selected
+      QueryDocumentSnapshot<Account> fromAccount =
+          accounts.firstWhere((e) => e.id == _fromAccountID);
+      QueryDocumentSnapshot<Account> toAccount =
+          accounts.firstWhere((e) => e.id == _toAccountID);
+
+      // Transfer the funds between the account then pop the prompt
+      await transferFunds(
+        fromAccount,
+        toAccount,
+        amount,
+      );
+
+      Navigator.pop(context);
+    } else {
+      // Set error text manually for the DropDown if the accounts are the same
+      setState(() {
+        _dropdownErrorText = _fromAccountID == _toAccountID
+            ? "Transfer accounts cannot be the same"
+            : null;
+      });
+    }
+  }
+
+  Future<void> transferFunds(QueryDocumentSnapshot<Account> fromAccount,
+      QueryDocumentSnapshot<Account> toAccount, double amount) async {
+    // Get the Transaction collections for both accounts
+
+    var fromAccountTransactions = _accountsCollection
+        .doc(fromAccount.id)
+        .collection("transactions")
+        .withConverter<Stabill.Transaction>(
+          fromFirestore: (snapshot, _) =>
+              Stabill.Transaction.fromJson(snapshot.data()!),
+          toFirestore: (acc, _) => acc.toJson(),
+        );
+
+    var toAccountTransactions = _accountsCollection
+        .doc(toAccount.id)
+        .collection("transactions")
+        .withConverter<Stabill.Transaction>(
+          fromFirestore: (snapshot, _) =>
+              Stabill.Transaction.fromJson(snapshot.data()!),
+          toFirestore: (acc, _) => acc.toJson(),
+        );
+
+    // Create a WriteBatch
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+
+    // Create and write the fromTransaction
+    Stabill.Transaction transaction = Stabill.Transaction(
+      name: "Transfer To ${toAccount.data().name}",
+      timestamp: DateTime.now(),
+      amount: amount,
+      cleared: true,
+      memo: "SYSTEM GENERATED",
+      method: Stabill.TransactionType.Withdrawal,
+    );
+    batch.set<Stabill.Transaction>(fromAccountTransactions.doc(), transaction);
+
+    // Create and write the toTransaction
+    transaction.name = "Transfer From ${fromAccount.data().name}";
+    batch.set<Stabill.Transaction>(toAccountTransactions.doc(), transaction);
+
+    // Commit the cahnges
+    return batch.commit();
   }
 }

@@ -161,7 +161,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     BalanceCorrectionModal.show(context, widget.accountID);
                     break;
                   case TransactionPageAction.Transfer:
-                    TransferFundsModal.show(context);
+                    TransferFundsModal.show(
+                      context,
+                      defaultAccountID: widget.accountID,
+                    );
                     break;
                   case TransactionPageAction.Reveal:
                     // TODO: Handle this case.
