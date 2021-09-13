@@ -78,7 +78,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
     searchController = TextEditingController();
     searchNode = FocusNode();
     isSearching = false;
-
     super.initState();
   }
 
@@ -118,6 +117,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       searchNode.unfocus();
                       setState(() => isSearching = !isSearching);
                     }
+                  },
+                  onChanged: (text) {
+                    setState(() {});
                   },
                 )
               : Text(widget.account.name),
