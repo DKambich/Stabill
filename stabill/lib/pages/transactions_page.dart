@@ -9,6 +9,7 @@ import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 import 'package:stabill/widgets/modals/balance_correction_modal.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
+import 'package:stabill/widgets/modals/transfer_transaction_modal.dart';
 
 class TransactionArguments {
   final String accountID;
@@ -167,10 +168,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     );
                     break;
                   case TransactionPageAction.Reveal:
+                    // Get all hiddent transactions
                     final transactionUpdates = await _transactionsCollection
                         .where("hidden", isEqualTo: true)
                         .get();
-                    print(transactionUpdates.docs.length);
+                    // Update each hiddent transaction
                     transactionUpdates.docs.forEach(
                       (transaction) => transaction.reference.update(
                         {"hidden": false},
@@ -269,7 +271,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             await clearTransaction(transactionID, transaction);
                             break;
                           case TransactionAction.Move:
-                            await moveTransaction(transactionID, transaction);
+                            moveTransaction(transactionID, transaction);
                             break;
                           case TransactionAction.Edit:
                             await editTransaction(transactionID, transaction);
@@ -355,9 +357,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return _transactionsCollection.doc(transactionID).set(transaction);
   }
 
-  Future<void> moveTransaction(
-      String transactionID, Stabill.Transaction transaction) {
-    return Future.delayed(Duration(milliseconds: 100));
+  void moveTransaction(String transactionID, Stabill.Transaction transaction) {
+    TransferTransactionModal.show(
+      context,
+      transaction,
+      transactionID,
+      widget.accountID,
+    );
   }
 
   List<PopupMenuItem<TransactionAction>> buildTransactionActions(
