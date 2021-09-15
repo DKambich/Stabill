@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/models/transaction.dart' as Stabill;
 
 class CreateAccountModal extends StatefulWidget {
   const CreateAccountModal({Key? key}) : super(key: key);
@@ -120,12 +121,12 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                               double accountBalance = double.parse(balanceStr);
                               Account newAccount = Account(
                                 name: accountName,
-                                currentBalance: accountBalance,
-                                availableBalance: accountBalance,
+                                currentBalance: 0,
+                                availableBalance: 0,
                               );
 
                               // Create the new Account
-                              await createAccount(newAccount);
+                              await createAccount(newAccount, accountBalance);
                               Navigator.pop(context);
                             }
                           },
@@ -141,7 +142,7 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
     );
   }
 
-  Future<void> createAccount(Account newAccount) async {
+  Future<void> createAccount(Account newAccount, double balance) async {
     String uid = FirebaseAuth.instance.currentUser!.uid;
     CollectionReference<Account> _accountsCollection = FirebaseFirestore
         .instance
@@ -154,7 +155,25 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
         );
 
     try {
-      await _accountsCollection.add(newAccount);
+      var doc = await _accountsCollection.add(newAccount);
+      if (balance == 0) return;
+      Stabill.Transaction transaction = Stabill.Transaction(
+        name: "Starting Balance",
+        amount: balance,
+        timestamp: DateTime.now(),
+        cleared: true,
+        memo: "System Generated",
+        method: Stabill.TransactionType.Deposit,
+      );
+
+      doc
+          .collection("transactions")
+          .withConverter<Stabill.Transaction>(
+            fromFirestore: (snapshot, _) =>
+                Stabill.Transaction.fromJson(snapshot.data()!),
+            toFirestore: (transaction, _) => transaction.toJson(),
+          )
+          .add(transaction);
     } catch (e) {
       return Future.error(e);
     }
