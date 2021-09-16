@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stabill/widgets/balance_text.dart';
 
 class AccountSummaryCard extends StatelessWidget {
-  final double totalCurrentBalance, totalAvailableBalance;
+  final int totalCurrentBalance, totalAvailableBalance;
 
   const AccountSummaryCard({
     Key? key,

@@ -228,7 +228,7 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
     if (validForm) {
       // Get the amount to transfer
       String amountText = _balanceController.text.substring(1);
-      double amount = double.parse(amountText);
+      int amount = int.parse(amountText.replaceAll(".", ""));
 
       // Get the accounts selected
       QueryDocumentSnapshot<Account> fromAccount =
@@ -255,7 +255,7 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
   }
 
   Future<void> transferFunds(QueryDocumentSnapshot<Account> fromAccount,
-      QueryDocumentSnapshot<Account> toAccount, double amount) async {
+      QueryDocumentSnapshot<Account> toAccount, int amount) async {
     // Get the Transaction collections for both accounts
 
     var fromAccountTransactions = _accountsCollection
@@ -292,6 +292,7 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
 
     // Create and write the toTransaction
     transaction.name = "Transfer From ${fromAccount.data().name}";
+    transaction.method = Stabill.TransactionType.Deposit;
     batch.set<Stabill.Transaction>(toAccountTransactions.doc(), transaction);
 
     // Commit the cahnges

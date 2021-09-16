@@ -20,7 +20,7 @@ class AccountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String name = account.name;
-    double currentBalance = account.currentBalance,
+    int currentBalance = account.currentBalance,
         availableBalance = account.availableBalance;
 
     return Card(

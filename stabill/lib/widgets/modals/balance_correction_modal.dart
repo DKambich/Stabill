@@ -141,9 +141,10 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
                     child: TextButton(
                       child: Text("Confirm"),
                       onPressed: () async {
-                        String newBalanceStr =
-                            _balanceController.text.replaceAll(r"$", "");
-                        double newBalance = double.parse(newBalanceStr);
+                        String newBalanceStr = _balanceController.text
+                            .replaceAll(r"$", "")
+                            .replaceAll(".", "");
+                        int newBalance = int.parse(newBalanceStr);
 
                         if (await correctBalance(newBalance))
                           Navigator.pop(context);
@@ -159,9 +160,9 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
     );
   }
 
-  Future<bool> correctBalance(double newBalance) async {
+  Future<bool> correctBalance(int newBalance) async {
     // Get the oldBalance from the account
-    double oldBalance = (await _accountDocument.get()).data()!.currentBalance;
+    int oldBalance = (await _accountDocument.get()).data()!.currentBalance;
 
     // Validate that oldBalance is not the newBalance
     if (oldBalance == newBalance) {
@@ -182,8 +183,7 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
     await Future.wait(transactionUpdates);
 
     // Get the difference between balances, ensuring the result has 2 decimal places at most
-    double balanceDelta =
-        double.parse((newBalance - oldBalance).toStringAsFixed(2));
+    int balanceDelta = newBalance - oldBalance;
 
     // Create a new transaction that has the correction information
     Stabill.Transaction correction = Stabill.Transaction(

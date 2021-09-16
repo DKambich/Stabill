@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> {
                     final entries = line.split(",");
                     Stabill.Transaction transaction = Stabill.Transaction(
                       name: entries[headerIndex["Transaction_Name"]!],
-                      amount: int.parse(entries[headerIndex["Amount"]!]) / 100,
+                      amount: int.parse(entries[headerIndex["Amount"]!]),
                       checkNumber: int.parse(entries[headerIndex["Check_No"]!]),
                       cleared:
                           entries[headerIndex["Has_Cleared"]!].toLowerCase() ==

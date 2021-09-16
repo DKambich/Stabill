@@ -1,6 +1,6 @@
 class Transaction {
   String name;
-  double amount;
+  int amount;
   DateTime timestamp;
   int checkNumber;
   bool cleared, hidden;
@@ -22,7 +22,7 @@ class Transaction {
       : this(
           name: json['name'],
           memo: json['memo'],
-          amount: json['amount'].toDouble(),
+          amount: json['amount'].toInt(),
           checkNumber: json['checkNumber'],
           cleared: json['cleared'],
           hidden: json['hidden'],

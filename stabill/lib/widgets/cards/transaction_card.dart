@@ -24,7 +24,7 @@ class TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double amount = transaction.method == TransactionType.Withdrawal
+    int amount = transaction.method == TransactionType.Withdrawal
         ? -transaction.amount
         : transaction.amount;
     return Card(

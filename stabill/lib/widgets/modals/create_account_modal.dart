@@ -116,14 +116,12 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                             if (_formKey.currentState!.validate()) {
                               // Setup the new account
                               String accountName = _accountController.text;
-                              String balanceStr =
-                                  _balanceController.text.replaceAll(r"$", "");
-                              double accountBalance = double.parse(balanceStr);
-                              Account newAccount = Account(
-                                name: accountName,
-                                currentBalance: 0,
-                                availableBalance: 0,
-                              );
+                              String balanceStr = _balanceController.text
+                                  .replaceAll(r"$", "")
+                                  .replaceAll(".", "");
+                              int accountBalance = int.parse(balanceStr);
+                              print(accountBalance);
+                              Account newAccount = Account(name: accountName);
 
                               // Create the new Account
                               await createAccount(newAccount, accountBalance);
@@ -142,7 +140,7 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
     );
   }
 
-  Future<void> createAccount(Account newAccount, double balance) async {
+  Future<void> createAccount(Account newAccount, int balance) async {
     String uid = FirebaseAuth.instance.currentUser!.uid;
     CollectionReference<Account> _accountsCollection = FirebaseFirestore
         .instance
@@ -153,7 +151,6 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
           fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
           toFirestore: (account, _) => account.toJson(),
         );
-
     try {
       var doc = await _accountsCollection.add(newAccount);
       if (balance == 0) return;
@@ -165,6 +162,8 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
         memo: "System Generated",
         method: Stabill.TransactionType.Deposit,
       );
+
+      print(balance);
 
       doc
           .collection("transactions")

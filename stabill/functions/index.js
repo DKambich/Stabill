@@ -20,6 +20,8 @@ exports.onDeleteAccount = functions.firestore
   });
 
 function updateAccountBalance(accountRef, currentDelta, availableDelta) {
+  currentDelta = Number(Math.round(currentDelta + "e" + 2 + "e-" + 2));
+  availableDelta = Number(Math.round(availableDelta + "e" + 2 + "e-" + 2));
   accountRef
     .update({
       currentBalance: admin.firestore.FieldValue.increment(currentDelta),
@@ -30,6 +32,24 @@ function updateAccountBalance(accountRef, currentDelta, availableDelta) {
 
 function getSignFromMethod(method) {
   return method == "TransactionType.Withdrawal" ? -1 : 1;
+}
+
+function roundTo(n, digits) {
+  var negative = false;
+  if (digits === undefined) {
+    digits = 0;
+  }
+  if (n < 0) {
+    negative = true;
+    n = n * -1;
+  }
+  var multiplicator = Math.pow(10, digits);
+  n = parseFloat((n * multiplicator).toFixed(11));
+  n = (Math.round(n) / multiplicator).toFixed(digits);
+  if (negative) {
+    n = (n * -1).toFixed(digits);
+  }
+  return Number(n);
 }
 
 exports.onChangeTransaction = functions.firestore
@@ -61,10 +81,12 @@ exports.onChangeTransaction = functions.firestore
     const currDelta = newCurrDelta + oldCurrDelta;
     const availDelta = newAvailDelta + oldAvailDelta;
 
-    accountRef.update({
-      currentBalance: admin.firestore.FieldValue.increment(currDelta),
-      availableBalance: admin.firestore.FieldValue.increment(availDelta),
-    });
+    if (accountRef != null && accountRef != undefined) {
+      accountRef.update({
+        currentBalance: admin.firestore.FieldValue.increment(currDelta),
+        availableBalance: admin.firestore.FieldValue.increment(availDelta),
+      });
+    }
   });
 
 // exports.onCreateTransaction = functions.firestore

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 class BalanceText extends StatelessWidget {
   final String text;
-  final double balance;
+  final int balance;
   final double fontSize;
 
   const BalanceText(
       {Key? key, this.fontSize = 20, required this.text, required this.balance})
       : super(key: key);
 
-  Color? getBalanceColor(BuildContext context, double balance) {
+  Color? getBalanceColor(BuildContext context, int balance) {
     if (balance > 0)
       return Colors.green;
     else if (balance < 0)
@@ -26,7 +26,7 @@ class BalanceText extends StatelessWidget {
     }
 
     balanceText += r"$";
-    balanceText += "${balance.abs().toStringAsFixed(2)}";
+    balanceText += "${(balance.abs() / 100).toStringAsFixed(2)}";
 
     return RichText(
       text: TextSpan(

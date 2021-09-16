@@ -234,6 +234,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   );
                 }
 
+                print(transactionData
+                    .map((e) =>
+                        e.data().amount *
+                        (e.data().method == Stabill.TransactionType.Deposit
+                            ? 1
+                            : -1))
+                    .reduce((value, element) => value + element));
+
+                print(transactionData
+                    .map((e) =>
+                        e.data().amount *
+                        (e.data().method == Stabill.TransactionType.Deposit
+                            ? 1
+                            : -1) *
+                        (e.data().cleared ? 1 : 0))
+                    .reduce((value, element) => value + element));
+
                 transactionData = transactionData
                     .where((element) => !element.data().hidden)
                     .toList();

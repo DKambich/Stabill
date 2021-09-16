@@ -43,7 +43,7 @@ class _TransactionModalState extends State<TransactionModal> {
           DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
       dateController = TextEditingController(text: transactionDate);
       amountController = TextEditingController(
-          text: "\$${widget.transaction!.amount.toStringAsFixed(2)}");
+          text: "\$${(widget.transaction!.amount / 100).toStringAsFixed(2)}");
       checkNumberController = TextEditingController(
           text:
               "${widget.transaction!.checkNumber != -1 ? widget.transaction!.checkNumber : ""}");
@@ -103,7 +103,9 @@ class _TransactionModalState extends State<TransactionModal> {
                       ? int.parse(checkNumberController.text)
                       : -1;
                   Transaction savedTransaction = Transaction(
-                    amount: double.parse(amountController.text.substring(1)),
+                    amount: int.parse(
+                      amountController.text.substring(1).replaceAll(".", ""),
+                    ),
                     checkNumber: checkNumber,
                     cleared: isCleared,
                     memo: memoController.text,
