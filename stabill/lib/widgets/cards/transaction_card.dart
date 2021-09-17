@@ -71,7 +71,10 @@ class TransactionCard extends StatelessWidget {
                 ],
               ),
             ),
-            BalanceText(text: "", balance: amount),
+            BalanceText(
+              balance: amount,
+              showPositivePrefix: true,
+            ),
             PopupMenuButton<TransactionAction>(
               itemBuilder: (_) => actions,
               onSelected: onSelected,

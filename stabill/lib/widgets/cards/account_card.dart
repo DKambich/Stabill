@@ -40,11 +40,11 @@ class AccountCard extends StatelessWidget {
               Column(
                 children: [
                   BalanceText(
-                    text: "Current: ",
+                    prefixText: "Current: ",
                     balance: currentBalance,
                   ),
                   BalanceText(
-                    text: "Available: ",
+                    prefixText: "Available: ",
                     balance: availableBalance,
                   ),
                 ],
