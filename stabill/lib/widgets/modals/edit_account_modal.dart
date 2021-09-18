@@ -1,7 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:stabill/models/account.dart';
+import 'package:provider/provider.dart';
+import 'package:stabill/providers/data_provider.dart';
 
 class EditAccountModal extends StatefulWidget {
   final String accountID;
@@ -83,8 +82,11 @@ class _EditAccountModalState extends State<EditAccountModal> {
                       child: TextButton(
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              // Create the new Account
-                              await renameAccount(_accountController.text);
+                              // Update the account
+                              await context.read<DataProvider>().updateAccount(
+                                    widget.accountID,
+                                    _accountController.text,
+                                  );
                               Navigator.pop(context);
                             }
                           },
@@ -98,27 +100,6 @@ class _EditAccountModalState extends State<EditAccountModal> {
         ),
       ),
     );
-  }
-
-  Future<void> renameAccount(String newAccountName) async {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-    CollectionReference<Account> _accountsCollection = FirebaseFirestore
-        .instance
-        .collection('users')
-        .doc(uid)
-        .collection("accounts")
-        .withConverter<Account>(
-          fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
-          toFirestore: (account, _) => account.toJson(),
-        );
-
-    try {
-      await _accountsCollection
-          .doc(widget.accountID)
-          .update({"name": newAccountName});
-    } catch (e) {
-      return Future.error(e);
-    }
   }
 
   @override

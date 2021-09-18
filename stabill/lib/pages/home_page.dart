@@ -43,8 +43,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print(context.watch<DataProvider>().user);
-
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(

@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart' as Stabill;
+import 'package:stabill/providers/data_provider.dart';
 
 class TransferTransactionModal extends StatefulWidget {
   final String currentAccountID, transactionID;
@@ -48,27 +50,15 @@ class _TransferFundsModalState extends State<TransferTransactionModal> {
   late Future<QuerySnapshot<Account>> _accountsFuture;
 
   // Form Variables
-  late GlobalKey<FormState> _formKey;
   late String _selectedAccountID;
 
   @override
   void initState() {
-    // Initialize Firebase variables
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-    _accountsCollection = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection("accounts")
-        .withConverter<Account>(
-          fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
-          toFirestore: (acc, _) => acc.toJson(),
-        );
+    // Get the list of accounts
+    _accountsFuture =
+        context.read<DataProvider>().getAccountsCollection().get();
 
-    _accountsFuture = _accountsCollection.get();
-
-    // Initialize Form variables
-    _formKey = GlobalKey<FormState>();
-
+    // Default the selected account
     _selectedAccountID = "";
 
     super.initState();
@@ -180,10 +170,14 @@ class _TransferFundsModalState extends State<TransferTransactionModal> {
                           child: TextButton(
                             child: Text("Confirm"),
                             onPressed: () async {
-                              await transferTransaction(
-                                _selectedAccountID,
-                                widget.transaction,
-                              );
+                              await context
+                                  .read<DataProvider>()
+                                  .transferTransaction(
+                                    widget.transaction,
+                                    widget.transactionID,
+                                    widget.currentAccountID,
+                                    _selectedAccountID,
+                                  );
                               Navigator.of(context).pop();
                             },
                           ),
@@ -196,35 +190,5 @@ class _TransferFundsModalState extends State<TransferTransactionModal> {
             ),
           );
         });
-  }
-
-  Future<void> transferTransaction(
-      String toAccountID, Stabill.Transaction transaction) async {
-    // Get the Transaction collections for both accounts
-
-    var fromAccountTransactionRef = _accountsCollection
-        .doc(widget.currentAccountID)
-        .collection("transactions")
-        .doc(widget.transactionID);
-
-    var toAccountTransactions = _accountsCollection
-        .doc(toAccountID)
-        .collection("transactions")
-        .withConverter<Stabill.Transaction>(
-          fromFirestore: (snapshot, _) =>
-              Stabill.Transaction.fromJson(snapshot.data()!),
-          toFirestore: (acc, _) => acc.toJson(),
-        );
-
-    // Create a WriteBatch
-    WriteBatch batch = FirebaseFirestore.instance.batch();
-
-    batch.set<Stabill.Transaction>(toAccountTransactions.doc(), transaction);
-
-    // Create and write the toTransaction
-    batch.delete(fromAccountTransactionRef);
-
-    // Commit the cahnges
-    return batch.commit();
   }
 }

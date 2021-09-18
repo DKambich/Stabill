@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart'
-    show FirebaseFirestore, CollectionReference;
+    show FirebaseFirestore, CollectionReference, DocumentReference, WriteBatch;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart';
@@ -27,17 +27,25 @@ class DataProvider {
         );
   }
 
+  DocumentReference<Account> getAccountDocument(String accountID) {
+    return getAccountsCollection().doc(accountID);
+  }
+
   CollectionReference<Transaction> getTransactionCollection(String accountID) {
-    if (user == null) throw Exception("User is not signed in");
-    String uid = user!.uid;
-    return getAccountsCollection()
-        .doc(accountID)
+    return getAccountDocument(accountID)
         .collection(transactionCol)
         .withConverter<Transaction>(
           fromFirestore: (snapshot, _) =>
               Transaction.fromJson(snapshot.data()!),
           toFirestore: (transaction, _) => transaction.toJson(),
         );
+  }
+
+  DocumentReference<Transaction> getTransactionDocument(
+    String accountID,
+    String transactionID,
+  ) {
+    return getTransactionCollection(accountID).doc(transactionID);
   }
 
   Future<void> createAccount(Account account, int startingBalance) async {
@@ -65,31 +73,45 @@ class DataProvider {
     }
   }
 
-  // Future<String> signUp({String email = "", String password = ""}) async {
-  //   try {
-  //     await firebaseAuth.createUserWithEmailAndPassword(
-  //       email: email,
-  //       password: password,
-  //     );
-  //     return "Signed up!";
-  //   } on FirebaseAuthException catch (e) {
-  //     return e.message ?? "An exception occured at sign up";
-  //   }
-  // }
+  Future<void> updateAccount(String accountID, String newName) async {
+    try {
+      // Get the account document
+      var accountDoc = getAccountDocument(accountID);
+      // Get the Account and set the new name
+      Account updatedAccount = (await accountDoc.get()).data()!;
+      updatedAccount.name = newName;
+      // Update the Account
+      await accountDoc.set(updatedAccount);
+    } catch (e) {
+      throw e;
+    }
+  }
 
-  // Future<String> signIn({String email = "", String password = ""}) async {
-  //   try {
-  //     await firebaseAuth.signInWithEmailAndPassword(
-  //       email: email,
-  //       password: password,
-  //     );
-  //     return "Signed in!";
-  //   } on FirebaseAuthException catch (e) {
-  //     return e.message ?? "An exception occured at sign in";
-  //   }
-  // }
+  Future<void> transferTransaction(
+    Transaction transaction,
+    String transactionID,
+    String fromAccountID,
+    String toAccountID,
+  ) async {
+    try {
+      // Get a reference to the old transaction doc
+      var oldTransactionDoc = getTransactionDocument(
+        fromAccountID,
+        transactionID,
+      );
 
-  // Future<void> signOut() async {
-  //   await firebaseAuth.signOut();
-  // }
+      // Get reference to the new transaction's parent collection
+      var newTransactionCol = getTransactionCollection(toAccountID);
+
+      // Batch write and delete to transfer the tranaction
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      batch.set<Transaction>(newTransactionCol.doc(), transaction);
+      batch.delete(oldTransactionDoc);
+
+      // Commit the changes
+      return batch.commit();
+    } catch (e) {
+      throw e;
+    }
+  }
 }
