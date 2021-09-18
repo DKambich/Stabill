@@ -4,8 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/login_page.dart';
+import 'package:stabill/providers/auth_provider.dart';
+import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/modals/create_account_modal.dart';
 import 'package:stabill/widgets/account_list.dart';
 import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
@@ -40,6 +43,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print(context.watch<DataProvider>().user);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -188,12 +193,8 @@ class _HomePageState extends State<HomePage> {
             child: ElevatedButton(
               child: Text("Logout"),
               onPressed: () {
-                FirebaseAuth.instance.signOut().then(
-                      (value) => Navigator.pushReplacementNamed(
-                        context,
-                        LoginPage.routeName,
-                      ),
-                    );
+                var auth = context.read<AuthProvider>();
+                auth.signOut();
               },
             ),
           ),

@@ -1,12 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
-import 'package:stabill/models/transaction.dart' as Stabill;
+import 'package:stabill/providers/data_provider.dart';
 
 class CreateAccountModal extends StatefulWidget {
   const CreateAccountModal({Key? key}) : super(key: key);
-
   @override
   _CreateAccountModalState createState() => _CreateAccountModalState();
 
@@ -115,16 +113,23 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               // Setup the new account
-                              String accountName = _accountController.text;
-                              String balanceStr = _balanceController.text
-                                  .replaceAll(r"$", "")
-                                  .replaceAll(".", "");
-                              int accountBalance = int.parse(balanceStr);
-                              print(accountBalance);
-                              Account newAccount = Account(name: accountName);
+                              Account account = Account(
+                                name: _accountController.text,
+                              );
 
+                              int startingBalance = int.parse(
+                                _balanceController.text.replaceAll(
+                                  RegExp(r"[$|.]"),
+                                  "",
+                                ),
+                              );
+
+                              await context.read<DataProvider>().createAccount(
+                                    account,
+                                    startingBalance,
+                                  );
                               // Create the new Account
-                              await createAccount(newAccount, accountBalance);
+                              // await createAccount(newAccount, accountBalance);
                               Navigator.pop(context);
                             }
                           },
@@ -138,44 +143,6 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
         ),
       ),
     );
-  }
-
-  Future<void> createAccount(Account newAccount, int balance) async {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-    CollectionReference<Account> _accountsCollection = FirebaseFirestore
-        .instance
-        .collection('users')
-        .doc(uid)
-        .collection("accounts")
-        .withConverter<Account>(
-          fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
-          toFirestore: (account, _) => account.toJson(),
-        );
-    try {
-      var doc = await _accountsCollection.add(newAccount);
-      if (balance == 0) return;
-      Stabill.Transaction transaction = Stabill.Transaction(
-        name: "Starting Balance",
-        amount: balance,
-        timestamp: DateTime.now(),
-        cleared: true,
-        memo: "System Generated",
-        method: Stabill.TransactionType.Deposit,
-      );
-
-      print(balance);
-
-      doc
-          .collection("transactions")
-          .withConverter<Stabill.Transaction>(
-            fromFirestore: (snapshot, _) =>
-                Stabill.Transaction.fromJson(snapshot.data()!),
-            toFirestore: (transaction, _) => transaction.toJson(),
-          )
-          .add(transaction);
-    } catch (e) {
-      return Future.error(e);
-    }
   }
 
   @override
