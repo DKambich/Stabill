@@ -120,7 +120,7 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
               _toAccountID = widget.defaultAccountID!;
             } else {
               _fromAccountID = accounts[0].id;
-              _toAccountID = accounts[0].id;
+              _toAccountID = accounts[1].id;
             }
           }
 

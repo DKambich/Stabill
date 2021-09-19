@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
-import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
-import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/modals/create_account_modal.dart';
 import 'package:stabill/widgets/account_list.dart';
 import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
@@ -18,9 +16,7 @@ import 'package:stabill/models/transaction.dart' as Stabill;
 class HomePage extends StatefulWidget {
   static final String routeName = "/home";
 
-  HomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -46,7 +42,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text("Stabill"),
         actions: [
           PopupMenuButton(onSelected: (HomePageAction selected) async {
             switch (selected) {

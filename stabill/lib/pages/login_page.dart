@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:stabill/pages/home_page.dart';
+import 'package:provider/provider.dart';
+import 'package:stabill/providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
   static final String routeName = "/login";
@@ -48,28 +48,8 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void login() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text,
-        );
-
-        Navigator.pushReplacementNamed(
-          context,
-          HomePage.routeName,
-        );
-      } on FirebaseAuthException catch (e) {
-        print('Failed with error code: ${e.code}');
-        print(e.message);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    print("Login Page");
     return Scaffold(
       body: Center(
         child: Padding(
@@ -88,6 +68,8 @@ class _LoginPageState extends State<LoginPage> {
                       hintText: "someone@example.com",
                     ),
                     validator: emailValidator,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
                   ),
                 ),
                 Padding(
@@ -98,13 +80,23 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: "Password",
                     ),
                     validator: passwordValidator,
+                    obscureText: true,
+                    keyboardType: TextInputType.visiblePassword,
+                    textInputAction: TextInputAction.done,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ElevatedButton(
                     child: Text("Login"),
-                    onPressed: login,
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        context.read<AuthProvider>().signIn(
+                              email: emailController.text,
+                              password: passwordController.text,
+                            );
+                      }
+                    },
                   ),
                 ),
               ],

@@ -7,6 +7,8 @@ class AuthProvider {
 
   Stream<User?> get authState => firebaseAuth.authStateChanges();
 
+  User? get currentUser => firebaseAuth.currentUser;
+
   Future<String> signUp({String email = "", String password = ""}) async {
     try {
       await firebaseAuth.createUserWithEmailAndPassword(
