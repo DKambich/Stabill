@@ -1,27 +1,28 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'
+    show QuerySnapshot, QueryDocumentSnapshot;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
-import 'package:stabill/models/transaction.dart' as Stabill;
+import 'package:stabill/models/transaction.dart';
 import 'package:stabill/providers/data_provider.dart';
 
 class TransferTransactionModal extends StatefulWidget {
   final String currentAccountID, transactionID;
-  final Stabill.Transaction transaction;
+  final Transaction transaction;
 
-  const TransferTransactionModal(
-      {Key? key,
-      required this.currentAccountID,
-      required this.transaction,
-      required this.transactionID})
-      : super(key: key);
+  const TransferTransactionModal({
+    Key? key,
+    required this.currentAccountID,
+    required this.transaction,
+    required this.transactionID,
+  }) : super(key: key);
 
   @override
   _TransferFundsModalState createState() => _TransferFundsModalState();
 
   static void show(
     BuildContext context,
-    Stabill.Transaction transaction,
+    Transaction transaction,
     String transactionID,
     String currentAccountID,
   ) {

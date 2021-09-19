@@ -114,4 +114,34 @@ class DataProvider {
       throw e;
     }
   }
+
+  Future<void> transferFunds(
+    int transferAmount,
+    String fromAccountID,
+    String toAccountID,
+  ) async {
+    var fromAccount = (await getAccountDocument(fromAccountID).get()).data()!;
+    var fromAccountTransactions = getTransactionCollection(fromAccountID);
+
+    var toAccount = (await getAccountDocument(toAccountID).get()).data()!;
+    var toAccountTransactions = getTransactionCollection(toAccountID);
+
+    Transaction transaction = Transaction(
+      name: "Transfer To ${toAccount.name}",
+      timestamp: DateTime.now(),
+      amount: transferAmount,
+      cleared: true,
+      memo: "SYSTEM GENERATED",
+      method: TransactionType.Withdrawal,
+    );
+
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+    batch.set<Transaction>(fromAccountTransactions.doc(), transaction);
+    // Create and write the toTransaction
+    transaction.name = "Transfer From ${fromAccount.name}";
+    transaction.method = TransactionType.Deposit;
+    batch.set<Transaction>(toAccountTransactions.doc(), transaction);
+
+    return batch.commit();
+  }
 }
