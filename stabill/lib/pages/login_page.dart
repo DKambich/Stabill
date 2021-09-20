@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -91,10 +92,12 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text("Login"),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        context.read<AuthProvider>().signIn(
+                        await context.read<AuthProvider>().signIn(
                               email: emailController.text,
                               password: passwordController.text,
                             );
+                        Navigator.of(context)
+                            .pushReplacementNamed(HomePage.routeName);
                       }
                     },
                   ),

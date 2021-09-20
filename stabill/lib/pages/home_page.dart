@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/pages/login_page.dart';
+import 'package:stabill/pages/settings_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
+import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/widgets/modals/create_account_modal.dart';
 import 'package:stabill/widgets/account_list.dart';
 import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
@@ -142,6 +145,7 @@ class _HomePageState extends State<HomePage> {
               case HomePageAction.Export:
                 break;
               case HomePageAction.Settings:
+                Navigator.of(context).pushNamed(SettingsPage.routeName);
                 break;
             }
           }, itemBuilder: (ctx) {
@@ -183,15 +187,7 @@ class _HomePageState extends State<HomePage> {
           AccountList(
             shouldHideFAB: shouldHideFAB,
           ),
-          Center(
-            child: ElevatedButton(
-              child: Text("Logout"),
-              onPressed: () {
-                var auth = context.read<AuthProvider>();
-                auth.signOut();
-              },
-            ),
-          ),
+          Center(child: Text("Insights"))
         ],
         onPageChanged: (int index) {
           setState(() {

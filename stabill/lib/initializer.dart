@@ -7,6 +7,7 @@ import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/splash_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
+import 'package:flutter/scheduler.dart';
 
 class Initializer extends StatelessWidget {
   const Initializer({Key? key}) : super(key: key);
@@ -14,7 +15,6 @@ class Initializer extends StatelessWidget {
   Future<void> initalize() async {
     print("Initializing App...");
     await Firebase.initializeApp();
-    await Future.delayed(Duration(milliseconds: 2000));
     print("App Initalized Successfully");
   }
 
@@ -29,27 +29,34 @@ class Initializer extends StatelessWidget {
         return StreamBuilder<User?>(
           stream: context.read<AuthProvider>().authState,
           builder: (context, snapshot) {
-            Widget page;
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              page = SplashPage();
-            } else {
+            print(snapshot.connectionState);
+            if (snapshot.connectionState == ConnectionState.active) {
               final User? user = snapshot.data;
-              page = (user != null ? HomePage() : LoginPage());
+              WidgetsBinding.instance!.addPostFrameCallback((_) {
+                if (user != null) {
+                  Navigator.of(context)
+                      .pushReplacementNamed(HomePage.routeName);
+                } else {
+                  Navigator.of(context)
+                      .pushReplacementNamed(LoginPage.routeName);
+                }
+              });
             }
-            return AnimatedSwitcher(
-              duration: Duration(milliseconds: 300),
-              child: page,
-              transitionBuilder: (child, animation) {
-                const begin = Offset(0.0, 1.0), end = Offset.zero;
-                const curve = Curves.ease;
-                var tween = Tween(begin: begin, end: end)
-                    .chain(CurveTween(curve: curve));
-                return SlideTransition(
-                  position: animation.drive(tween),
-                  child: child,
-                );
-              },
-            );
+            return SplashPage();
+            // return AnimatedSwitcher(
+            //   duration: Duration(milliseconds: 300),
+            //   child: page,
+            //   transitionBuilder: (child, animation) {
+            //     const begin = Offset(0.0, 1.0), end = Offset.zero;
+            //     const curve = Curves.ease;
+            //     var tween = Tween(begin: begin, end: end)
+            //         .chain(CurveTween(curve: curve));
+            //     return SlideTransition(
+            //       position: animation.drive(tween),
+            //       child: child,
+            //     );
+            //   },
+            // );
           },
         );
       },

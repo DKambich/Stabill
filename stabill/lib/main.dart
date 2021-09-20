@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stabill/initializer.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
+import 'package:stabill/pages/settings_page.dart';
 import 'package:stabill/pages/transactions_page.dart';
+import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/providers/root_provider.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 
@@ -14,18 +17,25 @@ class Stabill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RootProvider(
-      child: MaterialApp(
-        title: 'Stabill',
-        theme: ThemeData(
-          primarySwatch: Colors.green,
-          accentColor: Colors.red,
-        ),
-        home: Initializer(),
-        routes: <String, WidgetBuilder>{
-          TransactionModal.routeName: (_ctx) => TransactionModal()
-        },
-        onGenerateRoute: generateRoute,
-      ),
+      child: Builder(builder: (context) {
+        return MaterialApp(
+          title: 'Stabill',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.green,
+              accentColor: Colors.red,
+              brightness: context.watch<PreferenceProvider>().darkTheme
+                  ? Brightness.dark
+                  : Brightness.light,
+            ),
+          ),
+          home: Initializer(),
+          routes: <String, WidgetBuilder>{
+            TransactionModal.routeName: (_ctx) => TransactionModal()
+          },
+          onGenerateRoute: generateRoute,
+        );
+      }),
     );
   }
 
@@ -33,22 +43,24 @@ class Stabill extends StatelessWidget {
     final String routeName = settings.name ?? "";
     if (routeName == HomePage.routeName) {
       return MaterialPageRoute(
-        builder: (_ctx) => HomePage(),
+        builder: (_) => HomePage(),
       );
     } else if (routeName == LoginPage.routeName) {
       return MaterialPageRoute(
-        builder: (_ctx) => LoginPage(),
+        builder: (_) => LoginPage(),
       );
     } else if (routeName == TransactionsPage.routeName) {
       final args = settings.arguments as TransactionArguments;
       return MaterialPageRoute(
-        builder: (_ctx) => TransactionsPage(
+        builder: (_) => TransactionsPage(
           accountID: args.accountID,
           account: args.account,
         ),
       );
     } else if (routeName == TransactionModal.routeName) {
       return MaterialPageRoute(builder: (_ctx) => TransactionModal());
+    } else if (routeName == SettingsPage.routeName) {
+      return MaterialPageRoute(builder: (_) => SettingsPage());
     }
 
     // The code only supports

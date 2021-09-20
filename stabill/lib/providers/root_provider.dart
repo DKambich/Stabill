@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/providers/preference_provider.dart';
 
 class RootProvider extends StatelessWidget {
   final Widget child;
@@ -18,7 +19,10 @@ class RootProvider extends StatelessWidget {
           FirebaseFirestore.instance,
           context.watch<AuthProvider>().currentUser,
         ),
-        child: child,
+        child: ChangeNotifierProvider(
+          create: (_) => PreferenceProvider(),
+          child: child,
+        ),
       ),
     );
   }
