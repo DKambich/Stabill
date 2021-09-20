@@ -87,6 +87,40 @@ class DataProvider {
     }
   }
 
+  Future<void> updateBalance(String accountID, int newBalance) async {
+    int oldBalance =
+        (await getAccountDocument(accountID).get()).data()!.currentBalance;
+
+    if (oldBalance == newBalance) return;
+
+    var transactionCol = getTransactionCollection(accountID);
+
+    var unclearedTransactions =
+        await transactionCol.where("cleared", isEqualTo: false).get();
+
+    var transactionUpdates = unclearedTransactions.docs.map(
+      (transaction) => transaction.reference.update({"cleared": true}),
+    );
+
+    await Future.wait(transactionUpdates);
+
+    int balanceDelta = newBalance - oldBalance;
+
+    Transaction correction = Transaction(
+      name: "Balance Correction",
+      amount: balanceDelta.abs(),
+      method: balanceDelta > 0
+          ? TransactionType.Deposit
+          : TransactionType.Withdrawal,
+      timestamp: DateTime.now(),
+      cleared: true,
+      memo: "System Generated",
+    );
+
+    // Add the new correction transaction to the transactions of the account
+    await transactionCol.add(correction);
+  }
+
   Future<void> transferTransaction(
     Transaction transaction,
     String transactionID,

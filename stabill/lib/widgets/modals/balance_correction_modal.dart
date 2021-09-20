@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
-import 'package:stabill/models/transaction.dart' as Stabill;
+import 'package:stabill/providers/data_provider.dart';
 
 class BalanceCorrectionModal extends StatefulWidget {
   final String accountID;
@@ -32,7 +32,6 @@ class BalanceCorrectionModal extends StatefulWidget {
 
 class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
   late DocumentReference<Account> _accountDocument;
-  late CollectionReference<Stabill.Transaction> _transactionCollection;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _balanceController =
@@ -42,24 +41,8 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
 
   @override
   void initState() {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-    _accountDocument = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection("accounts")
-        .withConverter<Account>(
-          fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
-          toFirestore: (account, _) => account.toJson(),
-        )
-        .doc(widget.accountID);
-
-    _transactionCollection = _accountDocument
-        .collection("transactions")
-        .withConverter<Stabill.Transaction>(
-          fromFirestore: (snapshot, _) =>
-              Stabill.Transaction.fromJson(snapshot.data()!),
-          toFirestore: (transaction, _) => transaction.toJson(),
-        );
+    _accountDocument =
+        context.read<DataProvider>().getAccountDocument(widget.accountID);
 
     _balanceController.addListener(() {
       String dollarStr = Account.formatDollarStr(_balanceController.text);
@@ -145,9 +128,20 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
                             .replaceAll(r"$", "")
                             .replaceAll(".", "");
                         int newBalance = int.parse(newBalanceStr);
-
-                        if (await correctBalance(newBalance))
+                        int oldBalance = (await _accountDocument.get())
+                            .data()!
+                            .currentBalance;
+                        if (newBalance != oldBalance) {
+                          await context
+                              .read<DataProvider>()
+                              .updateBalance(widget.accountID, newBalance);
                           Navigator.pop(context);
+                        } else {
+                          setState(() {
+                            errorText = "New balance cannot equal old balance";
+                            _formKey.currentState!.validate();
+                          });
+                        }
                       },
                     ),
                   ),
@@ -158,48 +152,5 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
         ),
       ),
     );
-  }
-
-  Future<bool> correctBalance(int newBalance) async {
-    // Get the oldBalance from the account
-    int oldBalance = (await _accountDocument.get()).data()!.currentBalance;
-
-    // Validate that oldBalance is not the newBalance
-    if (oldBalance == newBalance) {
-      setState(() {
-        errorText = "New balance cannot equal old balance";
-        _formKey.currentState!.validate();
-      });
-      return false;
-    }
-
-    // Mark all transactions in the account not already cleared as cleared
-    final transactionUpdates = (await _transactionCollection
-            .where("cleared", isEqualTo: false)
-            .get())
-        .docs
-        .map((transaction) => transaction.reference.update({"cleared": true}));
-
-    await Future.wait(transactionUpdates);
-
-    // Get the difference between balances, ensuring the result has 2 decimal places at most
-    int balanceDelta = newBalance - oldBalance;
-
-    // Create a new transaction that has the correction information
-    Stabill.Transaction correction = Stabill.Transaction(
-      timestamp: DateTime.now(),
-      amount: balanceDelta.abs(),
-      cleared: true,
-      memo: "System Generated",
-      name: "Balance Correction",
-      method: balanceDelta > 0
-          ? Stabill.TransactionType.Deposit
-          : Stabill.TransactionType.Withdrawal,
-    );
-
-    // Add the new correction transaction to the transactions of the account
-    _transactionCollection.add(correction);
-
-    return true;
   }
 }
