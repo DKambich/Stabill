@@ -181,7 +181,6 @@ class _TransactionModalState extends State<TransactionModal> {
                 ),
                 CheckboxListTile(
                   value: isCleared,
-                  activeColor: Theme.of(context).accentColor,
                   onChanged: (_) {
                     setState(() {
                       isCleared = !isCleared;
@@ -200,7 +199,6 @@ class _TransactionModalState extends State<TransactionModal> {
                         onChanged: (TransactionType? value) => setState(
                           () => method = TransactionType.Withdrawal,
                         ),
-                        activeColor: Theme.of(context).accentColor,
                       ),
                     ),
                     Flexible(
@@ -211,7 +209,6 @@ class _TransactionModalState extends State<TransactionModal> {
                         onChanged: (TransactionType? value) => setState(
                           () => method = TransactionType.Deposit,
                         ),
-                        activeColor: Theme.of(context).accentColor,
                       ),
                     ),
                   ],

@@ -10,32 +10,27 @@ import 'package:stabill/providers/root_provider.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 
 void main() {
-  runApp(Stabill());
+  runApp(MaterialApp(home: Stabill()));
 }
 
 class Stabill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RootProvider(
-      child: Builder(builder: (context) {
+      builder: (context) {
         return MaterialApp(
+          theme: context.read<PreferenceProvider>().getTheme(
+                context,
+                context.watch<PreferenceProvider>().themeMode,
+              ),
           title: 'Stabill',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSwatch(
-              primarySwatch: Colors.green,
-              accentColor: Colors.red,
-              brightness: context.watch<PreferenceProvider>().darkTheme
-                  ? Brightness.dark
-                  : Brightness.light,
-            ),
-          ),
           home: Initializer(),
           routes: <String, WidgetBuilder>{
             TransactionModal.routeName: (_ctx) => TransactionModal()
           },
           onGenerateRoute: generateRoute,
         );
-      }),
+      },
     );
   }
 

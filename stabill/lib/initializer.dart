@@ -7,7 +7,6 @@ import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/splash_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
-import 'package:flutter/scheduler.dart';
 
 class Initializer extends StatelessWidget {
   const Initializer({Key? key}) : super(key: key);

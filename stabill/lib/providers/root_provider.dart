@@ -7,8 +7,8 @@ import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/providers/preference_provider.dart';
 
 class RootProvider extends StatelessWidget {
-  final Widget child;
-  const RootProvider({Key? key, required this.child}) : super(key: key);
+  final Widget Function(BuildContext) builder;
+  const RootProvider({Key? key, required this.builder}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class RootProvider extends StatelessWidget {
         ),
         child: ChangeNotifierProvider(
           create: (_) => PreferenceProvider(),
-          child: child,
+          child: Builder(builder: builder),
         ),
       ),
     );

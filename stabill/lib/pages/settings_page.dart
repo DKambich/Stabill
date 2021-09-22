@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/providers/preference_provider.dart';
+import 'package:stabill/widgets/dialogs/theme_picker.dart';
 
 class SettingsPage extends StatefulWidget {
   static final String routeName = "/settings";
@@ -17,7 +18,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    bool darkTheme = context.watch<PreferenceProvider>().darkTheme;
+    ThemeType mode = context.watch<PreferenceProvider>().themeMode;
     return Scaffold(
       appBar: AppBar(
         title: Text("Settings"),
@@ -25,15 +26,18 @@ class _SettingsPageState extends State<SettingsPage> {
       body: Column(
         children: [
           ListTile(
-            leading: Icon(darkTheme ? Icons.dark_mode : Icons.light_mode),
+            leading: Icon(mode == ThemeType.Light
+                ? Icons.light_mode
+                : mode == ThemeType.Dark
+                    ? Icons.dark_mode
+                    : Icons.brightness_auto),
             title: Text("Toggle theme"),
-            onTap: context.read<PreferenceProvider>().toggleTheme,
-            trailing: Switch(
-              value: darkTheme,
-              onChanged: (boo) {
-                context.read<PreferenceProvider>().toggleTheme();
-              },
-            ),
+            onTap: () async => context.read<PreferenceProvider>().setThemeMode(
+                  await ThemePicker.show(
+                    context,
+                    mode,
+                  ),
+                ),
           ),
           ListTile(
             leading: Icon(Icons.logout),

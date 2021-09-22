@@ -21,7 +21,9 @@ class BalanceText extends StatelessWidget {
     else if (balance < 0)
       return Colors.red;
     else
-      return Theme.of(context).textTheme.bodyText1!.color;
+      return Theme.of(context).brightness == Brightness.light
+          ? Colors.black
+          : Colors.white;
   }
 
   @override
@@ -38,12 +40,12 @@ class BalanceText extends StatelessWidget {
 
     return RichText(
       text: TextSpan(
-        style: TextStyle(
-          fontSize: fontSize,
-          color: Theme.of(context).textTheme.caption!.color,
-        ),
+        style: TextStyle(fontSize: fontSize),
         children: <TextSpan>[
-          TextSpan(text: prefixText),
+          TextSpan(
+            text: prefixText,
+            style: TextStyle(color: Colors.grey),
+          ),
           TextSpan(
             text: balanceText,
             style: TextStyle(

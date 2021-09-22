@@ -27,6 +27,8 @@ class TransactionCard extends StatelessWidget {
     int amount = transaction.method == TransactionType.Withdrawal
         ? -transaction.amount
         : transaction.amount;
+
+    Color? fontColor = transaction.cleared ? null : Colors.grey;
     return Card(
       child: Padding(
         padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16, right: 8),
@@ -42,28 +44,35 @@ class TransactionCard extends StatelessWidget {
                     textStyle: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: transaction.cleared ? Colors.black : Colors.grey,
+                      color: transaction.cleared
+                          ? Theme.of(context).brightness == Brightness.light
+                              ? Colors.black
+                              : Colors.white
+                          : Colors.grey,
                     ),
                     textStyleHighlight: TextStyle(
-                      backgroundColor: Colors.yellow,
+                      backgroundColor:
+                          Theme.of(context).brightness == Brightness.light
+                              ? Colors.yellow
+                              : Colors.blue,
                     ),
                   ),
                   Text(
                     "Check Number: ${transaction.checkNumber == -1 ? "None" : transaction.checkNumber}",
                     style: TextStyle(
-                      color: transaction.cleared ? Colors.black : Colors.grey,
+                      color: fontColor,
                     ),
                   ),
                   Text(
                     "Date: ${DateFormat('MM/dd/yyyy hh:mm a').format(transaction.timestamp)}",
                     style: TextStyle(
-                      color: transaction.cleared ? Colors.black : Colors.grey,
+                      color: fontColor,
                     ),
                   ),
                   Text(
                     "Memo: ${transaction.memo}",
                     style: TextStyle(
-                      color: transaction.cleared ? Colors.black : Colors.grey,
+                      color: fontColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
