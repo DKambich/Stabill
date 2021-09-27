@@ -18,7 +18,8 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    ThemeType mode = context.watch<PreferenceProvider>().themeMode;
+    ThemeMode mode = context.watch<PreferenceProvider>().themeMode;
+    Brightness brightness = Theme.of(context).brightness;
     return Scaffold(
       appBar: AppBar(
         title: Text("Settings"),
@@ -26,11 +27,11 @@ class _SettingsPageState extends State<SettingsPage> {
       body: Column(
         children: [
           ListTile(
-            leading: Icon(mode == ThemeType.Light
-                ? Icons.light_mode
-                : mode == ThemeType.Dark
-                    ? Icons.dark_mode
-                    : Icons.brightness_auto),
+            leading: Icon(
+              brightness == Brightness.light
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
             title: Text("Toggle theme"),
             onTap: () async => context.read<PreferenceProvider>().setThemeMode(
                   await ThemePicker.show(

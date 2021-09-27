@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stabill/providers/preference_provider.dart';
+import 'package:intl/intl.dart';
 
 class ThemePicker extends StatefulWidget {
-  final ThemeType defaultType;
+  final ThemeMode defaultType;
 
   const ThemePicker({Key? key, required this.defaultType}) : super(key: key);
 
   @override
   _ThemePickerState createState() => _ThemePickerState();
 
-  static Future<ThemeType> show(
+  static Future<ThemeMode> show(
     BuildContext context,
-    ThemeType currentThemeType,
+    ThemeMode currentThemeType,
   ) async {
-    return await showDialog<ThemeType>(
+    return await showDialog<ThemeMode>(
           context: context,
           builder: (_) => ThemePicker(
             defaultType: currentThemeType,
@@ -25,7 +25,7 @@ class ThemePicker extends StatefulWidget {
 }
 
 class _ThemePickerState extends State<ThemePicker> {
-  late ThemeType selectedType;
+  late ThemeMode selectedType;
 
   @override
   void initState() {
@@ -39,14 +39,18 @@ class _ThemePickerState extends State<ThemePicker> {
       title: Text("Select Theme Type"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        children: ThemeType.values
+        children: ThemeMode.values
             .map(
-              (type) => RadioListTile<ThemeType>(
+              (type) => RadioListTile<ThemeMode>(
                   value: type,
                   groupValue: selectedType,
-                  title: Text(type
-                      .toString()
-                      .substring(type.toString().indexOf(".") + 1)),
+                  title: Text(
+                    toBeginningOfSentenceCase(
+                      type.toString().substring(
+                            type.toString().indexOf(".") + 1,
+                          ),
+                    )!,
+                  ),
                   onChanged: (val) => setState(() {
                         selectedType = val!;
                       }),

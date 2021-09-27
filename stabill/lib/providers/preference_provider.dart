@@ -3,36 +3,34 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceProvider extends ChangeNotifier {
   final String key = "theme";
-  late ThemeType mode;
+  late ThemeMode mode;
   SharedPreferences? _preferences;
 
-  ThemeType get themeMode => mode;
+  ThemeMode get themeMode => mode;
 
   PreferenceProvider() {
-    mode = ThemeType.Light;
+    mode = ThemeMode.light;
     _loadFromPrefs();
   }
 
-  void setThemeMode(ThemeType newMode) {
+  void setThemeMode(ThemeMode newMode) {
     mode = newMode;
     _saveToPrefs();
     notifyListeners();
   }
 
-  ThemeData getTheme(BuildContext context, ThemeType mode) {
+  ThemeData getTheme(BuildContext context, ThemeMode mode) {
     final brightness;
     switch (mode) {
-      case ThemeType.Light:
+      case ThemeMode.light:
         brightness = Brightness.light;
         break;
-      case ThemeType.Dark:
+      case ThemeMode.dark:
         brightness = Brightness.dark;
         break;
-      case ThemeType.System:
+      case ThemeMode.system:
         brightness = MediaQuery.of(context).platformBrightness;
         break;
-      default:
-        brightness = Brightness.light;
     }
 
     final theme = ThemeData(
@@ -56,8 +54,11 @@ class PreferenceProvider extends ChangeNotifier {
 
   _loadFromPrefs() async {
     await _initPrefs();
-    String theme = _preferences!.getString(key) ?? ThemeType.Light.toString();
-    mode = ThemeType.values.firstWhere((type) => type.toString() == theme);
+    String theme = _preferences!.getString(key) ?? ThemeMode.light.toString();
+    mode = ThemeMode.values.firstWhere(
+      (type) => type.toString() == theme,
+      orElse: () => ThemeMode.light,
+    );
     notifyListeners();
   }
 
@@ -66,5 +67,3 @@ class PreferenceProvider extends ChangeNotifier {
     _preferences!.setString(key, mode.toString());
   }
 }
-
-enum ThemeType { Light, Dark, System }
