@@ -1,10 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:intl/intl.dart';
+import 'package:stabill/utilities/dollar_formatter.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 
 class TransactionModal extends StatefulWidget {
@@ -43,7 +41,8 @@ class _TransactionModalState extends State<TransactionModal> {
           DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
       dateController = TextEditingController(text: transactionDate);
       amountController = TextEditingController(
-          text: "\$${(widget.transaction!.amount / 100).toStringAsFixed(2)}");
+        text: "\$${(widget.transaction!.amount / 100).toStringAsFixed(2)}",
+      );
       checkNumberController = TextEditingController(
           text:
               "${widget.transaction!.checkNumber != -1 ? widget.transaction!.checkNumber : ""}");
@@ -62,19 +61,19 @@ class _TransactionModalState extends State<TransactionModal> {
       memoController = TextEditingController(text: "");
     }
 
-    amountController.addListener(() {
-      String dollarStr = Account.formatDollarStr(amountController.text
-          .substring(0, min(amountController.text.length, 10)));
+    // amountController.addListener(() {
+    //   String dollarStr = Account.formatDollarStr(amountController.text
+    //       .substring(0, min(amountController.text.length, 10)));
 
-      amountController.value = amountController.value.copyWith(
-        text: dollarStr,
-        selection: TextSelection(
-          baseOffset: dollarStr.length,
-          extentOffset: dollarStr.length,
-        ),
-        composing: TextRange.empty,
-      );
-    });
+    //   amountController.value = amountController.value.copyWith(
+    //     text: dollarStr,
+    //     selection: TextSelection(
+    //       baseOffset: dollarStr.length,
+    //       extentOffset: dollarStr.length,
+    //     ),
+    //     composing: TextRange.empty,
+    //   );
+    // });
 
     super.initState();
   }
@@ -104,7 +103,7 @@ class _TransactionModalState extends State<TransactionModal> {
                       : -1;
                   Transaction savedTransaction = Transaction(
                     amount: int.parse(
-                      amountController.text.substring(1).replaceAll(".", ""),
+                      amountController.text.replaceAll(RegExp(r"[^\d]"), ""),
                     ),
                     checkNumber: checkNumber,
                     cleared: isCleared,
@@ -136,6 +135,7 @@ class _TransactionModalState extends State<TransactionModal> {
                     controller: nameController,
                     decoration: InputDecoration(labelText: "Name"),
                     keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.next,
                     validator: (String? text) {
                       if (text != null && text.length > 0) {
                         return null;
@@ -151,12 +151,14 @@ class _TransactionModalState extends State<TransactionModal> {
                     controller: amountController,
                     decoration: InputDecoration(labelText: "Amount"),
                     keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.done,
                     validator: (String? text) {
                       if (text != null && double.parse(text.substring(1)) > 0) {
                         return null;
                       }
                       return "Amount must be greater than 0";
                     },
+                    inputFormatters: [DollarTextInputFormatter(maxDigits: 7)],
                   ),
                 ),
                 Padding(
@@ -176,7 +178,10 @@ class _TransactionModalState extends State<TransactionModal> {
                     controller: checkNumberController,
                     decoration: InputDecoration(labelText: "Check Number"),
                     keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(4)
+                    ],
                   ),
                 ),
                 CheckboxListTile(

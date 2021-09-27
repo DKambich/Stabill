@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stabill/initializer.dart';
+import 'package:stabill/utilities/initializer.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/settings_page.dart';

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/utilities/dollar_formatter.dart';
 
 class TransferFundsModal extends StatefulWidget {
   final String? defaultAccountID;
@@ -50,20 +51,20 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
     _dropdownErrorText = null;
 
     _balanceController = TextEditingController(text: r"$0.00");
-    _balanceController.addListener(() {
-      // Format the TextField text to be a dollar string
-      String formatStr = Account.formatDollarStr(_balanceController.text);
+    // _balanceController.addListener(() {
+    //   // Format the TextField text to be a dollar string
+    //   String formatStr = Account.formatDollarStr(_balanceController.text);
 
-      // Replace the TextField text with the format string
-      _balanceController.value = _balanceController.value.copyWith(
-        text: formatStr,
-        selection: TextSelection(
-          baseOffset: formatStr.length,
-          extentOffset: formatStr.length,
-        ),
-        composing: TextRange.empty,
-      );
-    });
+    //   // Replace the TextField text with the format string
+    //   _balanceController.value = _balanceController.value.copyWith(
+    //     text: formatStr,
+    //     selection: TextSelection(
+    //       baseOffset: formatStr.length,
+    //       extentOffset: formatStr.length,
+    //     ),
+    //     composing: TextRange.empty,
+    //   );
+    // });
 
     super.initState();
   }
@@ -184,6 +185,7 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
                       controller: _balanceController,
                       decoration: InputDecoration(labelText: "Amount"),
                       enableInteractiveSelection: false,
+                      inputFormatters: [DollarTextInputFormatter(maxDigits: 7)],
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.go,
                       validator: (value) {
@@ -216,8 +218,9 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
     // If the form is valid, transfer the funds
     if (validForm) {
       // Get the amount to transfer
-      String amountText = _balanceController.text.substring(1);
-      int amount = int.parse(amountText.replaceAll(".", ""));
+      int amount = int.parse(
+        _balanceController.text.replaceAll(RegExp(r"[^\d]"), ""),
+      );
       DataProvider dataProvider = context.read<DataProvider>();
       Account fromAccount = await dataProvider.getAccount(_fromAccountID);
       Account toAccount = await dataProvider.getAccount(_toAccountID);

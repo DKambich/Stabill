@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/utilities/dollar_formatter.dart';
 
 class BalanceCorrectionModal extends StatefulWidget {
   final String accountID;
@@ -36,31 +37,31 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
 
   String? errorText;
 
-  @override
-  void initState() {
-    _balanceController.addListener(() {
-      String dollarStr = Account.formatDollarStr(_balanceController.text);
-      if ((_balanceController.text.endsWith("-") ||
-              _balanceController.text.startsWith("-")) &&
-          _balanceController.text != r"$0.00-") {
-        dollarStr = "-" + dollarStr;
-      }
+  // @override
+  // void initState() {
+  //   // _balanceController.addListener(() {
+  //   //   String dollarStr = Account.formatDollarStr(_balanceController.text);
+  //   //   if ((_balanceController.text.endsWith("-") ||
+  //   //           _balanceController.text.startsWith("-")) &&
+  //   //       _balanceController.text != r"$0.00-") {
+  //   //     dollarStr = "-" + dollarStr;
+  //   //   }
 
-      if (_balanceController.text == r"-$0.00") {
-        dollarStr = r"$0.00";
-      }
+  //   //   if (_balanceController.text == r"-$0.00") {
+  //   //     dollarStr = r"$0.00";
+  //   //   }
 
-      _balanceController.value = _balanceController.value.copyWith(
-        text: dollarStr,
-        selection: TextSelection(
-          baseOffset: dollarStr.length,
-          extentOffset: dollarStr.length,
-        ),
-        composing: TextRange.empty,
-      );
-    });
-    super.initState();
-  }
+  //   //   _balanceController.value = _balanceController.value.copyWith(
+  //   //     text: dollarStr,
+  //   //     selection: TextSelection(
+  //   //       baseOffset: dollarStr.length,
+  //   //       extentOffset: dollarStr.length,
+  //   //     ),
+  //   //     composing: TextRange.empty,
+  //   //   );
+  //   // });
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +103,9 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
                 validator: (_) {
                   return errorText;
                 },
+                inputFormatters: [
+                  DollarTextInputFormatter(allowNegative: true, maxDigits: 8)
+                ],
               ),
             ),
             Padding(
@@ -119,8 +123,7 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
                       child: Text("Confirm"),
                       onPressed: () async {
                         String newBalanceStr = _balanceController.text
-                            .replaceAll(r"$", "")
-                            .replaceAll(".", "");
+                            .replaceAll(RegExp(r"[^\d]"), "");
 
                         DataProvider dataProvider =
                             context.read<DataProvider>();

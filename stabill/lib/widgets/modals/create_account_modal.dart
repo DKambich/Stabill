@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/utilities/dollar_formatter.dart';
 
 class CreateAccountModal extends StatefulWidget {
   const CreateAccountModal({Key? key}) : super(key: key);
@@ -29,22 +30,22 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
       TextEditingController(text: r"$0.00");
   final _formKey = GlobalKey<FormState>();
 
-  @override
-  void initState() {
-    super.initState();
-    _balanceController.addListener(() {
-      String dollarStr = Account.formatDollarStr(_balanceController.text);
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _balanceController.addListener(() {
+  //     String dollarStr = Account.formatDollarStr(_balanceController.text);
 
-      _balanceController.value = _balanceController.value.copyWith(
-        text: dollarStr,
-        selection: TextSelection(
-          baseOffset: dollarStr.length,
-          extentOffset: dollarStr.length,
-        ),
-        composing: TextRange.empty,
-      );
-    });
-  }
+  //     _balanceController.value = _balanceController.value.copyWith(
+  //       text: dollarStr,
+  //       selection: TextSelection(
+  //         baseOffset: dollarStr.length,
+  //         extentOffset: dollarStr.length,
+  //       ),
+  //       composing: TextRange.empty,
+  //     );
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +97,7 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                   ),
                   enableInteractiveSelection: false,
                   textInputAction: TextInputAction.done,
+                  inputFormatters: [DollarTextInputFormatter(maxDigits: 8)],
                 ),
               ),
               Padding(
@@ -118,10 +120,8 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                               );
 
                               int startingBalance = int.parse(
-                                _balanceController.text.replaceAll(
-                                  RegExp(r"[$|.]"),
-                                  "",
-                                ),
+                                _balanceController.text
+                                    .replaceAll(RegExp(r"[^\d]"), ""),
                               );
 
                               await context.read<DataProvider>().createAccount(
