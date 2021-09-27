@@ -97,6 +97,7 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                   ),
                   enableInteractiveSelection: false,
                   textInputAction: TextInputAction.done,
+                  textCapitalization: TextCapitalization.words,
                   inputFormatters: [DollarTextInputFormatter(maxDigits: 8)],
                 ),
               ),

@@ -136,6 +136,7 @@ class _TransactionModalState extends State<TransactionModal> {
                     decoration: InputDecoration(labelText: "Name"),
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
+                    textCapitalization: TextCapitalization.words,
                     validator: (String? text) {
                       if (text != null && text.length > 0) {
                         return null;
@@ -226,6 +227,7 @@ class _TransactionModalState extends State<TransactionModal> {
                     decoration: InputDecoration(labelText: "Memo"),
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
+                    textCapitalization: TextCapitalization.sentences,
                   ),
                 ),
               ],
