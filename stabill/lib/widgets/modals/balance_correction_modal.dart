@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
@@ -31,8 +30,6 @@ class BalanceCorrectionModal extends StatefulWidget {
 }
 
 class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
-  late DocumentReference<Account> _accountDocument;
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _balanceController =
       TextEditingController(text: r"$0.00");
@@ -41,9 +38,6 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
 
   @override
   void initState() {
-    _accountDocument =
-        context.read<DataProvider>().getAccountDocument(widget.accountID);
-
     _balanceController.addListener(() {
       String dollarStr = Account.formatDollarStr(_balanceController.text);
       if ((_balanceController.text.endsWith("-") ||
@@ -127,14 +121,15 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
                         String newBalanceStr = _balanceController.text
                             .replaceAll(r"$", "")
                             .replaceAll(".", "");
+
+                        DataProvider dataProvider =
+                            context.read<DataProvider>();
                         int newBalance = int.parse(newBalanceStr);
-                        int oldBalance = (await _accountDocument.get())
-                            .data()!
-                            .currentBalance;
+                        Account account =
+                            await dataProvider.getAccount(widget.accountID);
+                        int oldBalance = account.currentBalance;
                         if (newBalance != oldBalance) {
-                          await context
-                              .read<DataProvider>()
-                              .updateBalance(widget.accountID, newBalance);
+                          await dataProvider.updateBalance(account, newBalance);
                           Navigator.pop(context);
                         } else {
                           setState(() {

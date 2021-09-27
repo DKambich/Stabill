@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
 
 class EditAccountModal extends StatefulWidget {
@@ -83,10 +84,12 @@ class _EditAccountModalState extends State<EditAccountModal> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               // Update the account
-                              await context.read<DataProvider>().updateAccount(
-                                    widget.accountID,
-                                    _accountController.text,
-                                  );
+                              DataProvider dataProvider =
+                                  context.read<DataProvider>();
+                              Account account = await dataProvider
+                                  .getAccount(widget.accountID);
+                              account.name = _accountController.text;
+                              await dataProvider.updateAccount(account);
                               Navigator.pop(context);
                             }
                           },

@@ -34,6 +34,10 @@ class DataProvider {
     return getAccountsCollection().doc(accountID);
   }
 
+  Future<Account> getAccount(String accountID) async {
+    return (await getAccountDocument(accountID).get()).data()!;
+  }
+
   CollectionReference<Transaction> getTransactionCollection(String accountID) {
     return getAccountDocument(accountID)
         .collection(transactionCol)
@@ -51,6 +55,14 @@ class DataProvider {
     String transactionID,
   ) {
     return getTransactionCollection(accountID).doc(transactionID);
+  }
+
+  Future<Transaction> getTransaction(
+    String accountID,
+    String transactionID,
+  ) async {
+    return (await getTransactionDocument(accountID, transactionID).get())
+        .data()!;
   }
 
   Future<void> createAccount(Account account, int startingBalance) async {
@@ -78,27 +90,23 @@ class DataProvider {
     }
   }
 
-  Future<void> updateAccount(String accountID, String newName) async {
+  Future<void> updateAccount(Account account) async {
     try {
-      // Get the account document
-      var accountDoc = getAccountDocument(accountID);
-      // Get the Account and set the new name
-      Account updatedAccount = (await accountDoc.get()).data()!;
-      updatedAccount.name = newName;
+      // Get the Account document
+      var accountDoc = getAccountDocument(account.id);
       // Update the Account
-      await accountDoc.set(updatedAccount);
+      await accountDoc.set(account);
     } catch (e) {
       throw e;
     }
   }
 
-  Future<void> updateBalance(String accountID, int newBalance) async {
-    int oldBalance =
-        (await getAccountDocument(accountID).get()).data()!.currentBalance;
+  Future<void> updateBalance(Account account, int newBalance) async {
+    int oldBalance = account.currentBalance;
 
     if (oldBalance == newBalance) return;
 
-    var transactionCol = getTransactionCollection(accountID);
+    var transactionCol = getTransactionCollection(account.id);
 
     var unclearedTransactions =
         await transactionCol.where("cleared", isEqualTo: false).get();
@@ -127,20 +135,19 @@ class DataProvider {
   }
 
   Future<void> transferTransaction(
+    Account fromAccount,
+    Account toAccount,
     Transaction transaction,
-    String transactionID,
-    String fromAccountID,
-    String toAccountID,
   ) async {
     try {
       // Get a reference to the old transaction doc
       var oldTransactionDoc = getTransactionDocument(
-        fromAccountID,
-        transactionID,
+        fromAccount.id,
+        transaction.id,
       );
 
       // Get reference to the new transaction's parent collection
-      var newTransactionCol = getTransactionCollection(toAccountID);
+      var newTransactionCol = getTransactionCollection(toAccount.id);
 
       // Batch write and delete to transfer the tranaction
       WriteBatch batch = FirebaseFirestore.instance.batch();
@@ -155,23 +162,21 @@ class DataProvider {
   }
 
   Future<void> transferFunds(
+    Account fromAccount,
+    Account toAccount,
     int transferAmount,
-    String fromAccountID,
-    String toAccountID,
   ) async {
-    var fromAccount = (await getAccountDocument(fromAccountID).get()).data()!;
-    var fromAccountTransactions = getTransactionCollection(fromAccountID);
+    var fromAccountTransactions = getTransactionCollection(fromAccount.id);
 
-    var toAccount = (await getAccountDocument(toAccountID).get()).data()!;
-    var toAccountTransactions = getTransactionCollection(toAccountID);
+    var toAccountTransactions = getTransactionCollection(toAccount.id);
 
     Transaction transaction = Transaction(
       name: "Transfer To ${toAccount.name}",
-      timestamp: DateTime.now(),
       amount: transferAmount,
+      method: TransactionType.Withdrawal,
+      timestamp: DateTime.now(),
       cleared: true,
       memo: "SYSTEM GENERATED",
-      method: TransactionType.Withdrawal,
     );
 
     WriteBatch batch = FirebaseFirestore.instance.batch();

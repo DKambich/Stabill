@@ -169,14 +169,17 @@ class _TransferFundsModalState extends State<TransferTransactionModal> {
                           child: TextButton(
                             child: Text("Confirm"),
                             onPressed: () async {
-                              await context
-                                  .read<DataProvider>()
-                                  .transferTransaction(
-                                    widget.transaction,
-                                    widget.transactionID,
-                                    widget.currentAccountID,
-                                    _selectedAccountID,
-                                  );
+                              DataProvider dataProvider =
+                                  context.read<DataProvider>();
+                              Account fromAccount = await dataProvider
+                                  .getAccount(widget.currentAccountID);
+                              Account toAccount = await dataProvider
+                                  .getAccount(_selectedAccountID);
+                              await dataProvider.transferTransaction(
+                                fromAccount,
+                                toAccount,
+                                widget.transaction,
+                              );
                               Navigator.of(context).pop();
                             },
                           ),

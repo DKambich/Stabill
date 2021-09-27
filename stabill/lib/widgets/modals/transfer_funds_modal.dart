@@ -218,12 +218,11 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
       // Get the amount to transfer
       String amountText = _balanceController.text.substring(1);
       int amount = int.parse(amountText.replaceAll(".", ""));
+      DataProvider dataProvider = context.read<DataProvider>();
+      Account fromAccount = await dataProvider.getAccount(_fromAccountID);
+      Account toAccount = await dataProvider.getAccount(_toAccountID);
 
-      await context.read<DataProvider>().transferFunds(
-            amount,
-            _fromAccountID,
-            _toAccountID,
-          );
+      await dataProvider.transferFunds(fromAccount, toAccount, amount);
 
       Navigator.pop(context);
     } else {
