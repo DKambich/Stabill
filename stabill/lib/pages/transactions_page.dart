@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart' as Stabill;
+import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/cards/transaction_card.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
@@ -45,34 +47,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   @override
   void initState() {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-
+    DataProvider dataProvider = context.read<DataProvider>();
     // Get a reference to the account document
-    _accountDocument = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection("accounts")
-        .withConverter<Account>(
-          fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
-          toFirestore: (acc, _) => acc.toJson(),
-        )
-        .doc(widget.accountID);
+    _accountDocument = dataProvider.getAccountDocument(widget.accountID);
 
     // Get a stream for the account
     _accountStream = _accountDocument.snapshots();
 
     // Get a stream for the account's transaction list to listen to
-    _transactionsCollection = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection("accounts")
-        .doc(widget.accountID)
-        .collection("transactions")
-        .withConverter<Stabill.Transaction>(
-          fromFirestore: (snapshot, _) =>
-              Stabill.Transaction.fromJson(snapshot.data()!),
-          toFirestore: (acc, _) => acc.toJson(),
-        );
+    _transactionsCollection =
+        dataProvider.getTransactionCollection(widget.accountID);
 
     _transactionsStream = _transactionsCollection.snapshots();
 

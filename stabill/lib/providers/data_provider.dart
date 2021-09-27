@@ -22,7 +22,10 @@ class DataProvider {
         .doc(uid)
         .collection(accountCol)
         .withConverter<Account>(
-          fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
+          fromFirestore: (snapshot, _) => Account.fromJson(
+            snapshot.data()!,
+            snapshot.id,
+          ),
           toFirestore: (account, _) => account.toJson(),
         );
   }
@@ -35,8 +38,10 @@ class DataProvider {
     return getAccountDocument(accountID)
         .collection(transactionCol)
         .withConverter<Transaction>(
-          fromFirestore: (snapshot, _) =>
-              Transaction.fromJson(snapshot.data()!),
+          fromFirestore: (snapshot, _) => Transaction.fromJson(
+            snapshot.data()!,
+            snapshot.id,
+          ),
           toFirestore: (transaction, _) => transaction.toJson(),
         );
   }

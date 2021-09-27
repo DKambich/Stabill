@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/settings_page.dart';
+import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/modals/create_account_modal.dart';
 import 'package:stabill/widgets/account_list.dart';
 import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
@@ -97,16 +99,9 @@ class _HomePageState extends State<HomePage> {
                   }
 
                   // Initialize Firebase variables
-                  String uid = FirebaseAuth.instance.currentUser!.uid;
-                  var _accountsCollection = FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(uid)
-                      .collection("accounts")
-                      .withConverter<Account>(
-                        fromFirestore: (snapshot, _) =>
-                            Account.fromJson(snapshot.data()!),
-                        toFirestore: (acc, _) => acc.toJson(),
-                      );
+                  DataProvider dataProvider = context.read<DataProvider>();
+                  var _accountsCollection =
+                      dataProvider.getAccountsCollection();
 
                   for (String key in accounts.keys) {
                     Account newAccount = Account(name: key);
@@ -120,13 +115,8 @@ class _HomePageState extends State<HomePage> {
                               ? transactions.length
                               : i + 499));
                     }
-                    var transactionRef = accountRef
-                        .collection("transactions")
-                        .withConverter<Stabill.Transaction>(
-                          fromFirestore: (snapshot, _) =>
-                              Stabill.Transaction.fromJson(snapshot.data()!),
-                          toFirestore: (acc, _) => acc.toJson(),
-                        );
+                    var transactionRef =
+                        dataProvider.getTransactionCollection(accountRef.id);
                     List<WriteBatch> batches = [];
                     for (var list in sublists) {
                       WriteBatch batch = FirebaseFirestore.instance.batch();

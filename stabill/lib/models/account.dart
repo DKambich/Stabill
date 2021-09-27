@@ -1,15 +1,19 @@
 class Account {
-  String name;
-  int availableBalance;
-  int currentBalance;
+  String name, id;
+  int availableBalance, currentBalance;
 
-  Account({this.name = "", this.availableBalance = 0, this.currentBalance = 0});
+  Account(
+      {this.name = "",
+      this.id = "",
+      this.availableBalance = 0,
+      this.currentBalance = 0});
 
-  Account.fromJson(Map<String, dynamic> json)
+  Account.fromJson(Map<String, dynamic> json, String id)
       : this(
           name: json['name']! as String,
           availableBalance: json['availableBalance'].toInt(),
           currentBalance: json['currentBalance'].toInt(),
+          id: id,
         );
 
   Map<String, Object?> toJson() {

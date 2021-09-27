@@ -1,15 +1,14 @@
 class Transaction {
-  String name;
-  int amount;
+  String name, memo, id;
+  int amount, checkNumber;
   DateTime timestamp;
-  int checkNumber;
   bool cleared, hidden;
-  String memo;
   TransactionType method;
 
   Transaction({
     this.name = "",
     this.memo = "",
+    this.id = "",
     this.amount = 0,
     this.checkNumber = -1,
     this.cleared = false,
@@ -18,7 +17,7 @@ class Transaction {
     required this.timestamp,
   });
 
-  Transaction.fromJson(Map<String, dynamic> json)
+  Transaction.fromJson(Map<String, dynamic> json, String id)
       : this(
           name: json['name'],
           memo: json['memo'],
@@ -29,6 +28,7 @@ class Transaction {
           method: TransactionType.values
               .firstWhere((element) => element.toString() == json['method']),
           timestamp: json['timestamp'].toDate(),
+          id: id,
         );
 
   Map<String, Object?> toJson() {

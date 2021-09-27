@@ -4,8 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/transactions_page.dart';
+import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/cards/account_card.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
@@ -29,16 +31,8 @@ class _AccountListState extends State<AccountList> {
 
   @override
   void initState() {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
     // Get a stream for the accounts list to listen to
-    _accountsCollection = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection("accounts")
-        .withConverter<Account>(
-          fromFirestore: (snapshot, _) => Account.fromJson(snapshot.data()!),
-          toFirestore: (acc, _) => acc.toJson(),
-        );
+    _accountsCollection = context.read<DataProvider>().getAccountsCollection();
 
     _accountsStream = _accountsCollection.snapshots();
 
