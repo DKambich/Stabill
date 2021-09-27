@@ -20,7 +20,7 @@ class PreferenceProvider extends ChangeNotifier {
   }
 
   ThemeData getTheme(BuildContext context, ThemeMode mode) {
-    final brightness;
+    final Brightness brightness;
     switch (mode) {
       case ThemeMode.light:
         brightness = Brightness.light;
@@ -31,6 +31,8 @@ class PreferenceProvider extends ChangeNotifier {
       case ThemeMode.system:
         brightness = MediaQuery.of(context).platformBrightness;
         break;
+      default:
+        brightness = Brightness.light;
     }
 
     final theme = ThemeData(
@@ -47,14 +49,14 @@ class PreferenceProvider extends ChangeNotifier {
     );
   }
 
-  _initPrefs() async {
-    if (_preferences == null)
-      _preferences = await SharedPreferences.getInstance();
+  Future<void> _initPrefs() async {
+    _preferences ??= await SharedPreferences.getInstance();
   }
 
-  _loadFromPrefs() async {
+  Future<void> _loadFromPrefs() async {
     await _initPrefs();
-    String theme = _preferences!.getString(key) ?? ThemeMode.light.toString();
+    final String theme =
+        _preferences!.getString(key) ?? ThemeMode.light.toString();
     mode = ThemeMode.values.firstWhere(
       (type) => type.toString() == theme,
       orElse: () => ThemeMode.light,
@@ -62,7 +64,7 @@ class PreferenceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  _saveToPrefs() async {
+  Future<void> _saveToPrefs() async {
     await _initPrefs();
     _preferences!.setString(key, mode.toString());
   }

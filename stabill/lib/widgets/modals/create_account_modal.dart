@@ -19,7 +19,7 @@ class CreateAccountModal extends StatefulWidget {
           topRight: Radius.circular(25),
         ),
       ),
-      builder: (_) => CreateAccountModal(),
+      builder: (_) => const CreateAccountModal(),
     );
   }
 }
@@ -63,7 +63,7 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
+              const Text(
                 "Create Account",
                 style: TextStyle(fontSize: 20),
                 textAlign: TextAlign.center,
@@ -73,7 +73,7 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                 child: TextFormField(
                   autofocus: true,
                   controller: _accountController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "Account Name",
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
                   ),
@@ -91,7 +91,7 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                 child: TextFormField(
                   controller: _balanceController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "Starting Balance",
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
                   ),
@@ -108,33 +108,35 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                     Expanded(
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: Text('Cancel'),
+                        child: const Text('Cancel'),
                       ),
                     ),
                     Expanded(
                       child: TextButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              // Setup the new account
-                              Account account = Account(
-                                name: _accountController.text,
-                              );
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            // Setup the new account
+                            final Account account = Account(
+                              name: _accountController.text,
+                            );
 
-                              int startingBalance = int.parse(
-                                _balanceController.text
-                                    .replaceAll(RegExp(r"[^\d]"), ""),
-                              );
+                            final int startingBalance = int.parse(
+                              _balanceController.text
+                                  .replaceAll(RegExp(r"[^\d]"), ""),
+                            );
 
-                              await context.read<DataProvider>().createAccount(
-                                    account,
-                                    startingBalance,
-                                  );
-                              // Create the new Account
-                              // await createAccount(newAccount, accountBalance);
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Text('Confirm')),
+                            await context.read<DataProvider>().createAccount(
+                                  account,
+                                  startingBalance,
+                                );
+                            // Create the new Account
+                            // await createAccount(newAccount, accountBalance);
+                            if (!mounted) return;
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: const Text('Confirm'),
+                      ),
                     ),
                   ],
                 ),

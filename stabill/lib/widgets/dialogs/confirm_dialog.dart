@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ConfirmDialog extends StatelessWidget {
-  final String title, message;
-  final String? confirmText, cancelText;
-  final Color? confirmColor, cancelColor;
+  final String title;
+  final String message;
+  final String? confirmText;
+  final String? cancelText;
+  final Color? confirmColor;
+  final Color? cancelColor;
 
   const ConfirmDialog({
     Key? key,
@@ -19,10 +22,10 @@ class ConfirmDialog extends StatelessWidget {
     BuildContext context,
     String title,
     String message, {
-    confirmText,
-    confirmColor,
-    cancelText,
-    cancelColor,
+    String? confirmText,
+    Color? confirmColor,
+    String? cancelText,
+    Color? cancelColor,
   }) async {
     final bool? result = await showDialog<bool>(
       context: context,
@@ -47,13 +50,13 @@ class ConfirmDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop<bool>(false),
-          child: Text(cancelText ?? "Cancel"),
           style: TextButton.styleFrom(primary: cancelColor),
+          child: Text(cancelText ?? "Cancel"),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop<bool>(true),
-          child: Text(confirmText ?? "Confirm"),
           style: TextButton.styleFrom(primary: confirmColor),
+          child: Text(confirmText ?? "Confirm"),
         )
       ],
     );

@@ -36,36 +36,37 @@ class _ThemePickerState extends State<ThemePicker> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Select Theme Type"),
+      title: const Text("Select Theme Type"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: ThemeMode.values
             .map(
               (type) => RadioListTile<ThemeMode>(
-                  value: type,
-                  groupValue: selectedType,
-                  title: Text(
-                    toBeginningOfSentenceCase(
-                      type.toString().substring(
-                            type.toString().indexOf(".") + 1,
-                          ),
-                    )!,
-                  ),
-                  onChanged: (val) => setState(() {
-                        selectedType = val!;
-                      }),
-                  contentPadding: EdgeInsets.zero),
+                value: type,
+                groupValue: selectedType,
+                title: Text(
+                  toBeginningOfSentenceCase(
+                    type.toString().substring(
+                          type.toString().indexOf(".") + 1,
+                        ),
+                  )!,
+                ),
+                onChanged: (val) => setState(() {
+                  selectedType = val!;
+                }),
+                contentPadding: EdgeInsets.zero,
+              ),
             )
             .toList(),
       ),
       actions: [
         TextButton(
-          child: Text("Cancel"),
           onPressed: () => Navigator.of(context).pop(),
+          child: const Text("Cancel"),
         ),
         TextButton(
-          child: Text("Confirm"),
           onPressed: () => Navigator.of(context).pop(selectedType),
+          child: const Text("Confirm"),
         )
       ],
     );

@@ -1,18 +1,21 @@
 class Account {
-  String name, id;
-  int availableBalance, currentBalance;
+  String name;
+  String id;
+  int availableBalance;
+  int currentBalance;
 
-  Account(
-      {this.name = "",
-      this.id = "",
-      this.availableBalance = 0,
-      this.currentBalance = 0});
+  Account({
+    this.name = "",
+    this.id = "",
+    this.availableBalance = 0,
+    this.currentBalance = 0,
+  });
 
   Account.fromJson(Map<String, dynamic> json, String id)
       : this(
           name: json['name']! as String,
-          availableBalance: json['availableBalance'].toInt(),
-          currentBalance: json['currentBalance'].toInt(),
+          availableBalance: (json['availableBalance']! as num).toInt(),
+          currentBalance: (json['currentBalance']! as num).toInt(),
           id: id,
         );
 
@@ -22,30 +25,5 @@ class Account {
       'availableBalance': availableBalance,
       'currentBalance': currentBalance,
     };
-  }
-
-  static String formatDollarStr(String input) {
-    // Remove all non-numeric characters
-    String text = input.replaceAll(RegExp(r"[^\d]"), "");
-
-    // Pad front of text with 0 until it is 3 characters
-    if (text.length < 3) {
-      text = text.padLeft(3, "0");
-    }
-
-    // Remove a zero from the front of the text if the length is 4
-    if (text.startsWith("0") && text.length == 4) {
-      text = text.substring(1);
-    }
-
-    // Insert the dollar sign
-    text = "\$" + text;
-
-    // Insert the decimal point
-    text = text.substring(0, text.length - 2) +
-        "." +
-        text.substring(text.length - 2);
-
-    return text;
   }
 }

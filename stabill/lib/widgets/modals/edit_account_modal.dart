@@ -46,7 +46,7 @@ class _EditAccountModalState extends State<EditAccountModal> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
+              const Text(
                 "Edit Account",
                 style: TextStyle(fontSize: 20),
                 textAlign: TextAlign.center,
@@ -56,7 +56,7 @@ class _EditAccountModalState extends State<EditAccountModal> {
                 child: TextFormField(
                   autofocus: true,
                   controller: _accountController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "New Account Name",
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
                   ),
@@ -77,24 +77,26 @@ class _EditAccountModalState extends State<EditAccountModal> {
                     Expanded(
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: Text('Cancel'),
+                        child: const Text('Cancel'),
                       ),
                     ),
                     Expanded(
                       child: TextButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              // Update the account
-                              DataProvider dataProvider =
-                                  context.read<DataProvider>();
-                              Account account = await dataProvider
-                                  .getAccount(widget.accountID);
-                              account.name = _accountController.text;
-                              await dataProvider.updateAccount(account);
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Text('Confirm')),
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            // Update the account
+                            final DataProvider dataProvider =
+                                context.read<DataProvider>();
+                            final Account account =
+                                await dataProvider.getAccount(widget.accountID);
+                            account.name = _accountController.text;
+                            await dataProvider.updateAccount(account);
+                            if (!mounted) return;
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: const Text('Confirm'),
+                      ),
                     ),
                   ],
                 ),

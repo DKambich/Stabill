@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BalanceText extends StatelessWidget {
-  final bool showPositivePrefix, showNegativePrefix;
+  final bool showPositivePrefix;
+  final bool showNegativePrefix;
   final String prefixText;
   final int balance;
   final double fontSize;
@@ -16,14 +17,15 @@ class BalanceText extends StatelessWidget {
   }) : super(key: key);
 
   Color? getBalanceColor(BuildContext context, int balance) {
-    if (balance > 0)
+    if (balance > 0) {
       return Colors.green;
-    else if (balance < 0)
+    } else if (balance < 0) {
       return Colors.red;
-    else
+    } else {
       return Theme.of(context).brightness == Brightness.light
           ? Colors.black
           : Colors.white;
+    }
   }
 
   @override
@@ -36,7 +38,7 @@ class BalanceText extends StatelessWidget {
     }
 
     balanceText += r"$";
-    balanceText += "${(balance.abs() / 100).toStringAsFixed(2)}";
+    balanceText += (balance.abs() / 100).toStringAsFixed(2);
 
     return RichText(
       text: TextSpan(
@@ -44,7 +46,7 @@ class BalanceText extends StatelessWidget {
         children: <TextSpan>[
           TextSpan(
             text: prefixText,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
           TextSpan(
             text: balanceText,

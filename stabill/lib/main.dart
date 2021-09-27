@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stabill/utilities/initializer.dart';
+import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/settings_page.dart';
 import 'package:stabill/pages/transactions_page.dart';
 import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/providers/root_provider.dart';
+import 'package:stabill/utilities/initializer.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 
 void main() {
@@ -24,10 +25,7 @@ class Stabill extends StatelessWidget {
                 context.watch<PreferenceProvider>().themeMode,
               ),
           title: 'Stabill',
-          home: Initializer(),
-          routes: <String, WidgetBuilder>{
-            TransactionModal.routeName: (_ctx) => TransactionModal()
-          },
+          home: const Initializer(),
           onGenerateRoute: generateRoute,
         );
       },
@@ -38,34 +36,31 @@ class Stabill extends StatelessWidget {
     final String routeName = settings.name ?? "";
     if (routeName == HomePage.routeName) {
       return MaterialPageRoute(
-        builder: (_) => HomePage(),
+        builder: (_) => const HomePage(),
       );
     } else if (routeName == LoginPage.routeName) {
       return MaterialPageRoute(
-        builder: (_) => LoginPage(),
+        builder: (_) => const LoginPage(),
       );
     } else if (routeName == TransactionsPage.routeName) {
-      final args = settings.arguments as TransactionArguments;
-      return MaterialPageRoute(
-        builder: (_) => TransactionsPage(
-          accountID: args.accountID,
-          account: args.account,
-        ),
-      );
+      if (settings.arguments != null) {
+        final Account args = settings.arguments! as Account;
+        return MaterialPageRoute(
+          builder: (_) => TransactionsPage(account: args),
+        );
+      }
+      assert(false, 'Need to pass account argument to $routeName');
     } else if (routeName == TransactionModal.routeName) {
-      return MaterialPageRoute(builder: (_ctx) => TransactionModal());
+      return MaterialPageRoute(
+        builder: (_) => const TransactionModal(),
+        fullscreenDialog: true,
+      );
     } else if (routeName == SettingsPage.routeName) {
-      return MaterialPageRoute(builder: (_) => SettingsPage());
+      return MaterialPageRoute(builder: (_) => const SettingsPage());
+    } else {
+      assert(false, 'Need to implement $routeName');
     }
 
-    // The code only supports
-    // PassArgumentsScreen.routeName right now.
-    // Other values need to be implemented if we
-    // add them. The assertion here will help remind
-    // us of that higher up in the call stack, since
-    // this assertion would otherwise fire somewhere
-    // in the framework.
-    assert(false, 'Need to implement $routeName');
     return null;
   }
 }

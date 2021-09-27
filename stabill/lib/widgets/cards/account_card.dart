@@ -19,9 +19,9 @@ class AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String name = account.name;
-    int currentBalance = account.currentBalance,
-        availableBalance = account.availableBalance;
+    final String name = account.name;
+    final int currentBalance = account.currentBalance;
+    final int availableBalance = account.availableBalance;
 
     return Card(
       child: InkWell(
@@ -34,10 +34,12 @@ class AccountCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   name,
-                  style: TextStyle(fontSize: 24),
+                  style: const TextStyle(fontSize: 24),
                 ),
               ),
               Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   BalanceText(
                     prefixText: "Current: ",
@@ -48,9 +50,6 @@ class AccountCard extends StatelessWidget {
                     balance: availableBalance,
                   ),
                 ],
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.end,
               ),
               PopupMenuButton<AccountAction>(
                 itemBuilder: (_) => actions,

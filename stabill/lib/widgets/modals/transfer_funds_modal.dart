@@ -17,7 +17,7 @@ class TransferFundsModal extends StatefulWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
@@ -34,7 +34,8 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
 
   // Form Variables
   late GlobalKey<FormState> _formKey;
-  late String _fromAccountID, _toAccountID;
+  late String _fromAccountID;
+  late String _toAccountID;
   late String? _dropdownErrorText;
   late TextEditingController _balanceController;
 
@@ -72,142 +73,144 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<QuerySnapshot<Account>>(
-        future: _accountsFuture,
-        builder: (ctx, snapshot) {
-          // If there is an error, notify the user and pop the prompt
-          if (snapshot.hasError) {
-            // TODO: Notify user there was an error
-            Navigator.pop(context);
-            return SizedBox.shrink();
-          }
+      future: _accountsFuture,
+      builder: (ctx, snapshot) {
+        // If there is an error, notify the user and pop the prompt
+        if (snapshot.hasError) {
+          // TODO: Notify user there was an error
+          Navigator.pop(context);
+          return const SizedBox.shrink();
+        }
 
-          // If it is loading, show a loading indicator
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 164.0),
-                  child: CircularProgressIndicator(),
-                ),
-              ],
-            );
-          }
-
-          // If there is no data or there are not enough accounts, notify the user and pop the prompt
-          if (!snapshot.hasData || snapshot.data!.docs.length < 2) {
-            // TODO: Notify user there are not enough accounts to transfer between
-            Navigator.pop(context);
-            return SizedBox.shrink();
-          }
-
-          // Retrieve the accounts from the collection
-          List<QueryDocumentSnapshot<Account>> accounts = snapshot.data!.docs;
-
-          // Set the default account IDs if they are not initialized
-          if (_fromAccountID == "" || _toAccountID == "") {
-            if (widget.defaultAccountID != null) {
-              _fromAccountID = widget.defaultAccountID!;
-              _toAccountID = widget.defaultAccountID!;
-            } else {
-              _fromAccountID = accounts[0].id;
-              _toAccountID = accounts[1].id;
-            }
-          }
-
-          // Map each account to a DropdownMenuItem
-          List<DropdownMenuItem<String>> dropdownItems = accounts
-              .map(
-                (value) => DropdownMenuItem(
-                  value: value.id,
-                  child: Text(value.data().name),
-                ),
-              )
-              .toList();
-
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: 48.0,
-                right: 48.0,
-                top: 24,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        // If it is loading, show a loading indicator
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 164.0),
+                child: CircularProgressIndicator(),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    "Transfer Funds",
-                    style: TextStyle(fontSize: 20),
-                    textAlign: TextAlign.center,
-                  ),
-                  InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: "Transfer from",
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    child: DropdownButton(
-                      value: _fromAccountID,
-                      items: dropdownItems,
-                      menuMaxHeight: 200,
-                      isExpanded: true,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _fromAccountID = newValue ?? "";
-                        });
-                      },
-                    ),
-                  ),
-                  InputDecorator(
-                    decoration: InputDecoration(
-                      errorText: _dropdownErrorText,
-                      labelText: "Transfer to",
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    child: DropdownButton(
-                      value: _toAccountID,
-                      items: dropdownItems,
-                      menuMaxHeight: 200,
-                      isExpanded: true,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _toAccountID = newValue ?? "";
-                        });
-                      },
-                    ),
-                  ),
-                  Form(
-                    key: _formKey,
-                    child: TextFormField(
-                      controller: _balanceController,
-                      decoration: InputDecoration(labelText: "Amount"),
-                      enableInteractiveSelection: false,
-                      inputFormatters: [DollarTextInputFormatter(maxDigits: 7)],
-                      keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.go,
-                      validator: (value) {
-                        if (value == null || value == "" || value == "\$0.00") {
-                          return 'Transfer amount cannot be zero';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ElevatedButton(
-                      onPressed: () => initiateTransfer(),
-                      child: Text("Complete Transfer"),
-                    ),
-                  )
-                ],
-              ),
-            ),
+            ],
           );
-        });
+        }
+
+        // If there is no data or there are not enough accounts, notify the user and pop the prompt
+        if (!snapshot.hasData || snapshot.data!.docs.length < 2) {
+          // TODO: Notify user there are not enough accounts to transfer between
+          Navigator.pop(context);
+          return const SizedBox.shrink();
+        }
+
+        // Retrieve the accounts from the collection
+        final List<QueryDocumentSnapshot<Account>> accounts =
+            snapshot.data!.docs;
+
+        // Set the default account IDs if they are not initialized
+        if (_fromAccountID == "" || _toAccountID == "") {
+          if (widget.defaultAccountID != null) {
+            _fromAccountID = widget.defaultAccountID!;
+            _toAccountID = widget.defaultAccountID!;
+          } else {
+            _fromAccountID = accounts[0].id;
+            _toAccountID = accounts[1].id;
+          }
+        }
+
+        // Map each account to a DropdownMenuItem
+        final List<DropdownMenuItem<String>> dropdownItems = accounts
+            .map(
+              (value) => DropdownMenuItem(
+                value: value.id,
+                child: Text(value.data().name),
+              ),
+            )
+            .toList();
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 48.0,
+              right: 48.0,
+              top: 24,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  "Transfer Funds",
+                  style: TextStyle(fontSize: 20),
+                  textAlign: TextAlign.center,
+                ),
+                InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: "Transfer from",
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  child: DropdownButton(
+                    value: _fromAccountID,
+                    items: dropdownItems,
+                    menuMaxHeight: 200,
+                    isExpanded: true,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _fromAccountID = newValue ?? "";
+                      });
+                    },
+                  ),
+                ),
+                InputDecorator(
+                  decoration: InputDecoration(
+                    errorText: _dropdownErrorText,
+                    labelText: "Transfer to",
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  child: DropdownButton(
+                    value: _toAccountID,
+                    items: dropdownItems,
+                    menuMaxHeight: 200,
+                    isExpanded: true,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _toAccountID = newValue ?? "";
+                      });
+                    },
+                  ),
+                ),
+                Form(
+                  key: _formKey,
+                  child: TextFormField(
+                    controller: _balanceController,
+                    decoration: const InputDecoration(labelText: "Amount"),
+                    enableInteractiveSelection: false,
+                    inputFormatters: [DollarTextInputFormatter(maxDigits: 7)],
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.go,
+                    validator: (value) {
+                      if (value == null || value == "" || value == "\$0.00") {
+                        return 'Transfer amount cannot be zero';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: ElevatedButton(
+                    onPressed: () => initiateTransfer(),
+                    child: const Text("Complete Transfer"),
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> initiateTransfer() async {
@@ -218,14 +221,15 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
     // If the form is valid, transfer the funds
     if (validForm) {
       // Get the amount to transfer
-      int amount = int.parse(
+      final int amount = int.parse(
         _balanceController.text.replaceAll(RegExp(r"[^\d]"), ""),
       );
-      DataProvider dataProvider = context.read<DataProvider>();
-      Account fromAccount = await dataProvider.getAccount(_fromAccountID);
-      Account toAccount = await dataProvider.getAccount(_toAccountID);
+      final DataProvider dataProvider = context.read<DataProvider>();
+      final Account fromAccount = await dataProvider.getAccount(_fromAccountID);
+      final Account toAccount = await dataProvider.getAccount(_toAccountID);
 
       await dataProvider.transferFunds(fromAccount, toAccount, amount);
+      if (!mounted) return;
 
       Navigator.pop(context);
     } else {

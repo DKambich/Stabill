@@ -77,13 +77,13 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            const Text(
               "Balance Correction",
               style: TextStyle(fontSize: 20),
               textAlign: TextAlign.center,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
                 "Enter the new balance for this account. This will mark all transactions as cleared and set the account balance to the sepecified value",
               ),
@@ -93,7 +93,7 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
               child: TextFormField(
                 autofocus: true,
                 controller: _balanceController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "New Balance",
                   floatingLabelBehavior: FloatingLabelBehavior.auto,
                 ),
@@ -114,25 +114,26 @@ class _BalanceCorrectionModalState extends State<BalanceCorrectionModal> {
                 children: [
                   Expanded(
                     child: TextButton(
-                      child: Text("Cancel"),
+                      child: const Text("Cancel"),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
                   Expanded(
                     child: TextButton(
-                      child: Text("Confirm"),
+                      child: const Text("Confirm"),
                       onPressed: () async {
-                        String newBalanceStr = _balanceController.text
+                        final String newBalanceStr = _balanceController.text
                             .replaceAll(RegExp(r"[^\d]"), "");
 
-                        DataProvider dataProvider =
+                        final DataProvider dataProvider =
                             context.read<DataProvider>();
-                        int newBalance = int.parse(newBalanceStr);
-                        Account account =
+                        final int newBalance = int.parse(newBalanceStr);
+                        final Account account =
                             await dataProvider.getAccount(widget.accountID);
-                        int oldBalance = account.currentBalance;
+                        final int oldBalance = account.currentBalance;
                         if (newBalance != oldBalance) {
                           await dataProvider.updateBalance(account, newBalance);
+                          if (!mounted) return;
                           Navigator.pop(context);
                         } else {
                           setState(() {

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:stabill/models/transaction.dart';
 import 'package:intl/intl.dart';
+import 'package:stabill/models/transaction.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 
 class TransactionModal extends StatefulWidget {
-  static final String routeName = "/transaction";
+  static const String routeName = "/transaction";
   final Transaction? transaction;
-  TransactionModal({
+  const TransactionModal({
     Key? key,
     // ignore: avoid_init_to_null
     this.transaction = null,
@@ -22,12 +22,12 @@ class _TransactionModalState extends State<TransactionModal> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late bool isCleared;
-  late TransactionType method = TransactionType.Withdrawal;
-  late TextEditingController nameController,
-      amountController,
-      dateController,
-      checkNumberController,
-      memoController;
+  late TransactionType method = TransactionType.withdrawal;
+  late TextEditingController nameController;
+  late TextEditingController amountController;
+  late TextEditingController dateController;
+  late TextEditingController checkNumberController;
+  late TextEditingController memoController;
   late DateTime timestamp;
 
   @override
@@ -37,23 +37,25 @@ class _TransactionModalState extends State<TransactionModal> {
       method = widget.transaction!.method;
       nameController = TextEditingController(text: widget.transaction!.name);
       timestamp = widget.transaction!.timestamp;
-      String transactionDate =
+      final String transactionDate =
           DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
       dateController = TextEditingController(text: transactionDate);
       amountController = TextEditingController(
         text: "\$${(widget.transaction!.amount / 100).toStringAsFixed(2)}",
       );
       checkNumberController = TextEditingController(
-          text:
-              "${widget.transaction!.checkNumber != -1 ? widget.transaction!.checkNumber : ""}");
-      memoController =
-          TextEditingController(text: "${widget.transaction!.memo}");
+        text:
+            "${widget.transaction!.checkNumber != -1 ? widget.transaction!.checkNumber : ""}",
+      );
+      memoController = TextEditingController(
+        text: widget.transaction!.memo,
+      );
     } else {
       isCleared = false;
-      method = TransactionType.Withdrawal;
+      method = TransactionType.withdrawal;
       nameController = TextEditingController(text: "");
       timestamp = DateTime.now();
-      String transactionDate =
+      final String transactionDate =
           DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
       dateController = TextEditingController(text: transactionDate);
       amountController = TextEditingController(text: "\$0.00");
@@ -80,42 +82,44 @@ class _TransactionModalState extends State<TransactionModal> {
 
   @override
   Widget build(BuildContext context) {
-    String action = widget.transaction != null ? "Edit" : "Add";
+    final String action = widget.transaction != null ? "Edit" : "Add";
     return Scaffold(
       appBar: AppBar(
         title: Text('$action Transaction'),
         actions: [
           IconButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  if (widget.transaction != null) {
-                    bool confirm = await ConfirmDialog.show(
-                      context,
-                      "Update Transaction",
-                      "Are you sure you want to update the transaction '${widget.transaction!.name}'?",
-                    );
-                    if (!confirm) {
-                      return;
-                    }
-                  }
-                  int checkNumber = checkNumberController.text.length > 0
-                      ? int.parse(checkNumberController.text)
-                      : -1;
-                  Transaction savedTransaction = Transaction(
-                    amount: int.parse(
-                      amountController.text.replaceAll(RegExp(r"[^\d]"), ""),
-                    ),
-                    checkNumber: checkNumber,
-                    cleared: isCleared,
-                    memo: memoController.text,
-                    name: nameController.text,
-                    method: method,
-                    timestamp: timestamp,
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                if (widget.transaction != null) {
+                  final bool confirm = await ConfirmDialog.show(
+                    context,
+                    "Update Transaction",
+                    "Are you sure you want to update the transaction '${widget.transaction!.name}'?",
                   );
-                  Navigator.of(context).pop<Transaction>(savedTransaction);
+                  if (!confirm) {
+                    return;
+                  }
                 }
-              },
-              icon: Icon(Icons.check))
+                final int checkNumber = checkNumberController.text.isNotEmpty
+                    ? int.parse(checkNumberController.text)
+                    : -1;
+                final Transaction savedTransaction = Transaction(
+                  amount: int.parse(
+                    amountController.text.replaceAll(RegExp(r"[^\d]"), ""),
+                  ),
+                  checkNumber: checkNumber,
+                  cleared: isCleared,
+                  memo: memoController.text,
+                  name: nameController.text,
+                  method: method,
+                  timestamp: timestamp,
+                );
+                if (!mounted) return;
+                Navigator.of(context).pop<Transaction>(savedTransaction);
+              }
+            },
+            icon: const Icon(Icons.check),
+          )
         ],
       ),
       body: Theme(
@@ -133,12 +137,12 @@ class _TransactionModalState extends State<TransactionModal> {
                       const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
                   child: TextFormField(
                     controller: nameController,
-                    decoration: InputDecoration(labelText: "Name"),
+                    decoration: const InputDecoration(labelText: "Name"),
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
                     textCapitalization: TextCapitalization.words,
                     validator: (String? text) {
-                      if (text != null && text.length > 0) {
+                      if (text != null && text.isNotEmpty) {
                         return null;
                       }
                       return "Name must be at least one character";
@@ -150,7 +154,7 @@ class _TransactionModalState extends State<TransactionModal> {
                       const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
                   child: TextFormField(
                     controller: amountController,
-                    decoration: InputDecoration(labelText: "Amount"),
+                    decoration: const InputDecoration(labelText: "Amount"),
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
                     validator: (String? text) {
@@ -167,7 +171,7 @@ class _TransactionModalState extends State<TransactionModal> {
                       const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
                   child: TextFormField(
                     controller: dateController,
-                    decoration: InputDecoration(labelText: "Date"),
+                    decoration: const InputDecoration(labelText: "Date"),
                     readOnly: true,
                     onTap: showDateTime,
                   ),
@@ -177,7 +181,8 @@ class _TransactionModalState extends State<TransactionModal> {
                       const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
                   child: TextFormField(
                     controller: checkNumberController,
-                    decoration: InputDecoration(labelText: "Check Number"),
+                    decoration:
+                        const InputDecoration(labelText: "Check Number"),
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
@@ -192,28 +197,28 @@ class _TransactionModalState extends State<TransactionModal> {
                       isCleared = !isCleared;
                     });
                   },
-                  title: Text("Mark as cleared"),
+                  title: const Text("Mark as cleared"),
                   controlAffinity: ListTileControlAffinity.leading,
                 ),
                 Row(
                   children: [
                     Flexible(
                       child: RadioListTile<TransactionType>(
-                        title: Text("Withdrawal"),
-                        value: TransactionType.Withdrawal,
+                        title: const Text("Withdrawal"),
+                        value: TransactionType.withdrawal,
                         groupValue: method,
                         onChanged: (TransactionType? value) => setState(
-                          () => method = TransactionType.Withdrawal,
+                          () => method = TransactionType.withdrawal,
                         ),
                       ),
                     ),
                     Flexible(
                       child: RadioListTile<TransactionType>(
-                        title: Text("Deposit"),
-                        value: TransactionType.Deposit,
+                        title: const Text("Deposit"),
+                        value: TransactionType.deposit,
                         groupValue: method,
                         onChanged: (TransactionType? value) => setState(
-                          () => method = TransactionType.Deposit,
+                          () => method = TransactionType.deposit,
                         ),
                       ),
                     ),
@@ -224,7 +229,7 @@ class _TransactionModalState extends State<TransactionModal> {
                       const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
                   child: TextFormField(
                     controller: memoController,
-                    decoration: InputDecoration(labelText: "Memo"),
+                    decoration: const InputDecoration(labelText: "Memo"),
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
                     textCapitalization: TextCapitalization.sentences,
@@ -238,29 +243,34 @@ class _TransactionModalState extends State<TransactionModal> {
     );
   }
 
-  void showDateTime() async {
+  Future<void> showDateTime() async {
     // Get the current DateTime
-    DateTime now = DateTime.now();
+    final DateTime now = DateTime.now();
 
     // Get the selected date or use the current date if canceled
-    DateTime selectedDate = await showDatePicker(
+    final DateTime selectedDate = await showDatePicker(
           context: context,
           initialDate: now,
           firstDate: DateTime(0),
-          lastDate: now.add(Duration(days: 365)),
+          lastDate: now.add(const Duration(days: 365)),
         ) ??
         now;
 
     // Get the selected time or use the current time if canceled
-    TimeOfDay selectedTime = await showTimePicker(
+    final TimeOfDay selectedTime = await showTimePicker(
           context: context,
           initialTime: TimeOfDay.now(),
         ) ??
         TimeOfDay.fromDateTime(now);
 
     // Create a new date from the selected date and time
-    timestamp = DateTime(selectedDate.year, selectedDate.month,
-        selectedDate.day, selectedTime.hour, selectedTime.minute);
+    timestamp = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
 
     // Update the date form field
     dateController.text = DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);

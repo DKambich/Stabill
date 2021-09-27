@@ -20,14 +20,13 @@ class DollarTextInputFormatter extends TextInputFormatter {
         text = text.substring(0, text.length - 1);
       } else {
         // Add the hyphen to the start and remove the new hyphen from the end
-        text = "-" + text.substring(0, text.length - 1);
+        text = "-${text.substring(0, text.length - 1)}";
       }
     }
 
     // Insert the decimal point
-    text = text.substring(0, text.length - 2) +
-        "." +
-        text.substring(text.length - 2);
+    text =
+        "${text.substring(0, text.length - 2)}.${text.substring(text.length - 2)}";
 
     // Format as a currency
     return format.format(double.parse(text));
@@ -67,7 +66,6 @@ class DollarTextInputFormatter extends TextInputFormatter {
         baseOffset: currencyStr.length,
         extentOffset: currencyStr.length,
       ),
-      composing: TextRange.empty,
     );
   }
 }

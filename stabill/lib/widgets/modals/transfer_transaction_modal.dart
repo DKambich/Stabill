@@ -7,7 +7,8 @@ import 'package:stabill/models/transaction.dart';
 import 'package:stabill/providers/data_provider.dart';
 
 class TransferTransactionModal extends StatefulWidget {
-  final String currentAccountID, transactionID;
+  final String currentAccountID;
+  final String transactionID;
   final Transaction transaction;
 
   const TransferTransactionModal({
@@ -29,7 +30,7 @@ class TransferTransactionModal extends StatefulWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
@@ -66,131 +67,135 @@ class _TransferFundsModalState extends State<TransferTransactionModal> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<QuerySnapshot<Account>>(
-        future: _accountsFuture,
-        builder: (ctx, snapshot) {
-          // If there is an error, notify the user and pop the prompt
-          if (snapshot.hasError) {
-            // TODO: Notify user there was an error
-            Navigator.pop(context);
-            return SizedBox.shrink();
-          }
+      future: _accountsFuture,
+      builder: (ctx, snapshot) {
+        // If there is an error, notify the user and pop the prompt
+        if (snapshot.hasError) {
+          // TODO: Notify user there was an error
+          Navigator.pop(context);
+          return const SizedBox.shrink();
+        }
 
-          // If it is loading, show a loading indicator
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Column(
+        // If it is loading, show a loading indicator
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 164.0),
+                child: CircularProgressIndicator(),
+              ),
+            ],
+          );
+        }
+
+        // If there is no data or there are not enough accounts, notify the user and pop the prompt
+        if (!snapshot.hasData || snapshot.data!.docs.length < 2) {
+          // TODO: Notify user there are not enough accounts to transfer between
+          Navigator.pop(context);
+          return const SizedBox.shrink();
+        }
+
+        // Retrieve the accounts from the collection
+        final List<QueryDocumentSnapshot<Account>> accounts = snapshot
+            .data!.docs
+            .where((element) => element.id != widget.currentAccountID)
+            .toList();
+
+        // Set the default account IDs if they are not initialized
+        if (_selectedAccountID == "") {
+          _selectedAccountID = accounts.first.id;
+        }
+
+        // Map each account to a DropdownMenuItem
+        final List<DropdownMenuItem<String>> dropdownItems = accounts
+            .map(
+              (value) => DropdownMenuItem(
+                value: value.id,
+                child: Text(value.data().name),
+              ),
+            )
+            .toList();
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 48.0,
+              right: 48.0,
+              top: 24,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            ),
+            child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const Text(
+                  "Transfer Transaction",
+                  style: TextStyle(fontSize: 20),
+                  textAlign: TextAlign.center,
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Select an account to transfer the transaction to",
+                  ),
+                ),
+                InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: "Transfer to",
+                    border: InputBorder.none,
+                  ),
+                  child: DropdownButton(
+                    value: _selectedAccountID,
+                    items: dropdownItems,
+                    menuMaxHeight: 200,
+                    isExpanded: true,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedAccountID = newValue ?? "";
+                      });
+                    },
+                  ),
+                ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 164.0),
-                  child: CircularProgressIndicator(),
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          child: const Text("Cancel"),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextButton(
+                          child: const Text("Confirm"),
+                          onPressed: () async {
+                            final DataProvider dataProvider =
+                                context.read<DataProvider>();
+                            final Account fromAccount = await dataProvider
+                                .getAccount(widget.currentAccountID);
+                            final Account toAccount = await dataProvider
+                                .getAccount(_selectedAccountID);
+                            await dataProvider.transferTransaction(
+                              fromAccount,
+                              toAccount,
+                              widget.transaction,
+                            );
+                            if (!mounted) return;
+
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            );
-          }
-
-          // If there is no data or there are not enough accounts, notify the user and pop the prompt
-          if (!snapshot.hasData || snapshot.data!.docs.length < 2) {
-            // TODO: Notify user there are not enough accounts to transfer between
-            Navigator.pop(context);
-            return SizedBox.shrink();
-          }
-
-          // Retrieve the accounts from the collection
-          List<QueryDocumentSnapshot<Account>> accounts = snapshot.data!.docs
-              .where((element) => element.id != widget.currentAccountID)
-              .toList();
-
-          // Set the default account IDs if they are not initialized
-          if (_selectedAccountID == "") {
-            _selectedAccountID = accounts.first.id;
-          }
-
-          // Map each account to a DropdownMenuItem
-          List<DropdownMenuItem<String>> dropdownItems = accounts
-              .map(
-                (value) => DropdownMenuItem(
-                  value: value.id,
-                  child: Text(value.data().name),
-                ),
-              )
-              .toList();
-
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: 48.0,
-                right: 48.0,
-                top: 24,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    "Transfer Transaction",
-                    style: TextStyle(fontSize: 20),
-                    textAlign: TextAlign.center,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "Select an account to transfer the transaction to",
-                    ),
-                  ),
-                  InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: "Transfer to",
-                      border: InputBorder.none,
-                    ),
-                    child: DropdownButton(
-                      value: _selectedAccountID,
-                      items: dropdownItems,
-                      menuMaxHeight: 200,
-                      isExpanded: true,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedAccountID = newValue ?? "";
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextButton(
-                            child: Text("Cancel"),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ),
-                        Expanded(
-                          child: TextButton(
-                            child: Text("Confirm"),
-                            onPressed: () async {
-                              DataProvider dataProvider =
-                                  context.read<DataProvider>();
-                              Account fromAccount = await dataProvider
-                                  .getAccount(widget.currentAccountID);
-                              Account toAccount = await dataProvider
-                                  .getAccount(_selectedAccountID);
-                              await dataProvider.transferTransaction(
-                                fromAccount,
-                                toAccount,
-                                widget.transaction,
-                              );
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 }

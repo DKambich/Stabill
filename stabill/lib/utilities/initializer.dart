@@ -12,9 +12,7 @@ class Initializer extends StatelessWidget {
   const Initializer({Key? key}) : super(key: key);
 
   Future<void> initalize() async {
-    print("Initializing App...");
     await Firebase.initializeApp();
-    print("App Initalized Successfully");
   }
 
   @override
@@ -23,12 +21,11 @@ class Initializer extends StatelessWidget {
       future: initalize(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return SplashPage();
+          return const SplashPage();
         }
         return StreamBuilder<User?>(
           stream: context.read<AuthProvider>().authState,
           builder: (context, snapshot) {
-            print(snapshot.connectionState);
             if (snapshot.connectionState == ConnectionState.active) {
               final User? user = snapshot.data;
               WidgetsBinding.instance!.addPostFrameCallback((_) {
@@ -41,7 +38,7 @@ class Initializer extends StatelessWidget {
                 }
               });
             }
-            return SplashPage();
+            return const SplashPage();
             // return AnimatedSwitcher(
             //   duration: Duration(milliseconds: 300),
             //   child: page,

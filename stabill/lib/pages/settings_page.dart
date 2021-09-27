@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
@@ -7,7 +6,7 @@ import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/widgets/dialogs/theme_picker.dart';
 
 class SettingsPage extends StatefulWidget {
-  static final String routeName = "/settings";
+  static const String routeName = "/settings";
 
   const SettingsPage({Key? key}) : super(key: key);
 
@@ -18,11 +17,11 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    ThemeMode mode = context.watch<PreferenceProvider>().themeMode;
-    Brightness brightness = Theme.of(context).brightness;
+    final ThemeMode mode = context.watch<PreferenceProvider>().themeMode;
+    final Brightness brightness = Theme.of(context).brightness;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Settings"),
+        title: const Text("Settings"),
       ),
       body: Column(
         children: [
@@ -32,7 +31,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ? Icons.light_mode
                   : Icons.dark_mode,
             ),
-            title: Text("Toggle theme"),
+            title: const Text("Toggle theme"),
             onTap: () async => context.read<PreferenceProvider>().setThemeMode(
                   await ThemePicker.show(
                     context,
@@ -41,8 +40,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
           ),
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text("Sign out"),
+            leading: const Icon(Icons.logout),
+            title: const Text("Sign out"),
             onTap: () async {
               context.read<AuthProvider>().signOut();
               Navigator.of(context).pushNamedAndRemoveUntil(

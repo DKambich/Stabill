@@ -1,8 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Transaction {
-  String name, memo, id;
-  int amount, checkNumber;
+  String name;
+  String memo;
+  String id;
+  int amount;
+  int checkNumber;
   DateTime timestamp;
-  bool cleared, hidden;
+  bool cleared;
+  bool hidden;
   TransactionType method;
 
   Transaction({
@@ -13,21 +19,21 @@ class Transaction {
     this.checkNumber = -1,
     this.cleared = false,
     this.hidden = false,
-    this.method = TransactionType.Withdrawal,
+    this.method = TransactionType.withdrawal,
     required this.timestamp,
   });
 
   Transaction.fromJson(Map<String, dynamic> json, String id)
       : this(
-          name: json['name'],
-          memo: json['memo'],
-          amount: json['amount'].toInt(),
-          checkNumber: json['checkNumber'],
-          cleared: json['cleared'],
-          hidden: json['hidden'],
+          name: json['name']! as String,
+          memo: json['memo']! as String,
+          amount: (json['amount']! as num).toInt(),
+          checkNumber: (json['checkNumber']! as num).toInt(),
+          cleared: json['cleared'] as bool,
+          hidden: json['hidden'] as bool,
           method: TransactionType.values
               .firstWhere((element) => element.toString() == json['method']),
-          timestamp: json['timestamp'].toDate(),
+          timestamp: (json['timestamp']! as Timestamp).toDate(),
           id: id,
         );
 
@@ -46,6 +52,6 @@ class Transaction {
 }
 
 enum TransactionType {
-  Withdrawal,
-  Deposit,
+  withdrawal,
+  deposit,
 }

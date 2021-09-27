@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart'
     show FirebaseFirestore, CollectionReference, DocumentReference, WriteBatch;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,15 +10,15 @@ class DataProvider {
   final FirebaseFirestore firebaseFirestore;
   final User? user;
 
-  static const String userCol = "users",
-      accountCol = "accounts",
-      transactionCol = "transactions";
+  static const String userCol = "users";
+  static const String accountCol = "accounts";
+  static const String transactionCol = "transactions";
 
   DataProvider(this.firebaseFirestore, this.user);
 
   CollectionReference<Account> getAccountsCollection() {
     if (user == null) throw Exception("User is not signed in");
-    String uid = user!.uid;
+    final String uid = user!.uid;
     return firebaseFirestore
         .collection(userCol)
         .doc(uid)
@@ -68,63 +70,63 @@ class DataProvider {
   Future<void> createAccount(Account account, int startingBalance) async {
     try {
       // Add the new account to the collection
-      var accountRef = await getAccountsCollection().add(account);
+      final accountRef = await getAccountsCollection().add(account);
 
       // Don't create a starting transaction if there is no balance
       if (startingBalance == 0) return;
 
       // Create a transaction as the starting balance for the account
-      Transaction startingTransaction = Transaction(
+      final Transaction startingTransaction = Transaction(
         name: "Starting Balance",
         amount: startingBalance,
         timestamp: DateTime.now(),
         cleared: true,
-        method: TransactionType.Deposit,
+        method: TransactionType.deposit,
         memo: "System Generated",
       );
 
       // Add the new transaction to the collection
       await getTransactionCollection(accountRef.id).add(startingTransaction);
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
   Future<void> updateAccount(Account account) async {
     try {
       // Get the Account document
-      var accountDoc = getAccountDocument(account.id);
+      final accountDoc = getAccountDocument(account.id);
       // Update the Account
       await accountDoc.set(account);
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
   Future<void> updateBalance(Account account, int newBalance) async {
-    int oldBalance = account.currentBalance;
+    final int oldBalance = account.currentBalance;
 
     if (oldBalance == newBalance) return;
 
-    var transactionCol = getTransactionCollection(account.id);
+    final transactionCol = getTransactionCollection(account.id);
 
-    var unclearedTransactions =
+    final unclearedTransactions =
         await transactionCol.where("cleared", isEqualTo: false).get();
 
-    var transactionUpdates = unclearedTransactions.docs.map(
+    final transactionUpdates = unclearedTransactions.docs.map(
       (transaction) => transaction.reference.update({"cleared": true}),
     );
 
     await Future.wait(transactionUpdates);
 
-    int balanceDelta = newBalance - oldBalance;
+    final int balanceDelta = newBalance - oldBalance;
 
-    Transaction correction = Transaction(
+    final Transaction correction = Transaction(
       name: "Balance Correction",
       amount: balanceDelta.abs(),
       method: balanceDelta > 0
-          ? TransactionType.Deposit
-          : TransactionType.Withdrawal,
+          ? TransactionType.deposit
+          : TransactionType.withdrawal,
       timestamp: DateTime.now(),
       cleared: true,
       memo: "System Generated",
@@ -141,23 +143,23 @@ class DataProvider {
   ) async {
     try {
       // Get a reference to the old transaction doc
-      var oldTransactionDoc = getTransactionDocument(
+      final oldTransactionDoc = getTransactionDocument(
         fromAccount.id,
         transaction.id,
       );
 
       // Get reference to the new transaction's parent collection
-      var newTransactionCol = getTransactionCollection(toAccount.id);
+      final newTransactionCol = getTransactionCollection(toAccount.id);
 
       // Batch write and delete to transfer the tranaction
-      WriteBatch batch = FirebaseFirestore.instance.batch();
+      final WriteBatch batch = FirebaseFirestore.instance.batch();
       batch.set<Transaction>(newTransactionCol.doc(), transaction);
       batch.delete(oldTransactionDoc);
 
       // Commit the changes
       return batch.commit();
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
@@ -166,26 +168,98 @@ class DataProvider {
     Account toAccount,
     int transferAmount,
   ) async {
-    var fromAccountTransactions = getTransactionCollection(fromAccount.id);
+    final fromAccountTransactions = getTransactionCollection(fromAccount.id);
 
-    var toAccountTransactions = getTransactionCollection(toAccount.id);
+    final toAccountTransactions = getTransactionCollection(toAccount.id);
 
-    Transaction transaction = Transaction(
+    final Transaction transaction = Transaction(
       name: "Transfer To ${toAccount.name}",
       amount: transferAmount,
-      method: TransactionType.Withdrawal,
       timestamp: DateTime.now(),
       cleared: true,
       memo: "SYSTEM GENERATED",
     );
 
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    final WriteBatch batch = FirebaseFirestore.instance.batch();
     batch.set<Transaction>(fromAccountTransactions.doc(), transaction);
     // Create and write the toTransaction
     transaction.name = "Transfer From ${fromAccount.name}";
-    transaction.method = TransactionType.Deposit;
+    transaction.method = TransactionType.deposit;
     batch.set<Transaction>(toAccountTransactions.doc(), transaction);
 
     return batch.commit();
+  }
+
+  Future<void> importCSV(File csv) async {
+    /*
+    final lines = await file.readAsLines();
+
+                  final List<String> headers = lines[0].split(",");
+                  lines.removeAt(0);
+
+                  final Map<String, int> headerIndex = headers
+                      .asMap()
+                      .map<String, int>((key, value) => MapEntry(value, key));
+
+                  final Map<String, List<Transaction>> accounts = {};
+
+                  for (final String line in lines) {
+                    final entries = line.split(",");
+                    final Transaction transaction = Transaction(
+                      name: entries[headerIndex["Transaction_Name"]!],
+                      amount: int.parse(entries[headerIndex["Amount"]!]),
+                      checkNumber: int.parse(entries[headerIndex["Check_No"]!]),
+                      cleared:
+                          entries[headerIndex["Has_Cleared"]!].toLowerCase() ==
+                              "true",
+                      method: entries[headerIndex["Transaction_Type"]!]
+                                  .toLowerCase() ==
+                              "true"
+                          ? TransactionType.deposit
+                          : TransactionType.withdrawal,
+                      timestamp: DateTime.fromMillisecondsSinceEpoch(
+                        int.parse(entries[headerIndex["Creation_Date"]!]),
+                      ),
+                      hidden:
+                          entries[headerIndex["Is_Hidden"]!].toLowerCase() ==
+                              "true",
+                      memo: entries[headerIndex["Memo"]!],
+                    );
+
+                    final list = accounts.putIfAbsent(
+                      entries[headerIndex["Account_Name"]!],
+                      () => [],
+                    );
+                    list.add(transaction);
+                  }
+
+                  // Initialize Firebase variables
+                  DataProvider dataProvider = context.read<DataProvider>();
+                  var _accountsCollection =
+                      dataProvider.getAccountsCollection();
+
+                  for (String key in accounts.keys) {
+                    Account newAccount = Account(name: key);
+                    var accountRef = await _accountsCollection.add(newAccount);
+                    List<Transaction> transactions = accounts[key]!;
+                    List<List<Transaction>> sublists = [];
+                    for (int i = 0; i < transactions.length; i += 499) {
+                      sublists.add(transactions.sublist(
+                          i,
+                          i + 499 > transactions.length
+                              ? transactions.length
+                              : i + 499));
+                    }
+                    var transactionRef =
+                        dataProvider.getTransactionCollection(accountRef.id);
+                    List<WriteBatch> batches = [];
+                    for (var list in sublists) {
+                      WriteBatch batch = FirebaseFirestore.instance.batch();
+                      for (var t in list)
+                        batch.set<Transaction>(transactionRef.doc(), t);
+                      batches.add(batch);
+                    }
+                    await Future.wait(batches.map((e) => e.commit()));
+                  }*/
   }
 }

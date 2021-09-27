@@ -4,9 +4,9 @@ import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
-  static final String routeName = "/login";
+  static const String routeName = "/login";
 
-  LoginPage({Key? key}) : super(key: key);
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -18,9 +18,9 @@ class _LoginPageState extends State<LoginPage> {
   late TextEditingController passwordController;
 
   @override
-  initState() {
-    emailController = new TextEditingController();
-    passwordController = new TextEditingController();
+  void initState() {
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
     super.initState();
   }
 
@@ -28,9 +28,9 @@ class _LoginPageState extends State<LoginPage> {
     if (value == null) {
       return null;
     }
-    String pattern =
+    const String pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regex = new RegExp(pattern);
+    final RegExp regex = RegExp(pattern);
     if (!regex.hasMatch(value)) {
       return 'Email format is invalid';
     } else {
@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextFormField(
                     controller: emailController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: "Email",
                       hintText: "someone@example.com",
                     ),
@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextFormField(
                     controller: passwordController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: "Password",
                     ),
                     validator: passwordValidator,
@@ -89,13 +89,14 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ElevatedButton(
-                    child: Text("Login"),
+                    child: const Text("Login"),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         await context.read<AuthProvider>().signIn(
                               email: emailController.text,
                               password: passwordController.text,
                             );
+                        if (!mounted) return;
                         Navigator.of(context)
                             .pushReplacementNamed(HomePage.routeName);
                       }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/widgets/balance_text.dart';
-import 'package:intl/intl.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 
-enum TransactionAction { Clear, Hide, Move, Edit, Delete }
+enum TransactionAction { clear, hide, move, edit, delete }
 
 class TransactionCard extends StatelessWidget {
   final Transaction transaction;
@@ -24,11 +24,11 @@ class TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int amount = transaction.method == TransactionType.Withdrawal
+    final int amount = transaction.method == TransactionType.withdrawal
         ? -transaction.amount
         : transaction.amount;
 
-    Color? fontColor = transaction.cleared ? null : Colors.grey;
+    final Color? fontColor = transaction.cleared ? null : Colors.grey;
     return Card(
       child: Padding(
         padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16, right: 8),

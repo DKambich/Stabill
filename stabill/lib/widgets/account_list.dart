@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'
+    show CollectionReference, QuerySnapshot, QueryDocumentSnapshot;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -21,7 +22,7 @@ class AccountList extends StatefulWidget {
   _AccountListState createState() => _AccountListState();
 }
 
-enum AccountAction { Edit, Delete }
+enum AccountAction { edit, delete }
 
 class _AccountListState extends State<AccountList> {
   final ScrollController _scrollController = ScrollController();
@@ -53,12 +54,12 @@ class _AccountListState extends State<AccountList> {
       stream: _accountsStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Text('Something went wrong');
+          return const Text('Something went wrong');
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(
-            children: [
+            children: const [
               AccountSummaryCard(
                 totalCurrentBalance: 0,
                 totalAvailableBalance: 0,
@@ -68,37 +69,42 @@ class _AccountListState extends State<AccountList> {
           );
         }
 
-        var accountData = snapshot.data!.docs;
+        final accountData = snapshot.data!.docs;
 
         int totalCurrentBalance = 0;
         int totalAvailableBalance = 0;
 
-        accountData.forEach((element) {
-          Account account = element.data();
+        void totalBalances(QueryDocumentSnapshot<Account> element) {
+          final Account account = element.data();
           totalCurrentBalance += account.currentBalance;
           totalAvailableBalance += account.availableBalance;
-        });
+        }
 
-        if (accountData.length == 0) {
-          return Column(children: [
-            AccountSummaryCard(
-              totalCurrentBalance: totalCurrentBalance,
-              totalAvailableBalance: totalAvailableBalance,
-            ),
-            Expanded(
-                child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.savings,
-                    size: 64,
-                  ),
-                  Text("Get started by adding a new account!"),
-                ],
+        accountData.forEach(totalBalances);
+
+        if (accountData.isEmpty) {
+          return Column(
+            children: [
+              AccountSummaryCard(
+                totalCurrentBalance: totalCurrentBalance,
+                totalAvailableBalance: totalAvailableBalance,
               ),
-            )),
-          ]);
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.savings,
+                        size: 64,
+                      ),
+                      Text("Get started by adding a new account!"),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
         }
 
         return Column(
@@ -119,22 +125,19 @@ class _AccountListState extends State<AccountList> {
                     account: account,
                     onTap: () {
                       widget.shouldHideFAB(false);
-                      Navigator.of(context).pushNamed(
+                      Navigator.of(context).pushNamed<Account>(
                         TransactionsPage.routeName,
-                        arguments: TransactionArguments(
-                          accountData[index].id,
-                          account,
-                        ),
+                        arguments: account,
                       );
                     },
                     actions: getAccountActions(),
                     onSelected: (AccountAction selectedAction) async {
                       switch (selectedAction) {
-                        case AccountAction.Edit:
+                        case AccountAction.edit:
                           EditAccountModal.show(context, accountID);
                           break;
-                        case AccountAction.Delete:
-                          bool confirm = await ConfirmDialog.show(
+                        case AccountAction.delete:
+                          final bool confirm = await ConfirmDialog.show(
                             context,
                             "Delete Account",
                             "Are you sure you want to delete the account '${account.name}'?",
@@ -162,24 +165,24 @@ class _AccountListState extends State<AccountList> {
 
   List<PopupMenuItem<AccountAction>> getAccountActions() {
     // Create the account actions
-    return [
+    return const [
       PopupMenuItem<AccountAction>(
+        value: AccountAction.edit,
         child: ListTile(
           leading: Icon(Icons.edit),
           title: Text("Edit"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
         ),
-        value: AccountAction.Edit,
       ),
       PopupMenuItem<AccountAction>(
+        value: AccountAction.delete,
         child: ListTile(
           leading: Icon(Icons.delete),
           title: Text("Delete"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
         ),
-        value: AccountAction.Delete,
       ),
     ];
   }
