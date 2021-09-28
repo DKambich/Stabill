@@ -31,8 +31,11 @@ class Transaction {
           checkNumber: (json['checkNumber']! as num).toInt(),
           cleared: json['cleared'] as bool,
           hidden: json['hidden'] as bool,
-          method: TransactionType.values
-              .firstWhere((element) => element.toString() == json['method']),
+          method: TransactionType.values.firstWhere(
+            (element) =>
+                element.toString().toLowerCase() ==
+                (json['method']! as String).toLowerCase(),
+          ),
           timestamp: (json['timestamp']! as Timestamp).toDate(),
           id: id,
         );

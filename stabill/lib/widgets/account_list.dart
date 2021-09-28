@@ -125,7 +125,7 @@ class _AccountListState extends State<AccountList> {
                     account: account,
                     onTap: () {
                       widget.shouldHideFAB(false);
-                      Navigator.of(context).pushNamed<Account>(
+                      Navigator.of(context).pushNamed(
                         TransactionsPage.routeName,
                         arguments: account,
                       );

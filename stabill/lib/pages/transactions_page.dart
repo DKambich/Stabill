@@ -288,8 +288,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final Transaction? createdTransaction =
-              await Navigator.of(context).pushNamed(TransactionModal.routeName);
+          final Transaction? createdTransaction = await Navigator.of(context)
+              .pushNamed<Transaction>(TransactionModal.routeName);
 
           if (createdTransaction != null) {
             addTransaction(createdTransaction);

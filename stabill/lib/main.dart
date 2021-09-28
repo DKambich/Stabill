@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/models/transaction.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/settings_page.dart';
@@ -51,7 +52,7 @@ class Stabill extends StatelessWidget {
       }
       assert(false, 'Need to pass account argument to $routeName');
     } else if (routeName == TransactionModal.routeName) {
-      return MaterialPageRoute(
+      return MaterialPageRoute<Transaction>(
         builder: (_) => const TransactionModal(),
         fullscreenDialog: true,
       );
