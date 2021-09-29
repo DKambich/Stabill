@@ -1,7 +1,12 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart'
-    show FirebaseFirestore, CollectionReference, DocumentReference, WriteBatch;
+    show
+        CollectionReference,
+        DocumentReference,
+        FieldValue,
+        FirebaseFirestore,
+        WriteBatch;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart';
@@ -87,6 +92,9 @@ class DataProvider {
 
       // Add the new transaction to the collection
       await getTransactionCollection(accountRef.id).add(startingTransaction);
+
+      account.id = accountRef.id;
+      await incrementBalance(account, transaction: startingTransaction);
     } catch (e) {
       rethrow;
     }
@@ -103,6 +111,40 @@ class DataProvider {
     }
   }
 
+  Future<void> incrementBalance(
+    Account account, {
+    Transaction? transaction,
+    int? deltaCurrent,
+    int? deltaAvailable,
+  }) async {
+    assert(
+      transaction != null || (deltaCurrent != null && deltaAvailable != null),
+      "Must specify a transaction or a deltaCurrent and deltaAvailable",
+    );
+    // assert(
+    //   transaction != null && (deltaCurrent != null || deltaAvailable != null),
+    //   "Must specify only a transaction or a deltaCurrent and deltaAvailable",
+    // );
+    int incrementCurrent = 0;
+    int incrementAvailable = 0;
+    if (transaction != null) {
+      incrementCurrent = transaction.amount *
+          (transaction.method == TransactionType.deposit ? 1 : -1);
+      incrementAvailable = transaction.cleared ? incrementCurrent : 0;
+    } else if (deltaCurrent != null && deltaAvailable != null) {
+      incrementCurrent = deltaCurrent;
+      incrementAvailable = deltaAvailable;
+    }
+    final accountRef = getAccountDocument(account.id);
+    await accountRef.update(
+      {
+        "currentBalance": FieldValue.increment(incrementCurrent),
+        "availableBalance": FieldValue.increment(incrementAvailable),
+      },
+    );
+  }
+
+  // TODO: Convert to transaction since reading account balance
   Future<void> updateBalance(Account account, int newBalance) async {
     final int oldBalance = account.currentBalance;
 
@@ -134,6 +176,79 @@ class DataProvider {
 
     // Add the new correction transaction to the transactions of the account
     await transactionCol.add(correction);
+    await incrementBalance(account, transaction: correction);
+  }
+
+  Future<void> addTransaction(Account account, Transaction transaction) async {
+    final transactionCol = getTransactionCollection(account.id);
+
+    await transactionCol.add(transaction);
+    await incrementBalance(account, transaction: transaction);
+  }
+
+  Future<void> deleteTransaction(
+    Account account,
+    Transaction transaction,
+  ) async {
+    final transactionRef = getTransactionDocument(account.id, transaction.id);
+
+    final int oldCurrDelta = -transaction.amount *
+        (transaction.method == TransactionType.deposit ? 1 : -1);
+    final int oldAvailDelta = transaction.cleared ? oldCurrDelta : 0;
+
+    await transactionRef.delete();
+    transaction.method = transaction.method == TransactionType.deposit
+        ? TransactionType.withdrawal
+        : TransactionType.deposit;
+
+    // transaction.cleared = !transaction.cleared;
+    await incrementBalance(
+      account,
+      deltaCurrent: oldCurrDelta,
+      deltaAvailable: oldAvailDelta,
+    );
+  }
+
+  Future<void> updateTransaction(
+    Account account,
+    Transaction oldTransaction,
+    Transaction newTransaction,
+  ) async {
+    final transactionRef =
+        getTransactionDocument(account.id, oldTransaction.id);
+
+    final int oldCurrDelta = -oldTransaction.amount *
+        (oldTransaction.method == TransactionType.deposit ? 1 : -1);
+    final int oldAvailDelta = oldTransaction.cleared ? oldCurrDelta : 0;
+
+    final int newCurrDelta = newTransaction.amount *
+        (newTransaction.method == TransactionType.deposit ? 1 : -1);
+    final int newAvailDelta = newTransaction.cleared ? newCurrDelta : 0;
+
+    await incrementBalance(
+      account,
+      deltaCurrent: newCurrDelta + oldCurrDelta,
+      deltaAvailable: newAvailDelta + oldAvailDelta,
+    );
+
+    await transactionRef.set(newTransaction);
+  }
+
+  Future<void> clearTransaction(
+    Account account,
+    Transaction transaction,
+  ) async {
+    final transactionRef = getTransactionDocument(account.id, transaction.id);
+    transaction.cleared = true;
+    await transactionRef.set(transaction);
+
+    final int availDelta = transaction.amount *
+        (transaction.method == TransactionType.deposit ? 1 : -1);
+    await incrementBalance(
+      account,
+      deltaCurrent: 0,
+      deltaAvailable: availDelta,
+    );
   }
 
   Future<void> transferTransaction(

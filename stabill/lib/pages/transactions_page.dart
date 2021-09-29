@@ -257,7 +257,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             await hideTransaction(transactionID, transaction);
                             break;
                           case TransactionAction.clear:
-                            await clearTransaction(transactionID, transaction);
+                            await context
+                                .read<DataProvider>()
+                                .clearTransaction(widget.account, transaction);
                             break;
                           case TransactionAction.move:
                             moveTransaction(transactionID, transaction);
@@ -273,7 +275,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               confirmColor: Colors.red,
                             );
                             if (confirm) {
-                              await deleteTransaction(transactionID);
+                              if (!mounted) return;
+                              await context
+                                  .read<DataProvider>()
+                                  .deleteTransaction(
+                                    widget.account,
+                                    transaction,
+                                  );
                             }
                             break;
                         }
@@ -292,16 +300,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
               .pushNamed<Transaction>(TransactionModal.routeName);
 
           if (createdTransaction != null) {
-            addTransaction(createdTransaction);
+            if (!mounted) return;
+            await context
+                .read<DataProvider>()
+                .addTransaction(widget.account, createdTransaction);
           }
         },
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  Future<void> addTransaction(Transaction transaction) {
-    return _transactionsCollection.add(transaction);
   }
 
   Future<void> editTransaction(
@@ -317,12 +324,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
 
     if (editedTransaction != null) {
-      _transactionsCollection.doc(transactionID).set(editedTransaction);
+      if (!mounted) return;
+      await context
+          .read<DataProvider>()
+          .updateTransaction(widget.account, transaction, editedTransaction);
     }
-  }
-
-  Future<void> deleteTransaction(String transactionID) {
-    return _transactionsCollection.doc(transactionID).delete();
   }
 
   Future<void> clearTransaction(String transactionID, Transaction transaction) {

@@ -20,11 +20,18 @@ dependencies:
   provider: ^6.0.0
   shared_preferences: ^2.0.8
   substring_highlight: ^1.0.33
+  flutter_native_splash: ^1.2.4
 
 dev_dependencies:
   flutter_launcher_icons: "^0.9.2"
   flutter_test:
     sdk: flutter
+
+flutter_native_splash:
+  color: "#4caf50"
+  image: assets/icon/logo.png
+  color_dark: "#121212"
+  fullscreen: true
 
 flutter_icons:
   android: "launcher_icon"
@@ -33,4 +40,6 @@ flutter_icons:
   image_path_ios: "assets/icon/logo_ios.png"
 
 flutter:
+  assets:
+    - assets/icon/logo.png
   uses-material-design: true

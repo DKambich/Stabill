@@ -19,75 +19,75 @@ exports.onDeleteAccount = functions.firestore
     await Promise.allSettled(deletedDocs);
   });
 
-function updateAccountBalance(accountRef, currentDelta, availableDelta) {
-  currentDelta = Number(Math.round(currentDelta + "e" + 2 + "e-" + 2));
-  availableDelta = Number(Math.round(availableDelta + "e" + 2 + "e-" + 2));
-  accountRef
-    .update({
-      currentBalance: admin.firestore.FieldValue.increment(currentDelta),
-      availableBalance: admin.firestore.FieldValue.increment(availableDelta),
-    })
-    .catch((error) => console.log(error));
-}
+// function updateAccountBalance(accountRef, currentDelta, availableDelta) {
+//   currentDelta = Number(Math.round(currentDelta + "e" + 2 + "e-" + 2));
+//   availableDelta = Number(Math.round(availableDelta + "e" + 2 + "e-" + 2));
+//   accountRef
+//     .update({
+//       currentBalance: admin.firestore.FieldValue.increment(currentDelta),
+//       availableBalance: admin.firestore.FieldValue.increment(availableDelta),
+//     })
+//     .catch((error) => console.log(error));
+// }
 
-function getSignFromMethod(method) {
-  return method == "TransactionType.Withdrawal" ? -1 : 1;
-}
+// function getSignFromMethod(method) {
+//   return method == "TransactionType.Withdrawal" ? -1 : 1;
+// }
 
-function roundTo(n, digits) {
-  var negative = false;
-  if (digits === undefined) {
-    digits = 0;
-  }
-  if (n < 0) {
-    negative = true;
-    n = n * -1;
-  }
-  var multiplicator = Math.pow(10, digits);
-  n = parseFloat((n * multiplicator).toFixed(11));
-  n = (Math.round(n) / multiplicator).toFixed(digits);
-  if (negative) {
-    n = (n * -1).toFixed(digits);
-  }
-  return Number(n);
-}
+// function roundTo(n, digits) {
+//   var negative = false;
+//   if (digits === undefined) {
+//     digits = 0;
+//   }
+//   if (n < 0) {
+//     negative = true;
+//     n = n * -1;
+//   }
+//   var multiplicator = Math.pow(10, digits);
+//   n = parseFloat((n * multiplicator).toFixed(11));
+//   n = (Math.round(n) / multiplicator).toFixed(digits);
+//   if (negative) {
+//     n = (n * -1).toFixed(digits);
+//   }
+//   return Number(n);
+// }
 
-exports.onChangeTransaction = functions.firestore
-  .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
-  .onWrite(async (change, context) => {
-    let accountRef;
+// exports.onChangeTransaction = functions.firestore
+//   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")
+//   .onWrite(async (change, context) => {
+//     let accountRef;
 
-    let oldCurrDelta = 0,
-      oldAvailDelta = 0;
-    if (change.before.exists) {
-      const transaction = change.before.data();
-      oldCurrDelta =
-        -transaction.amount * getSignFromMethod(transaction.method);
-      oldAvailDelta = transaction.cleared ? oldCurrDelta : 0;
+//     let oldCurrDelta = 0,
+//       oldAvailDelta = 0;
+//     if (change.before.exists) {
+//       const transaction = change.before.data();
+//       oldCurrDelta =
+//         -transaction.amount * getSignFromMethod(transaction.method);
+//       oldAvailDelta = transaction.cleared ? oldCurrDelta : 0;
 
-      accountRef = change.before.ref.parent.parent;
-    }
+//       accountRef = change.before.ref.parent.parent;
+//     }
 
-    let newCurrDelta = 0,
-      newAvailDelta = 0;
-    if (change.after.exists) {
-      const transaction = change.after.data();
-      newCurrDelta = transaction.amount * getSignFromMethod(transaction.method);
-      newAvailDelta = transaction.cleared ? newCurrDelta : 0;
+//     let newCurrDelta = 0,
+//       newAvailDelta = 0;
+//     if (change.after.exists) {
+//       const transaction = change.after.data();
+//       newCurrDelta = transaction.amount * getSignFromMethod(transaction.method);
+//       newAvailDelta = transaction.cleared ? newCurrDelta : 0;
 
-      accountRef = change.after.ref.parent.parent;
-    }
+//       accountRef = change.after.ref.parent.parent;
+//     }
 
-    const currDelta = newCurrDelta + oldCurrDelta;
-    const availDelta = newAvailDelta + oldAvailDelta;
+//     const currDelta = newCurrDelta + oldCurrDelta;
+//     const availDelta = newAvailDelta + oldAvailDelta;
 
-    if (accountRef != null && accountRef != undefined) {
-      accountRef.update({
-        currentBalance: admin.firestore.FieldValue.increment(currDelta),
-        availableBalance: admin.firestore.FieldValue.increment(availDelta),
-      });
-    }
-  });
+//     if (accountRef != null && accountRef != undefined) {
+//       accountRef.update({
+//         currentBalance: admin.firestore.FieldValue.increment(currDelta),
+//         availableBalance: admin.firestore.FieldValue.increment(availDelta),
+//       });
+//     }
+//   });
 
 // exports.onCreateTransaction = functions.firestore
 //   .document("/users/{userID}/accounts/{accountID}/transactions/{transactionID}")

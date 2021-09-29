@@ -16,7 +16,8 @@
 - Improvement: Use proper capitalization and keyboard type for TextInputs
 - Improvement: Dispose of controllers when finished with widgets
 - Improvement: Better error handling for promises
-- Improvement: Ensure any modification to account balances are rounded to 2 decimals
+- Improvement: Add better tooltips for buttons
+
 - Responsive UI: https://pub.dev/packages/responsive_builder
   - Improvement: Convert modals to 'prompts' that show as dialogs on large screens or modals on small screens
   - Improvement: Convert lists to grids on larger screen sizes
