@@ -72,13 +72,14 @@ class DataProvider {
         .data()!;
   }
 
-  Future<void> createAccount(Account account, int startingBalance) async {
+  Future<Account> createAccount(Account account, int startingBalance) async {
     try {
       // Add the new account to the collection
       final accountRef = await getAccountsCollection().add(account);
+      account.id = accountRef.id;
 
       // Don't create a starting transaction if there is no balance
-      if (startingBalance == 0) return;
+      if (startingBalance == 0) return account;
 
       // Create a transaction as the starting balance for the account
       final Transaction startingTransaction = Transaction(
@@ -93,8 +94,9 @@ class DataProvider {
       // Add the new transaction to the collection
       await getTransactionCollection(accountRef.id).add(startingTransaction);
 
-      account.id = accountRef.id;
       await incrementBalance(account, transaction: startingTransaction);
+
+      return account;
     } catch (e) {
       rethrow;
     }
@@ -183,6 +185,7 @@ class DataProvider {
     final transactionCol = getTransactionCollection(account.id);
 
     await transactionCol.add(transaction);
+
     await incrementBalance(account, transaction: transaction);
   }
 
@@ -197,11 +200,7 @@ class DataProvider {
     final int oldAvailDelta = transaction.cleared ? oldCurrDelta : 0;
 
     await transactionRef.delete();
-    transaction.method = transaction.method == TransactionType.deposit
-        ? TransactionType.withdrawal
-        : TransactionType.deposit;
 
-    // transaction.cleared = !transaction.cleared;
     await incrementBalance(
       account,
       deltaCurrent: oldCurrDelta,
@@ -244,6 +243,7 @@ class DataProvider {
 
     final int availDelta = transaction.amount *
         (transaction.method == TransactionType.deposit ? 1 : -1);
+
     await incrementBalance(
       account,
       deltaCurrent: 0,
@@ -257,22 +257,11 @@ class DataProvider {
     Transaction transaction,
   ) async {
     try {
-      // Get a reference to the old transaction doc
-      final oldTransactionDoc = getTransactionDocument(
-        fromAccount.id,
-        transaction.id,
-      );
+      // Add the transaction to the new account
+      await addTransaction(toAccount, transaction);
 
-      // Get reference to the new transaction's parent collection
-      final newTransactionCol = getTransactionCollection(toAccount.id);
-
-      // Batch write and delete to transfer the tranaction
-      final WriteBatch batch = FirebaseFirestore.instance.batch();
-      batch.set<Transaction>(newTransactionCol.doc(), transaction);
-      batch.delete(oldTransactionDoc);
-
-      // Commit the changes
-      return batch.commit();
+      // Delete the transaction from the old account
+      await deleteTransaction(fromAccount, transaction);
     } catch (e) {
       rethrow;
     }
@@ -283,98 +272,130 @@ class DataProvider {
     Account toAccount,
     int transferAmount,
   ) async {
-    final fromAccountTransactions = getTransactionCollection(fromAccount.id);
-
-    final toAccountTransactions = getTransactionCollection(toAccount.id);
-
+    // Create a withdrawal transaction
     final Transaction transaction = Transaction(
       name: "Transfer To ${toAccount.name}",
       amount: transferAmount,
       timestamp: DateTime.now(),
       cleared: true,
-      memo: "SYSTEM GENERATED",
+      memo: "System Generated",
     );
 
-    final WriteBatch batch = FirebaseFirestore.instance.batch();
-    batch.set<Transaction>(fromAccountTransactions.doc(), transaction);
-    // Create and write the toTransaction
+    // Add the withdrawal transaction to the from account
+    await addTransaction(fromAccount, transaction);
+
+    // Modify the transaction to be identical but a deposit from the from account
     transaction.name = "Transfer From ${fromAccount.name}";
     transaction.method = TransactionType.deposit;
-    batch.set<Transaction>(toAccountTransactions.doc(), transaction);
 
-    return batch.commit();
+    // Add the deposit transasction to the to account
+    await addTransaction(toAccount, transaction);
   }
 
   Future<void> importCSV(File csv) async {
-    /*
-    final lines = await file.readAsLines();
+    // Splite the CSV by newline
+    final List<String> lines = await csv.readAsLines();
 
-                  final List<String> headers = lines[0].split(",");
-                  lines.removeAt(0);
+    // Obtain the CSV headers and remove them from the data
+    final List<String> headers = lines[0].split(",");
+    lines.removeAt(0);
 
-                  final Map<String, int> headerIndex = headers
-                      .asMap()
-                      .map<String, int>((key, value) => MapEntry(value, key));
+    // Create an index map that maps a header to its column index
+    final Map<String, int> headerIndex = headers
+        .asMap()
+        .map<String, int>((index, header) => MapEntry(header, index));
 
-                  final Map<String, List<Transaction>> accounts = {};
+    // Create a map that maps an account name to a list of transactions
+    final Map<String, List<Transaction>> accounts = {};
 
-                  for (final String line in lines) {
-                    final entries = line.split(",");
-                    final Transaction transaction = Transaction(
-                      name: entries[headerIndex["Transaction_Name"]!],
-                      amount: int.parse(entries[headerIndex["Amount"]!]),
-                      checkNumber: int.parse(entries[headerIndex["Check_No"]!]),
-                      cleared:
-                          entries[headerIndex["Has_Cleared"]!].toLowerCase() ==
-                              "true",
-                      method: entries[headerIndex["Transaction_Type"]!]
-                                  .toLowerCase() ==
-                              "true"
-                          ? TransactionType.deposit
-                          : TransactionType.withdrawal,
-                      timestamp: DateTime.fromMillisecondsSinceEpoch(
-                        int.parse(entries[headerIndex["Creation_Date"]!]),
-                      ),
-                      hidden:
-                          entries[headerIndex["Is_Hidden"]!].toLowerCase() ==
-                              "true",
-                      memo: entries[headerIndex["Memo"]!],
-                    );
+    // Create a transaction for each line
+    for (final String line in lines) {
+      // Obtain the information for each transaction
+      final List<String> entries = line.split(",");
+      final String name = entries[headerIndex["Transaction_Name"]!];
+      final int amount = int.parse(entries[headerIndex["Amount"]!]);
+      final TransactionType method =
+          entries[headerIndex["Transaction_Type"]!].toLowerCase() == "true"
+              ? TransactionType.deposit
+              : TransactionType.withdrawal;
+      final DateTime timestamp = DateTime.fromMillisecondsSinceEpoch(
+        int.parse(entries[headerIndex["Creation_Date"]!]),
+      );
+      final int checkNumber = int.parse(entries[headerIndex["Check_No"]!]);
+      final bool cleared =
+          entries[headerIndex["Has_Cleared"]!].toLowerCase() == "true";
+      final bool hidden =
+          entries[headerIndex["Is_Hidden"]!].toLowerCase() == "true";
+      final String memo = entries[headerIndex["Memo"]!];
 
-                    final list = accounts.putIfAbsent(
-                      entries[headerIndex["Account_Name"]!],
-                      () => [],
-                    );
-                    list.add(transaction);
-                  }
+      final Transaction transaction = Transaction(
+        name: name,
+        amount: amount,
+        timestamp: timestamp,
+        checkNumber: checkNumber,
+        cleared: cleared,
+        method: method,
+        memo: memo,
+        hidden: hidden,
+      );
 
-                  // Initialize Firebase variables
-                  DataProvider dataProvider = context.read<DataProvider>();
-                  var _accountsCollection =
-                      dataProvider.getAccountsCollection();
+      // Add the transaction to it's corresponding list
+      accounts
+          .putIfAbsent(
+            entries[headerIndex["Account_Name"]!],
+            () => [],
+          )
+          .add(transaction);
+    }
 
-                  for (String key in accounts.keys) {
-                    Account newAccount = Account(name: key);
-                    var accountRef = await _accountsCollection.add(newAccount);
-                    List<Transaction> transactions = accounts[key]!;
-                    List<List<Transaction>> sublists = [];
-                    for (int i = 0; i < transactions.length; i += 499) {
-                      sublists.add(transactions.sublist(
-                          i,
-                          i + 499 > transactions.length
-                              ? transactions.length
-                              : i + 499));
-                    }
-                    var transactionRef =
-                        dataProvider.getTransactionCollection(accountRef.id);
-                    List<WriteBatch> batches = [];
-                    for (var list in sublists) {
-                      WriteBatch batch = FirebaseFirestore.instance.batch();
-                      for (var t in list)
-                        batch.set<Transaction>(transactionRef.doc(), t);
-                      batches.add(batch);
-                    }
-                    await Future.wait(batches.map((e) => e.commit()));
-                  }*/
+    for (final MapEntry<String, List<Transaction>> entry in accounts.entries) {
+      // Add the newAccount to the database
+      Account newAccount = Account(name: entry.key);
+      newAccount = await createAccount(newAccount, 0);
+
+      // Calculate the current and avaialable balances
+      int currentBalance = 0;
+      int availableBalance = 0;
+      for (final Transaction transaction in entry.value) {
+        final int currentDelta = transaction.amount *
+            (transaction.method == TransactionType.deposit ? 1 : -1);
+        final int availDelta = transaction.cleared ? currentDelta : 0;
+        currentBalance += currentDelta;
+        availableBalance += availDelta;
+      }
+
+      // Create sublists of Transactions to write as WriteBatch is limited to 500 documents
+      final List<List<Transaction>> sublists = [];
+      for (int i = 0; i < entry.value.length; i += 500) {
+        sublists.add(
+          entry.value.sublist(
+            i,
+            i + 500 > entry.value.length ? entry.value.length : i + 500,
+          ),
+        );
+      }
+
+      // Create a list of WriteBatches from each sublist
+      final transactionCol = getTransactionCollection(newAccount.id);
+      final List<WriteBatch> batches = [];
+      for (final List<Transaction> sublist in sublists) {
+        final WriteBatch batch = firebaseFirestore.batch();
+        // Create a document for each transaction in the sublist
+        for (final Transaction transaction in sublist) {
+          batch.set<Transaction>(transactionCol.doc(), transaction);
+        }
+        batches.add(batch);
+      }
+
+      // Commit each BatchWrites changes
+      await Future.wait(batches.map((batch) => batch.commit()));
+
+      // Update the balance of the new account
+      await incrementBalance(
+        newAccount,
+        deltaCurrent: currentBalance,
+        deltaAvailable: availableBalance,
+      );
+    }
   }
 }

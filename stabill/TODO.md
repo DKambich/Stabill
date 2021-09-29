@@ -17,6 +17,7 @@
 - Improvement: Dispose of controllers when finished with widgets
 - Improvement: Better error handling for promises
 - Improvement: Add better tooltips for buttons
+- Improvement: Add commas to BalanceText
 
 - Responsive UI: https://pub.dev/packages/responsive_builder
   - Improvement: Convert modals to 'prompts' that show as dialogs on large screens or modals on small screens

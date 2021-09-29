@@ -77,6 +77,7 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                     labelText: "Account Name",
                     floatingLabelBehavior: FloatingLabelBehavior.auto,
                   ),
+                  textCapitalization: TextCapitalization.words,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Account name too short';

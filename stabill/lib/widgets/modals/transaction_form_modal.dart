@@ -158,7 +158,9 @@ class _TransactionModalState extends State<TransactionModal> {
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
                     validator: (String? text) {
-                      if (text != null && double.parse(text.substring(1)) > 0) {
+                      if (text != null &&
+                          int.parse(text.replaceAll(RegExp(r"[^\d]"), "")) >
+                              0) {
                         return null;
                       }
                       return "Amount must be greater than 0";
