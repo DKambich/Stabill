@@ -6,9 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart'
         DocumentReference,
         FieldValue,
         FirebaseFirestore,
+        Query,
         WriteBatch;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/models/recurring_transaction.dart';
 import 'package:stabill/models/transaction.dart';
 
 class DataProvider {
@@ -18,6 +20,7 @@ class DataProvider {
   static const String userCol = "users";
   static const String accountCol = "accounts";
   static const String transactionCol = "transactions";
+  static const String recurringCol = "recurringTransactions";
 
   DataProvider(this.firebaseFirestore, this.user);
 
@@ -69,6 +72,48 @@ class DataProvider {
     String transactionID,
   ) async {
     return (await getTransactionDocument(accountID, transactionID).get())
+        .data()!;
+  }
+
+  Query<RecurringTransaction> getRecurringTransactionCollectionGroup() {
+    return firebaseFirestore
+        .collectionGroup(recurringCol)
+        .withConverter<RecurringTransaction>(
+          fromFirestore: (snapshot, _) => RecurringTransaction.fromJson(
+            snapshot.data()!,
+          ),
+          toFirestore: (transaction, _) => transaction.toJson(),
+        );
+  }
+
+  CollectionReference<RecurringTransaction> getRecurringTransactionCollection(
+      String accountID) {
+    return getAccountDocument(accountID)
+        .collection(recurringCol)
+        .withConverter<RecurringTransaction>(
+          fromFirestore: (snapshot, _) => RecurringTransaction.fromJson(
+            snapshot.data()!,
+          ),
+          toFirestore: (transaction, _) => transaction.toJson(),
+        );
+  }
+
+  DocumentReference<RecurringTransaction> getRecurringTransactionDocument(
+    String accountID,
+    String recurringTransactionID,
+  ) {
+    return getRecurringTransactionCollection(accountID)
+        .doc(recurringTransactionID);
+  }
+
+  Future<RecurringTransaction> getRecurringTransaction(
+    String accountID,
+    String recurringTransactionID,
+  ) async {
+    return (await getRecurringTransactionDocument(
+      accountID,
+      recurringTransactionID,
+    ).get())
         .data()!;
   }
 

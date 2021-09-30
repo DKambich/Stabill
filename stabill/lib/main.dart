@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/models/recurring_transaction.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
+import 'package:stabill/pages/recurring_transactions_page.dart';
 import 'package:stabill/pages/settings_page.dart';
 import 'package:stabill/pages/transactions_page.dart';
 import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/providers/root_provider.dart';
 import 'package:stabill/utilities/initializer.dart';
+import 'package:stabill/widgets/cards/transaction_card.dart';
+import 'package:stabill/widgets/modals/recurring_transaction_form_modal.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 
 void main() {
@@ -51,9 +55,30 @@ class Stabill extends StatelessWidget {
         );
       }
       assert(false, 'Need to pass account argument to $routeName');
+    } else if (routeName == RecurringTransactionsPage.routeName) {
+      return MaterialPageRoute(
+        builder: (_) => const RecurringTransactionsPage(),
+      );
     } else if (routeName == TransactionModal.routeName) {
+      Transaction? transaction;
+      if (settings.arguments != null) {
+        transaction = settings.arguments! as Transaction;
+      }
       return MaterialPageRoute<Transaction>(
-        builder: (_) => const TransactionModal(),
+        builder: (_) => TransactionModal(
+          transaction: transaction,
+        ),
+        fullscreenDialog: true,
+      );
+    } else if (routeName == RecurringTransactionModal.routeName) {
+      RecurringTransaction? transaction;
+      if (settings.arguments != null) {
+        transaction = settings.arguments! as RecurringTransaction;
+      }
+      return MaterialPageRoute<RecurringTransaction>(
+        builder: (_) => RecurringTransactionModal(
+          transaction: transaction,
+        ),
         fullscreenDialog: true,
       );
     } else if (routeName == SettingsPage.routeName) {
