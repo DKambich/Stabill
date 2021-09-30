@@ -48,6 +48,7 @@
   - Action: Delete transaction ✅
   - Action: Edit transaction ✅
   - Action: Mark transaction as cleared (show only if not cleared) ✅
+      - Enhancement: Allow user preference to display non-cleared transactions first
   - Action: Hide transaction (show only if cleared)
   - Action: Transfer transaction to another account
 - Feature: Searching transactions by name
