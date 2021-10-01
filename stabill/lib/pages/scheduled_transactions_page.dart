@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/widgets/cards/scheduled_transaction_card.dart';
 import 'package:stabill/widgets/modals/scheduled_transaction_form_modal.dart';
 
 class ScheduledTransactionsPage extends StatefulWidget {
@@ -35,8 +36,16 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.pushNamed(context, ScheduledTransactionModal.routeName);
+        onPressed: () async {
+          final ScheduledTransaction? scheduled = await Navigator.pushNamed(
+            context,
+            ScheduledTransactionModal.routeName,
+          );
+          if (!mounted) return;
+          if (scheduled != null) {
+            final DataProvider dataProvider = context.read<DataProvider>();
+            await dataProvider.addScheduledTransaction(scheduled);
+          }
         },
       ),
       body: StreamBuilder<QuerySnapshot<ScheduledTransaction>>(
@@ -50,7 +59,7 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          var scheduledData = snapshot.data!.docs;
+          final scheduledData = snapshot.data!.docs;
           if (scheduledData.isEmpty) {
             // Figure out why all this rendering is weird
             return Row(
@@ -75,9 +84,7 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
             itemCount: scheduledData.length,
             itemBuilder: (context, index) {
               final ScheduledTransaction item = scheduledData[index].data();
-              return Card(
-                child: Text(item.transaction.name),
-              );
+              return ScheduledTransactionCard(scheduledTransaction: item);
             },
           );
         },
