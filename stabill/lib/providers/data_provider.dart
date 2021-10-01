@@ -10,7 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'
         WriteBatch;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stabill/models/account.dart';
-import 'package:stabill/models/recurring_transaction.dart';
+import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/models/transaction.dart';
 
 class DataProvider {
@@ -20,7 +20,7 @@ class DataProvider {
   static const String userCol = "users";
   static const String accountCol = "accounts";
   static const String transactionCol = "transactions";
-  static const String recurringCol = "recurringTransactions";
+  static const String scheduledCol = "scheduledTransactions";
 
   DataProvider(this.firebaseFirestore, this.user);
 
@@ -75,44 +75,46 @@ class DataProvider {
         .data()!;
   }
 
-  Query<RecurringTransaction> getRecurringTransactionCollectionGroup() {
+  Query<ScheduledTransaction> getScheduledTransactionCollectionGroup() {
     return firebaseFirestore
-        .collectionGroup(recurringCol)
-        .withConverter<RecurringTransaction>(
-          fromFirestore: (snapshot, _) => RecurringTransaction.fromJson(
+        .collectionGroup(scheduledCol)
+        .where("uid", isEqualTo: user!.uid)
+        .withConverter<ScheduledTransaction>(
+          fromFirestore: (snapshot, _) => ScheduledTransaction.fromJson(
             snapshot.data()!,
           ),
           toFirestore: (transaction, _) => transaction.toJson(),
         );
   }
 
-  CollectionReference<RecurringTransaction> getRecurringTransactionCollection(
-      String accountID) {
-    return getAccountDocument(accountID)
-        .collection(recurringCol)
-        .withConverter<RecurringTransaction>(
-          fromFirestore: (snapshot, _) => RecurringTransaction.fromJson(
-            snapshot.data()!,
-          ),
-          toFirestore: (transaction, _) => transaction.toJson(),
-        );
-  }
-
-  DocumentReference<RecurringTransaction> getRecurringTransactionDocument(
+  CollectionReference<ScheduledTransaction> getScheduledTransactionCollection(
     String accountID,
-    String recurringTransactionID,
   ) {
-    return getRecurringTransactionCollection(accountID)
-        .doc(recurringTransactionID);
+    return getAccountDocument(accountID)
+        .collection(scheduledCol)
+        .withConverter<ScheduledTransaction>(
+          fromFirestore: (snapshot, _) => ScheduledTransaction.fromJson(
+            snapshot.data()!,
+          ),
+          toFirestore: (transaction, _) => transaction.toJson(),
+        );
   }
 
-  Future<RecurringTransaction> getRecurringTransaction(
+  DocumentReference<ScheduledTransaction> getScheduledTransactionDocument(
     String accountID,
-    String recurringTransactionID,
+    String scheduledTransactionID,
+  ) {
+    return getScheduledTransactionCollection(accountID)
+        .doc(scheduledTransactionID);
+  }
+
+  Future<ScheduledTransaction> getScheduledTransaction(
+    String accountID,
+    String scheduledTransactionID,
   ) async {
-    return (await getRecurringTransactionDocument(
+    return (await getScheduledTransactionDocument(
       accountID,
-      recurringTransactionID,
+      scheduledTransactionID,
     ).get())
         .data()!;
   }

@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:stabill/models/recurring_transaction.dart';
+import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 
-class RecurringTransactionModal extends StatefulWidget {
-  static const String routeName = "/recurringTransaction";
-  final RecurringTransaction? transaction;
-  const RecurringTransactionModal({
+class ScheduledTransactionModal extends StatefulWidget {
+  static const String routeName = "/scheduledTransaction";
+  final ScheduledTransaction? transaction;
+  const ScheduledTransactionModal({
     Key? key,
     // ignore: avoid_init_to_null
     this.transaction = null,
   }) : super(key: key);
 
   @override
-  _RecurringTransactionModalState createState() =>
-      _RecurringTransactionModalState();
+  _ScheduledTransactionModalState createState() =>
+      _ScheduledTransactionModalState();
 }
 
-class _RecurringTransactionModalState extends State<RecurringTransactionModal> {
+class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late bool isCleared;
@@ -87,7 +87,7 @@ class _RecurringTransactionModalState extends State<RecurringTransactionModal> {
     final String action = widget.transaction != null ? "Edit" : "Add";
     return Scaffold(
       appBar: AppBar(
-        title: Text('$action Recurring Transaction'),
+        title: Text('$action Scheduled Transaction'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -95,8 +95,8 @@ class _RecurringTransactionModalState extends State<RecurringTransactionModal> {
                 if (widget.transaction != null) {
                   final bool confirm = await ConfirmDialog.show(
                     context,
-                    "Update Recurring Transaction",
-                    "Are you sure you want to update the recurring transaction?",
+                    "Update Scheduled Transaction",
+                    "Are you sure you want to update the scheduled transaction?",
                   );
                   if (!confirm) {
                     return;
@@ -276,10 +276,10 @@ class _RecurringTransactionModalState extends State<RecurringTransactionModal> {
                     ),
                     child: DropdownButton(
                       value: "test",
-                      items: [
+                      items: const [
                         DropdownMenuItem<String>(
-                          child: Text("test"),
                           value: "test",
+                          child: Text("test"),
                         ),
                       ],
                       menuMaxHeight: 200,

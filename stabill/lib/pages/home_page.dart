@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
-import 'package:stabill/pages/recurring_transactions_page.dart';
+import 'package:stabill/pages/scheduled_transactions_page.dart';
 import 'package:stabill/pages/settings_page.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/account_list.dart';
@@ -130,12 +130,12 @@ class _HomePageState extends State<HomePage> {
                   onTap: () => TransferFundsModal.show(context),
                 ),
                 SpeedDialChild(
-                  child: const Icon(Icons.repeat),
-                  label: "Recurring Transactions",
+                  child: const Icon(Icons.schedule_outlined),
+                  label: "Schedule Transactions",
                   onTap: () {
                     Navigator.pushNamed(
                       context,
-                      RecurringTransactionsPage.routeName,
+                      ScheduledTransactionsPage.routeName,
                     );
                   },
                 ),

@@ -1,46 +1,46 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stabill/models/recurring_transaction.dart';
+import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/providers/data_provider.dart';
-import 'package:stabill/widgets/modals/recurring_transaction_form_modal.dart';
+import 'package:stabill/widgets/modals/scheduled_transaction_form_modal.dart';
 
-class RecurringTransactionsPage extends StatefulWidget {
-  static const String routeName = "/recurringTransactions";
+class ScheduledTransactionsPage extends StatefulWidget {
+  static const String routeName = "/scheduledTransactions";
 
-  const RecurringTransactionsPage({Key? key}) : super(key: key);
+  const ScheduledTransactionsPage({Key? key}) : super(key: key);
 
   @override
-  _RecurringTransactionsPageState createState() =>
-      _RecurringTransactionsPageState();
+  _ScheduledTransactionsPageState createState() =>
+      _ScheduledTransactionsPageState();
 }
 
-class _RecurringTransactionsPageState extends State<RecurringTransactionsPage> {
-  late Stream<QuerySnapshot<RecurringTransaction>> _recurringStream;
+class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
+  late Stream<QuerySnapshot<ScheduledTransaction>> _scheduledStream;
 
   @override
   void initState() {
     super.initState();
     final DataProvider dataProvider = context.read<DataProvider>();
 
-    final recurringCol = dataProvider.getRecurringTransactionCollectionGroup();
-    _recurringStream = recurringCol.snapshots();
+    _scheduledStream =
+        dataProvider.getScheduledTransactionCollectionGroup().snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Recurring Transactions"),
+        title: const Text("Scheduled Transactions"),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          Navigator.pushNamed(context, RecurringTransactionModal.routeName);
+          Navigator.pushNamed(context, ScheduledTransactionModal.routeName);
         },
       ),
-      body: StreamBuilder<QuerySnapshot<RecurringTransaction>>(
-        stream: _recurringStream,
+      body: StreamBuilder<QuerySnapshot<ScheduledTransaction>>(
+        stream: _scheduledStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Text('Something went wrong');
@@ -50,9 +50,8 @@ class _RecurringTransactionsPageState extends State<RecurringTransactionsPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          var recurringData = snapshot.data!.docs;
-          recurringData.clear();
-          if (recurringData.isEmpty) {
+          var scheduledData = snapshot.data!.docs;
+          if (scheduledData.isEmpty) {
             // Figure out why all this rendering is weird
             return Row(
               children: [
@@ -72,19 +71,10 @@ class _RecurringTransactionsPageState extends State<RecurringTransactionsPage> {
             );
           }
 
-          // Filter data to be only RecurringTransactions from the user
-          recurringData = recurringData
-              .where(
-                (data) =>
-                    data.reference.parent.parent!.parent.parent!.id ==
-                    context.read<DataProvider>().user!.uid,
-              )
-              .toList();
-
           return ListView.builder(
-            itemCount: recurringData.length,
+            itemCount: scheduledData.length,
             itemBuilder: (context, index) {
-              final RecurringTransaction item = recurringData[index].data();
+              final ScheduledTransaction item = scheduledData[index].data();
               return Card(
                 child: Text(item.transaction.name),
               );

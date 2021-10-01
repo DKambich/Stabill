@@ -12,12 +12,12 @@ exports.onDeleteAccount = functions.firestore
     await Promise.allSettled(deletedDocs);
   });
 
-exports.processRecurringTransactions = functions.pubsub
+exports.processScheduledTransactions = functions.pubsub
   .schedule("*/5 * * * *")
   .onRun(async (context) => {
     const query = admin
       .firestore()
-      .collectionGroup("recurringTransactions")
+      .collectionGroup("scheduledTransactions")
       .where("enabled", "=", true)
       .where("timestamp", "<", admin.firestore.Timestamp.now());
 

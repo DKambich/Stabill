@@ -33,7 +33,7 @@ class TransactionsPage extends StatefulWidget {
   _TransactionsPageState createState() => _TransactionsPageState();
 }
 
-enum TransactionPageAction { correction, transfer, reveal, recurring }
+enum TransactionPageAction { correction, transfer, reveal, schedule }
 
 class _TransactionsPageState extends State<TransactionsPage> {
   late DocumentReference<Account> _accountDocument;
@@ -166,7 +166,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   }
                   transactionUpdates.docs.forEach(revealTransaction);
                   break;
-                case TransactionPageAction.recurring:
+                case TransactionPageAction.schedule:
                   // TODO: Handle this case.
                   break;
               }
@@ -429,10 +429,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         ),
       ),
       const PopupMenuItem<TransactionPageAction>(
-        value: TransactionPageAction.recurring,
+        value: TransactionPageAction.schedule,
         child: ListTile(
-          leading: Icon(Icons.repeat),
-          title: Text("Recurring Transactions"),
+          leading: Icon(Icons.schedule_outlined),
+          title: Text("Schedule Transactions"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
         ),
