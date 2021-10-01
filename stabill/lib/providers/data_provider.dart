@@ -445,4 +445,11 @@ class DataProvider {
       );
     }
   }
+
+  Future<void> addScheduledTransaction(ScheduledTransaction transaction) async {
+    final scheduledCol =
+        getScheduledTransactionCollection(transaction.accountID);
+
+    await scheduledCol.add(transaction);
+  }
 }

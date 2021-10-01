@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart' show QuerySnapshot;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:stabill/models/account.dart';
 import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/models/transaction.dart';
+import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
-import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 
 class ScheduledTransactionModal extends StatefulWidget {
   static const String routeName = "/scheduledTransaction";
@@ -24,6 +27,11 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late bool isCleared;
+  late bool enabled;
+  late bool hideIfCleared;
+  late bool showNotifications;
+  late Frequency frequency;
+  late String accountID;
   late TransactionType method = TransactionType.withdrawal;
   late TextEditingController nameController;
   late TextEditingController amountController;
@@ -31,6 +39,8 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
   late TextEditingController checkNumberController;
   late TextEditingController memoController;
   late DateTime timestamp;
+
+  late Stream<QuerySnapshot<Account>> accountStream;
 
   @override
   void initState() {
@@ -54,6 +64,11 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
     // );
     // } else {
     isCleared = false;
+    enabled = true;
+    hideIfCleared = false;
+    showNotifications = false;
+    frequency = Frequency.once;
+    accountID = "";
     method = TransactionType.withdrawal;
     nameController = TextEditingController(text: "");
     timestamp = DateTime.now();
@@ -63,21 +78,9 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
     amountController = TextEditingController(text: "\$0.00");
     checkNumberController = TextEditingController(text: "");
     memoController = TextEditingController(text: "");
-    // }
 
-    // amountController.addListener(() {
-    //   String dollarStr = Account.formatDollarStr(amountController.text
-    //       .substring(0, min(amountController.text.length, 10)));
-
-    //   amountController.value = amountController.value.copyWith(
-    //     text: dollarStr,
-    //     selection: TextSelection(
-    //       baseOffset: dollarStr.length,
-    //       extentOffset: dollarStr.length,
-    //     ),
-    //     composing: TextRange.empty,
-    //   );
-    // });
+    accountStream =
+        context.read<DataProvider>().getAccountsCollection().snapshots();
 
     super.initState();
   }
@@ -90,241 +93,295 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
         title: Text('$action Scheduled Transaction'),
         actions: [
           IconButton(
-            onPressed: () async {
+            onPressed: () {
               if (_formKey.currentState!.validate()) {
-                if (widget.transaction != null) {
-                  final bool confirm = await ConfirmDialog.show(
-                    context,
-                    "Update Scheduled Transaction",
-                    "Are you sure you want to update the scheduled transaction?",
-                  );
-                  if (!confirm) {
-                    return;
-                  }
-                }
                 final int checkNumber = checkNumberController.text.isNotEmpty
                     ? int.parse(checkNumberController.text)
                     : -1;
-                final Transaction savedTransaction = Transaction(
-                  amount: int.parse(
-                    amountController.text.replaceAll(RegExp(r"[^\d]"), ""),
-                  ),
-                  checkNumber: checkNumber,
-                  cleared: isCleared,
-                  memo: memoController.text,
-                  name: nameController.text,
-                  method: method,
-                  timestamp: timestamp,
-                );
                 if (!mounted) return;
-                Navigator.of(context).pop<Transaction>(savedTransaction);
+
+                final ScheduledTransaction savedTransaction =
+                    ScheduledTransaction(
+                  Transaction(
+                    amount: int.parse(
+                      amountController.text.replaceAll(RegExp(r"[^\d]"), ""),
+                    ),
+                    checkNumber: checkNumber,
+                    cleared: isCleared,
+                    memo: memoController.text,
+                    name: nameController.text,
+                    method: method,
+                    timestamp: timestamp,
+                  ),
+                  accountID: accountID,
+                  enabled: enabled,
+                  frequency: frequency,
+                  hideIfCleared: hideIfCleared,
+                  showNotifications: showNotifications,
+                  uid: context.read<DataProvider>().user!.uid,
+                );
+                Navigator.of(context)
+                    .pop<ScheduledTransaction>(savedTransaction);
               }
             },
             icon: const Icon(Icons.check),
           )
         ],
       ),
-      body: Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                  child: TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: "Name"),
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.next,
-                    textCapitalization: TextCapitalization.words,
-                    validator: (String? text) {
-                      if (text != null && text.isNotEmpty) {
-                        return null;
-                      }
-                      return "Name must be at least one character";
-                    },
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                  child: TextFormField(
-                    controller: amountController,
-                    decoration: const InputDecoration(labelText: "Amount"),
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    validator: (String? text) {
-                      if (text != null &&
-                          int.parse(text.replaceAll(RegExp(r"[^\d]"), "")) >
-                              0) {
-                        return null;
-                      }
-                      return "Amount must be greater than 0";
-                    },
-                    inputFormatters: [DollarTextInputFormatter(maxDigits: 7)],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                  child: TextFormField(
-                    controller: checkNumberController,
-                    decoration:
-                        const InputDecoration(labelText: "Check Number"),
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(4)
-                    ],
-                  ),
-                ),
-                CheckboxListTile(
-                  value: isCleared,
-                  onChanged: (_) {
-                    setState(() {
-                      isCleared = !isCleared;
-                    });
-                  },
-                  title: const Text("Mark as cleared"),
-                  controlAffinity: ListTileControlAffinity.leading,
-                ),
-                Row(
+      body: StreamBuilder<QuerySnapshot<Account>>(
+        stream: accountStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final accountData = snapshot.data!.docs;
+          if (accountData.isEmpty) {
+            // TODO: Show an error
+            Navigator.pop(context);
+            return const SizedBox();
+          }
+
+          if (accountID == "") {
+            accountID = accountData.first.id;
+          }
+
+          return Theme(
+            data: Theme.of(context).copyWith(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
                   children: [
-                    Flexible(
-                      child: RadioListTile<TransactionType>(
-                        title: const Text("Withdrawal"),
-                        value: TransactionType.withdrawal,
-                        groupValue: method,
-                        onChanged: (TransactionType? value) => setState(
-                          () => method = TransactionType.withdrawal,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 4,
+                      ),
+                      child: TextFormField(
+                        controller: nameController,
+                        decoration: const InputDecoration(labelText: "Name"),
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.next,
+                        textCapitalization: TextCapitalization.words,
+                        validator: (String? text) {
+                          if (text != null && text.isNotEmpty) {
+                            return null;
+                          }
+                          return "Name must be at least one character";
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 4,
+                      ),
+                      child: TextFormField(
+                        controller: amountController,
+                        decoration: const InputDecoration(labelText: "Amount"),
+                        keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.done,
+                        validator: (String? text) {
+                          if (text != null &&
+                              int.parse(
+                                    text.replaceAll(RegExp(r"[^\d]"), ""),
+                                  ) >
+                                  0) {
+                            return null;
+                          }
+                          return "Amount must be greater than 0";
+                        },
+                        inputFormatters: [
+                          DollarTextInputFormatter(maxDigits: 7)
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 4,
+                      ),
+                      child: TextFormField(
+                        controller: checkNumberController,
+                        decoration:
+                            const InputDecoration(labelText: "Check Number"),
+                        keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.next,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(4)
+                        ],
+                      ),
+                    ),
+                    CheckboxListTile(
+                      value: isCleared,
+                      onChanged: (_) {
+                        setState(() {
+                          isCleared = !isCleared;
+                          if (!isCleared) hideIfCleared = false;
+                        });
+                      },
+                      title: const Text("Mark as cleared"),
+                      controlAffinity: ListTileControlAffinity.leading,
+                    ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: RadioListTile<TransactionType>(
+                            title: const Text("Withdrawal"),
+                            value: TransactionType.withdrawal,
+                            groupValue: method,
+                            onChanged: (TransactionType? value) => setState(
+                              () => method = TransactionType.withdrawal,
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          child: RadioListTile<TransactionType>(
+                            title: const Text("Deposit"),
+                            value: TransactionType.deposit,
+                            groupValue: method,
+                            onChanged: (TransactionType? value) => setState(
+                              () => method = TransactionType.deposit,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 4,
+                      ),
+                      child: TextFormField(
+                        controller: memoController,
+                        decoration: const InputDecoration(labelText: "Memo"),
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
+                        textCapitalization: TextCapitalization.sentences,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 4,
+                      ),
+                      child: TextFormField(
+                        controller: dateController,
+                        decoration:
+                            const InputDecoration(labelText: "Start Date"),
+                        readOnly: true,
+                        onTap: showDateTime,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 4,
+                      ),
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: "Frequency",
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        child: DropdownButton<Frequency>(
+                          value: frequency,
+                          items: Frequency.values
+                              .map(
+                                (value) => DropdownMenuItem<Frequency>(
+                                  value: value,
+                                  child: Text(value.toFormattedString()),
+                                ),
+                              )
+                              .toList(),
+                          menuMaxHeight: 200,
+                          isExpanded: true,
+                          onChanged: (Frequency? newValue) {
+                            setState(() {
+                              frequency = newValue ?? frequency;
+                            });
+                          },
                         ),
                       ),
                     ),
-                    Flexible(
-                      child: RadioListTile<TransactionType>(
-                        title: const Text("Deposit"),
-                        value: TransactionType.deposit,
-                        groupValue: method,
-                        onChanged: (TransactionType? value) => setState(
-                          () => method = TransactionType.deposit,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 4,
+                      ),
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: "Account",
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        child: DropdownButton<String>(
+                          value: accountID,
+                          items: accountData.map((doc) {
+                            return DropdownMenuItem<String>(
+                              value: doc.id,
+                              child: Text(doc.data().name),
+                            );
+                          }).toList(),
+                          menuMaxHeight: 200,
+                          isExpanded: true,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              accountID = newValue ?? accountID;
+                            });
+                          },
                         ),
                       ),
+                    ),
+                    CheckboxListTile(
+                      value: showNotifications,
+                      onChanged: (_) {
+                        setState(() {
+                          showNotifications = !showNotifications;
+                        });
+                      },
+                      title: const Text(
+                        "Show notification when transaction is added",
+                      ),
+                      controlAffinity: ListTileControlAffinity.leading,
+                    ),
+                    CheckboxListTile(
+                      value: hideIfCleared,
+                      onChanged: isCleared
+                          ? (_) {
+                              setState(() {
+                                hideIfCleared = !hideIfCleared;
+                              });
+                            }
+                          : null,
+                      title: const Text("Hide transaction once created"),
+                      controlAffinity: ListTileControlAffinity.leading,
+                    ),
+                    CheckboxListTile(
+                      value: enabled,
+                      onChanged: (_) {
+                        setState(() {
+                          enabled = !enabled;
+                        });
+                      },
+                      title: const Text("Enabled"),
+                      controlAffinity: ListTileControlAffinity.leading,
                     ),
                   ],
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                  child: TextFormField(
-                    controller: memoController,
-                    decoration: const InputDecoration(labelText: "Memo"),
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                  child: TextFormField(
-                    controller: dateController,
-                    decoration: const InputDecoration(labelText: "Start Date"),
-                    readOnly: true,
-                    onTap: showDateTime,
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: "Frequency",
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    child: DropdownButton<Frequency>(
-                      value: Frequency.once,
-                      items: Frequency.values
-                          .map(
-                            (value) => DropdownMenuItem<Frequency>(
-                              value: value,
-                              child: Text(value.toString()),
-                            ),
-                          )
-                          .toList(),
-                      menuMaxHeight: 200,
-                      isExpanded: true,
-                      onChanged: (Frequency? newValue) {},
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: "Account",
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    child: DropdownButton(
-                      value: "test",
-                      items: const [
-                        DropdownMenuItem<String>(
-                          value: "test",
-                          child: Text("test"),
-                        ),
-                      ],
-                      menuMaxHeight: 200,
-                      isExpanded: true,
-                      onChanged: (String? newValue) {},
-                    ),
-                  ),
-                ),
-                CheckboxListTile(
-                  value: isCleared,
-                  onChanged: (_) {
-                    setState(() {
-                      isCleared = !isCleared;
-                    });
-                  },
-                  title:
-                      const Text("Show notification when transaction is added"),
-                  controlAffinity: ListTileControlAffinity.leading,
-                ),
-                CheckboxListTile(
-                  value: isCleared,
-                  onChanged: isCleared
-                      ? (_) {
-                          setState(() {
-                            isCleared = !isCleared;
-                          });
-                        }
-                      : null,
-                  title: const Text("Hide transaction once created"),
-                  controlAffinity: ListTileControlAffinity.leading,
-                ),
-                CheckboxListTile(
-                  value: isCleared,
-                  onChanged: (_) {
-                    setState(() {
-                      isCleared = !isCleared;
-                    });
-                  },
-                  title: const Text("Enabled"),
-                  controlAffinity: ListTileControlAffinity.leading,
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
