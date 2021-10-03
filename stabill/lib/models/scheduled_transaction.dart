@@ -4,6 +4,7 @@ class ScheduledTransaction {
   final bool enabled;
   final bool hideIfCleared;
   final bool showNotifications;
+  final String id;
   final String uid;
   final String accountID;
   final Frequency frequency;
@@ -14,19 +15,24 @@ class ScheduledTransaction {
     this.enabled = false,
     this.hideIfCleared = false,
     this.showNotifications = false,
+    this.id = "",
     this.uid = "",
     this.accountID = "",
     this.frequency = Frequency.once,
   });
 
-  ScheduledTransaction.fromJson(Map<String, dynamic> json)
-      : this(
+  ScheduledTransaction.fromJson(
+    Map<String, dynamic> json,
+    String id,
+    String accountID,
+  ) : this(
           Transaction.fromJson(json, ""),
           enabled: json['enabled'] as bool,
           hideIfCleared: json['hideIfCleared'] as bool,
           showNotifications: json['showNotifications'] as bool,
+          id: id,
           uid: json['uid'] as String,
-          accountID: json['accountID'] as String,
+          accountID: accountID,
           frequency:
               FrequencyFormat.parseFrequency(json['frequency'] as String),
         );
@@ -37,7 +43,6 @@ class ScheduledTransaction {
     json['hideIfCleared'] = hideIfCleared;
     json['showNotifications'] = showNotifications;
     json['uid'] = uid;
-    json['accountID'] = accountID;
     json['frequency'] = frequency.toString();
     return json;
   }
