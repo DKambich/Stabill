@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class BalanceText extends StatelessWidget {
   final bool showPositivePrefix;
@@ -6,10 +7,11 @@ class BalanceText extends StatelessWidget {
   final String prefixText;
   final int balance;
   final double fontSize;
+  static final NumberFormat format = NumberFormat.currency(symbol: r"$");
 
   const BalanceText({
     Key? key,
-    this.fontSize = 20,
+    this.fontSize = 18,
     this.prefixText = "",
     required this.balance,
     this.showPositivePrefix = false,
@@ -30,15 +32,12 @@ class BalanceText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String balanceText = "";
-    if (balance < 0 && showNegativePrefix) {
-      balanceText = "-";
+    String balanceText = format.format(balance.toDouble() / 100);
+    if (!showNegativePrefix) {
+      balanceText = balanceText.substring(1);
     } else if (balance > 0 && showPositivePrefix) {
-      balanceText = "+";
+      balanceText = "+$balanceText";
     }
-
-    balanceText += r"$";
-    balanceText += (balance.abs() / 100).toStringAsFixed(2);
 
     return RichText(
       text: TextSpan(
