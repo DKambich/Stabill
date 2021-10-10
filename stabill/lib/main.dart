@@ -15,7 +15,7 @@ import 'package:stabill/widgets/modals/scheduled_transaction_form_modal.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 
 void main() {
-  runApp(MaterialApp(home: Stabill()));
+  runApp(Stabill());
 }
 
 class Stabill extends StatelessWidget {

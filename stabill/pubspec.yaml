@@ -19,6 +19,7 @@ dependencies:
   flutter_speed_dial: ^4.1.0
   lint: ^1.7.2
   provider: ^6.0.0
+  responsive_builder: ^0.4.1
   shared_preferences: ^2.0.8
   substring_highlight: ^1.0.33
 

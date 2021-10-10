@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
@@ -10,17 +11,33 @@ class CreateAccountModal extends StatefulWidget {
   _CreateAccountModalState createState() => _CreateAccountModalState();
 
   static void show(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
+    final DeviceScreenType deviceType =
+        getDeviceType(MediaQuery.of(context).size);
+    if (deviceType == DeviceScreenType.desktop ||
+        deviceType == DeviceScreenType.tablet) {
+      showDialog(
+        context: context,
+        builder: (_) => const AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(25)),
+          ),
+          contentPadding: EdgeInsets.zero,
+          content: CreateAccountModal(),
         ),
-      ),
-      builder: (_) => const CreateAccountModal(),
-    );
+      );
+    } else {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(25),
+            topRight: Radius.circular(25),
+          ),
+        ),
+        builder: (_) => const CreateAccountModal(),
+      );
+    }
   }
 }
 
@@ -29,23 +46,6 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
   final TextEditingController _balanceController =
       TextEditingController(text: r"$0.00");
   final _formKey = GlobalKey<FormState>();
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _balanceController.addListener(() {
-  //     String dollarStr = Account.formatDollarStr(_balanceController.text);
-
-  //     _balanceController.value = _balanceController.value.copyWith(
-  //       text: dollarStr,
-  //       selection: TextSelection(
-  //         baseOffset: dollarStr.length,
-  //         extentOffset: dollarStr.length,
-  //       ),
-  //       composing: TextRange.empty,
-  //     );
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +131,6 @@ class _CreateAccountModalState extends State<CreateAccountModal> {
                                   startingBalance,
                                 );
                             // Create the new Account
-                            // await createAccount(newAccount, accountBalance);
                             if (!mounted) return;
                             Navigator.pop(context);
                           }
