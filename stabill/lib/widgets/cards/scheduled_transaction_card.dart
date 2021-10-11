@@ -2,16 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/models/transaction.dart';
+import 'package:stabill/utilities/menu_card.dart';
 import 'package:stabill/widgets/balance_text.dart';
 
-// enum TransactionAction { clear, hide, move, edit, delete }
+enum ScheduledTransactionAction { edit, delete }
 
 class ScheduledTransactionCard extends StatelessWidget {
   final ScheduledTransaction scheduledTransaction;
-  // final GestureTapDownCallback? onMorePress;
-  // final List<PopupMenuEntry<TransactionAction>> actions;
-  // final void Function(TransactionAction)? onSelected;
-  // final String? query;
+
+  static const actions = [
+    PopupMenuItem<ScheduledTransactionAction>(
+      value: ScheduledTransactionAction.edit,
+      child: ListTile(
+        leading: Icon(Icons.edit),
+        title: Text("Edit"),
+        contentPadding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+      ),
+    ),
+    PopupMenuItem<ScheduledTransactionAction>(
+      value: ScheduledTransactionAction.delete,
+      child: ListTile(
+        leading: Icon(Icons.delete),
+        title: Text("Delete"),
+        contentPadding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+      ),
+    ),
+  ];
 
   const ScheduledTransactionCard({
     Key? key,
@@ -25,12 +43,14 @@ class ScheduledTransactionCard extends StatelessWidget {
         ? -transaction.amount
         : transaction.amount;
 
-    return Card(
+    return MenuCard(
+      actions: actions,
       child: Padding(
         padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16, right: 8),
         child: Row(
           children: [
             Expanded(
+              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -59,9 +79,11 @@ class ScheduledTransactionCard extends StatelessWidget {
                 ],
               ),
             ),
-            BalanceText(
-              balance: amount,
-              showPositivePrefix: true,
+            Expanded(
+              child: BalanceText(
+                balance: amount,
+                showPositivePrefix: true,
+              ),
             ),
           ],
         ),

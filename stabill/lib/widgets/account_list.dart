@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/transactions_page.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/utilities/header_list.dart';
 import 'package:stabill/widgets/cards/account_card.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
@@ -107,57 +108,53 @@ class _AccountListState extends State<AccountList> {
           );
         }
 
-        return Stack(
-          children: [
-            ListView.builder(
-              controller: _scrollController,
-              itemCount: accountData.length + 1,
-              itemBuilder: (ctx, index) {
-                if (index == 0) {
-                  return const SizedBox(
-                    height: 50,
+        return HeaderList(
+          header: AccountSummaryCard(
+            totalCurrentBalance: totalCurrentBalance,
+            totalAvailableBalance: totalAvailableBalance,
+          ),
+          listBody: ListView.builder(
+            controller: _scrollController,
+            itemCount: accountData.length,
+            itemBuilder: (ctx, index) {
+              final Account account = accountData[index].data();
+              final String accountID = accountData[index].id;
+              return AccountCard(
+                key: Key(accountID),
+                account: account,
+                onTap: () {
+                  widget.shouldHideFAB(false);
+                  Navigator.of(context).pushNamed(
+                    TransactionsPage.routeName,
+                    arguments: account,
                   );
-                }
-                index--;
-                final Account account = accountData[index].data();
-                final String accountID = accountData[index].id;
-                return AccountCard(
-                  key: Key(accountID),
-                  account: account,
-                  onTap: () {
-                    widget.shouldHideFAB(false);
-                    Navigator.of(context).pushNamed(
-                      TransactionsPage.routeName,
-                      arguments: account,
-                    );
-                  },
-                  actions: getAccountActions(),
-                  onSelected: (AccountAction selectedAction) async {
-                    switch (selectedAction) {
-                      case AccountAction.edit:
-                        EditAccountModal.show(context, accountID);
-                        break;
-                      case AccountAction.delete:
-                        final bool confirm = await ConfirmDialog.show(
-                          context,
-                          "Delete Account",
-                          "Are you sure you want to delete the account '${account.name}'?",
-                          confirmColor: Colors.red,
-                        );
-                        if (confirm) {
-                          await deleteAccount(accountID);
-                        }
-                        break;
-                    }
-                  },
-                );
-              },
-            ),
-            AccountSummaryCard(
-              totalCurrentBalance: totalCurrentBalance,
-              totalAvailableBalance: totalAvailableBalance,
-            ),
-          ],
+                },
+                actions: getAccountActions(),
+                onSelected: (AccountAction selectedAction) async {
+                  switch (selectedAction) {
+                    case AccountAction.edit:
+                      EditAccountModal.show(context, accountID);
+                      break;
+                    case AccountAction.delete:
+                      final bool confirm = await ConfirmDialog.show(
+                        context,
+                        "Delete Account",
+                        "Are you sure you want to delete the account '${account.name}'?",
+                        confirmColor: Colors.red,
+                      );
+                      if (confirm) {
+                        if (!mounted) return;
+                        this
+                            .context
+                            .read<DataProvider>()
+                            .deleteAccount(account);
+                      }
+                      break;
+                  }
+                },
+              );
+            },
+          ),
         );
       },
     );
