@@ -1,6 +1,9 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:responsive_builder/responsive_builder.dart';
+import 'package:stabill/constants.dart';
 
 class MenuCard<T> extends StatefulWidget {
   final Widget child;
@@ -28,27 +31,32 @@ class _MenuCardState<T> extends State<MenuCard<T>> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final deviceSize = getDeviceType(screenSize);
-
-    final bool displayMenuButton = deviceSize == DeviceScreenType.desktop ||
-        deviceSize == DeviceScreenType.tablet;
+    final bool displayMenuButton =
+        kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
     return Card(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(cardRadius),
+      ),
       child: GestureDetector(
         onLongPressDown: (details) => pressPosition = details.globalPosition,
         child: InkWell(
+          borderRadius: const BorderRadius.all(
+            Radius.circular(12),
+          ),
           onLongPress: () async {
             // Show a menu prompt if the platform is not on web
             if (!displayMenuButton) {
               final T? action = await showMenu<T>(
                 context: context,
+                items: widget.actions,
+                shape: menuShape,
                 position: RelativeRect.fromLTRB(
                   pressPosition.dx,
                   pressPosition.dy,
                   screenSize.width - pressPosition.dx,
                   screenSize.height - pressPosition.dy,
                 ),
-                items: widget.actions,
               );
 
               widget.onSelect?.call(action);
@@ -64,6 +72,7 @@ class _MenuCardState<T> extends State<MenuCard<T>> {
                   PopupMenuButton<T>(
                     itemBuilder: (_) => widget.actions,
                     onSelected: widget.onSelect,
+                    shape: menuShape,
                     padding: EdgeInsets.zero,
                     tooltip: "Show Actions",
                   )

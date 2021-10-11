@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/pages/scheduled_transactions_page.dart';
 import 'package:stabill/pages/settings_page.dart';
 import 'package:stabill/providers/data_provider.dart';
@@ -43,6 +44,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text("Stabill"),
         actions: [
           PopupMenuButton(
+            shape: menuShape,
             onSelected: (HomePageAction selected) async {
               switch (selected) {
                 case HomePageAction.import:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
@@ -18,9 +19,7 @@ class CreateAccountModal extends StatefulWidget {
       showDialog(
         context: context,
         builder: (_) => const AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(25)),
-          ),
+          shape: dialogShape,
           contentPadding: EdgeInsets.zero,
           content: CreateAccountModal(),
         ),
@@ -29,12 +28,7 @@ class CreateAccountModal extends StatefulWidget {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(25),
-            topRight: Radius.circular(25),
-          ),
-        ),
+        shape: modalShape,
         builder: (_) => const CreateAccountModal(),
       );
     }

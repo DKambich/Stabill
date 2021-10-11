@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'
         QuerySnapshot;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/providers/data_provider.dart';
@@ -141,6 +142,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ),
           ),
           PopupMenuButton(
+            shape: menuShape,
             onSelected: (TransactionPageAction selected) async {
               switch (selected) {
                 case TransactionPageAction.correction:
@@ -175,8 +177,102 @@ class _TransactionsPageState extends State<TransactionsPage> {
           )
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
+          StreamBuilder<QuerySnapshot<Transaction>>(
+            stream: _transactionsStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Text('Something went wrong');
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              var transactionData = snapshot.data!.docs;
+              if (transactionData.isEmpty) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.payment, size: 64),
+                    Text("Add a new transaction!"),
+                  ],
+                );
+              }
+
+              transactionData = transactionData
+                  .where((element) => !element.data().hidden)
+                  .toList();
+              if (isSearching) {
+                final String query = searchController.text.toLowerCase();
+                transactionData = transactionData
+                    .where(
+                      (element) =>
+                          element.data().name.toLowerCase().contains(query),
+                    )
+                    .toList();
+              }
+
+              transactionData.sort(
+                (a, b) => b.data().timestamp.compareTo(a.data().timestamp),
+              );
+
+              return ListView.builder(
+                itemCount: transactionData.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return const SizedBox(
+                      height: 50,
+                    );
+                  }
+                  index--;
+                  final Transaction transaction = transactionData[index].data();
+                  final String transactionID = transactionData[index].id;
+
+                  return TransactionCard(
+                    transaction: transaction,
+                    query: searchController.text,
+                    onSelected: (selectedAction) async {
+                      switch (selectedAction) {
+                        case TransactionAction.hide:
+                          await hideTransaction(transactionID, transaction);
+                          break;
+                        case TransactionAction.clear:
+                          await context
+                              .read<DataProvider>()
+                              .clearTransaction(widget.account, transaction);
+                          break;
+                        case TransactionAction.move:
+                          moveTransaction(transactionID, transaction);
+                          break;
+                        case TransactionAction.edit:
+                          await editTransaction(transactionID, transaction);
+                          break;
+                        case TransactionAction.delete:
+                          final bool confirm = await ConfirmDialog.show(
+                            context,
+                            "Delete Transaction",
+                            "Are you sure you want to delete the transaction '${transaction.name}'?",
+                            confirmColor: Colors.red,
+                          );
+                          if (confirm) {
+                            if (!mounted) return;
+                            await context
+                                .read<DataProvider>()
+                                .deleteTransaction(
+                                  widget.account,
+                                  transaction,
+                                );
+                          }
+                          break;
+                      }
+                    },
+                  );
+                },
+              );
+            },
+          ),
           StreamBuilder<DocumentSnapshot<Account>>(
             stream: _accountStream,
             builder: (context, snapshot) {
@@ -199,98 +295,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
               }
               return accountCard;
             },
-          ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot<Transaction>>(
-              stream: _transactionsStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Text('Something went wrong');
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                var transactionData = snapshot.data!.docs;
-                if (transactionData.isEmpty) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.payment, size: 64),
-                      Text("Add a new transaction!"),
-                    ],
-                  );
-                }
-
-                transactionData = transactionData
-                    .where((element) => !element.data().hidden)
-                    .toList();
-                if (isSearching) {
-                  final String query = searchController.text.toLowerCase();
-                  transactionData = transactionData
-                      .where(
-                        (element) =>
-                            element.data().name.toLowerCase().contains(query),
-                      )
-                      .toList();
-                }
-
-                transactionData.sort(
-                  (a, b) => b.data().timestamp.compareTo(a.data().timestamp),
-                );
-
-                return ListView.builder(
-                  itemCount: transactionData.length,
-                  itemBuilder: (context, index) {
-                    final Transaction transaction =
-                        transactionData[index].data();
-                    final String transactionID = transactionData[index].id;
-
-                    return TransactionCard(
-                      transaction: transaction,
-                      query: searchController.text,
-                      actions: buildTransactionActions(transaction),
-                      onSelected: (selectedAction) async {
-                        switch (selectedAction) {
-                          case TransactionAction.hide:
-                            await hideTransaction(transactionID, transaction);
-                            break;
-                          case TransactionAction.clear:
-                            await context
-                                .read<DataProvider>()
-                                .clearTransaction(widget.account, transaction);
-                            break;
-                          case TransactionAction.move:
-                            moveTransaction(transactionID, transaction);
-                            break;
-                          case TransactionAction.edit:
-                            await editTransaction(transactionID, transaction);
-                            break;
-                          case TransactionAction.delete:
-                            final bool confirm = await ConfirmDialog.show(
-                              context,
-                              "Delete Transaction",
-                              "Are you sure you want to delete the transaction '${transaction.name}'?",
-                              confirmColor: Colors.red,
-                            );
-                            if (confirm) {
-                              if (!mounted) return;
-                              await context
-                                  .read<DataProvider>()
-                                  .deleteTransaction(
-                                    widget.account,
-                                    transaction,
-                                  );
-                            }
-                            break;
-                        }
-                      },
-                    );
-                  },
-                );
-              },
-            ),
           ),
         ],
       ),
@@ -348,55 +352,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
       transactionID,
       widget.account.id,
     );
-  }
-
-  List<PopupMenuItem<TransactionAction>> buildTransactionActions(
-    Transaction transaction,
-  ) {
-    return [
-      if (transaction.cleared)
-        const PopupMenuItem<TransactionAction>(
-          value: TransactionAction.hide,
-          child: ListTile(
-            leading: Icon(Icons.visibility_off),
-            title: Text("Hide"),
-            contentPadding: EdgeInsets.zero,
-          ),
-        ),
-      if (!transaction.cleared)
-        const PopupMenuItem<TransactionAction>(
-          value: TransactionAction.clear,
-          child: ListTile(
-            leading: Icon(Icons.check),
-            title: Text("Mark Cleared"),
-            contentPadding: EdgeInsets.zero,
-          ),
-        ),
-      const PopupMenuItem<TransactionAction>(
-        value: TransactionAction.move,
-        child: ListTile(
-          leading: Icon(Icons.swap_horiz),
-          title: Text("Move"),
-          contentPadding: EdgeInsets.zero,
-        ),
-      ),
-      const PopupMenuItem<TransactionAction>(
-        value: TransactionAction.edit,
-        child: ListTile(
-          leading: Icon(Icons.edit),
-          title: Text("Edit"),
-          contentPadding: EdgeInsets.zero,
-        ),
-      ),
-      const PopupMenuItem<TransactionAction>(
-        value: TransactionAction.delete,
-        child: ListTile(
-          leading: Icon(Icons.delete),
-          title: Text("Delete"),
-          contentPadding: EdgeInsets.zero,
-        ),
-      ),
-    ];
   }
 
   List<PopupMenuEntry<TransactionPageAction>> buildPageActions() {

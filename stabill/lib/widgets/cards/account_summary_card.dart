@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/widgets/balance_text.dart';
 
 class AccountSummaryCard extends StatelessWidget {
@@ -14,6 +15,7 @@ class AccountSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      shape: topCardShape,
       margin: EdgeInsets.zero,
       elevation: 2,
       child: Padding(
@@ -25,12 +27,14 @@ class AccountSummaryCard extends StatelessWidget {
               child: BalanceText(
                 prefixText: "Current: ",
                 balance: totalCurrentBalance,
+                fontSize: 20,
               ),
             ),
             Expanded(
               child: BalanceText(
                 prefixText: "Available: ",
                 balance: totalAvailableBalance,
+                fontSize: 20,
               ),
             ),
           ],

@@ -10,7 +10,6 @@ enum TransactionAction { clear, hide, move, edit, delete }
 class TransactionCard extends StatelessWidget {
   final Transaction transaction;
   final GestureTapDownCallback? onMorePress;
-  final List<PopupMenuEntry<TransactionAction>> actions;
   final void Function(TransactionAction)? onSelected;
   final String? query;
 
@@ -18,7 +17,6 @@ class TransactionCard extends StatelessWidget {
     Key? key,
     required this.transaction,
     this.onMorePress,
-    required this.actions,
     this.onSelected,
     this.query,
   }) : super(key: key);
@@ -105,6 +103,7 @@ class TransactionCard extends StatelessWidget {
             leading: Icon(Icons.visibility_off),
             title: Text("Hide"),
             contentPadding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
           ),
         ),
       if (!transaction.cleared)
@@ -114,6 +113,7 @@ class TransactionCard extends StatelessWidget {
             leading: Icon(Icons.check),
             title: Text("Mark Cleared"),
             contentPadding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
           ),
         ),
       const PopupMenuItem<TransactionAction>(
@@ -122,6 +122,7 @@ class TransactionCard extends StatelessWidget {
           leading: Icon(Icons.swap_horiz),
           title: Text("Move"),
           contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
         ),
       ),
       const PopupMenuItem<TransactionAction>(
@@ -130,6 +131,7 @@ class TransactionCard extends StatelessWidget {
           leading: Icon(Icons.edit),
           title: Text("Edit"),
           contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
         ),
       ),
       const PopupMenuItem<TransactionAction>(
@@ -138,6 +140,7 @@ class TransactionCard extends StatelessWidget {
           leading: Icon(Icons.delete),
           title: Text("Delete"),
           contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
         ),
       ),
     ];
