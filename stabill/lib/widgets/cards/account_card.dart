@@ -1,5 +1,7 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:stabill/models/account.dart';
+import 'package:stabill/utilities/menu_card.dart';
 import 'package:stabill/widgets/account_list.dart';
 import 'package:stabill/widgets/balance_text.dart';
 
@@ -7,7 +9,28 @@ class AccountCard extends StatelessWidget {
   final Account account;
   final VoidCallback? onTap;
   final void Function(AccountAction)? onSelected;
-  final List<PopupMenuEntry<AccountAction>> actions;
+  final List<PopupMenuItem<AccountAction>> actions;
+
+  static const List<PopupMenuItem<AccountAction>> menuActions = [
+    PopupMenuItem<AccountAction>(
+      value: AccountAction.edit,
+      child: ListTile(
+        leading: Icon(Icons.edit),
+        title: Text("Edit"),
+        contentPadding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+      ),
+    ),
+    PopupMenuItem<AccountAction>(
+      value: AccountAction.delete,
+      child: ListTile(
+        leading: Icon(Icons.delete),
+        title: Text("Delete"),
+        contentPadding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+      ),
+    ),
+  ];
 
   const AccountCard({
     Key? key,
@@ -23,43 +46,39 @@ class AccountCard extends StatelessWidget {
     final int currentBalance = account.currentBalance;
     final int availableBalance = account.availableBalance;
 
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding:
-              const EdgeInsets.only(left: 24, top: 24, bottom: 24, right: 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  name,
-                  style: const TextStyle(fontSize: 24),
-                ),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  BalanceText(
-                    prefixText: "Current: ",
-                    balance: currentBalance,
-                  ),
-                  BalanceText(
-                    prefixText: "Available: ",
-                    balance: availableBalance,
-                  ),
-                ],
-              ),
-              PopupMenuButton<AccountAction>(
-                itemBuilder: (_) => actions,
-                onSelected: onSelected,
-                padding: EdgeInsets.zero,
-                tooltip: "Show Actions",
-              )
-            ],
+    return MenuCard<AccountAction>(
+      actions: actions,
+      onTap: onTap,
+      onSelect: (action) {
+        if (action != null) onSelected?.call(action);
+      },
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          Expanded(
+            child: AutoSizeText(
+              name,
+              style: const TextStyle(fontSize: 24),
+              maxLines: 1,
+            ),
           ),
-        ),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                BalanceText(
+                  prefixText: "Current: ",
+                  balance: currentBalance,
+                ),
+                BalanceText(
+                  prefixText: "Available: ",
+                  balance: availableBalance,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

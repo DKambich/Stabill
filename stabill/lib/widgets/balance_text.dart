@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -39,9 +40,8 @@ class BalanceText extends StatelessWidget {
       balanceText = "+$balanceText";
     }
 
-    return RichText(
-      text: TextSpan(
-        style: TextStyle(fontSize: fontSize),
+    return AutoSizeText.rich(
+      TextSpan(
         children: <TextSpan>[
           TextSpan(
             text: prefixText,
@@ -55,6 +55,9 @@ class BalanceText extends StatelessWidget {
           ),
         ],
       ),
+      style: TextStyle(fontSize: fontSize),
+      textAlign: TextAlign.center,
+      maxLines: 1,
     );
   }
 }

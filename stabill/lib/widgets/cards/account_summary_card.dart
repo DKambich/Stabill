@@ -21,13 +21,17 @@ class AccountSummaryCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            BalanceText(
-              prefixText: "Current: ",
-              balance: totalCurrentBalance,
+            Expanded(
+              child: BalanceText(
+                prefixText: "Current: ",
+                balance: totalCurrentBalance,
+              ),
             ),
-            BalanceText(
-              prefixText: "Available: ",
-              balance: totalAvailableBalance,
+            Expanded(
+              child: BalanceText(
+                prefixText: "Available: ",
+                balance: totalAvailableBalance,
+              ),
             ),
           ],
         ),
