@@ -36,7 +36,7 @@ class TransactionsPage extends StatefulWidget {
   _TransactionsPageState createState() => _TransactionsPageState();
 }
 
-enum TransactionPageAction { correction, transfer, reveal, schedule }
+enum TransactionPageAction { correction, transfer, reveal }
 
 class _TransactionsPageState extends State<TransactionsPage> {
   late DocumentReference<Account> _accountDocument;
@@ -196,9 +196,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   }
                   transactionUpdates.docs.forEach(revealTransaction);
                   break;
-                case TransactionPageAction.schedule:
-                  // TODO: Handle this case.
-                  break;
               }
             },
             itemBuilder: (_) => buildPageActions(),
@@ -328,11 +325,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
   }
 
-  Future<void> clearTransaction(String transactionID, Transaction transaction) {
-    transaction.cleared = true;
-    return _transactionsCollection.doc(transactionID).set(transaction);
-  }
-
   Future<void> hideTransaction(String transactionID, Transaction transaction) {
     transaction.hidden = true;
     return _transactionsCollection.doc(transactionID).set(transaction);
@@ -372,15 +364,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
         child: ListTile(
           leading: Icon(Icons.swap_horiz),
           title: Text("Transfer Funds"),
-          contentPadding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-        ),
-      ),
-      const PopupMenuItem<TransactionPageAction>(
-        value: TransactionPageAction.schedule,
-        child: ListTile(
-          leading: Icon(Icons.schedule_outlined),
-          title: Text("Schedule Transactions"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
         ),
