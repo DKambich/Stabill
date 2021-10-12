@@ -50,6 +50,13 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.delete_forever_outlined),
+            title: const Text("Delete Account"),
+            onTap: () async {
+              // Show delete account dialog
+            },
+          ),
         ],
       ),
     );

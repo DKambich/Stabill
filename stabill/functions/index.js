@@ -2,6 +2,15 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
+exports.deleteUserData = functions.auth.user().onDelete(async (user) => {
+  const userDoc = admin.firestore().collection("users").doc(user.uid);
+  const userAccounts = await userDoc.collection("accounts").get();
+  const deletedAccounts = userAccounts.docs.map((doc) => doc.ref.delete());
+
+  await Promise.allSettled(deletedAccounts);
+  await userDoc.delete();
+});
+
 exports.onDeleteAccount = functions.firestore
   .document("/users/{userID}/accounts/{accountID}")
   .onDelete(async (snap, context) => {

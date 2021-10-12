@@ -36,4 +36,15 @@ class AuthProvider {
   Future<void> signOut() async {
     await firebaseAuth.signOut();
   }
+
+  Future<void> deleteAccount(String email, String password) async {
+    try {
+      await currentUser?.reauthenticateWithCredential(
+        EmailAuthProvider.credential(email: email, password: password),
+      );
+      await currentUser?.delete();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
