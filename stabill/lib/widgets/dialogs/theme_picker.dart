@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:stabill/constants.dart';
 
 class ThemePicker extends StatefulWidget {
   final ThemeMode defaultType;
@@ -37,6 +38,7 @@ class _ThemePickerState extends State<ThemePicker> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text("Select Theme Type"),
+      shape: dialogShape,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: ThemeMode.values

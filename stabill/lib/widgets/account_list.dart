@@ -115,7 +115,6 @@ class _AccountListState extends State<AccountList> {
                       context,
                       "Delete Account",
                       "Are you sure you want to delete the account '${account.name}'?",
-                      confirmColor: Colors.red,
                     );
                     if (confirm) {
                       if (!mounted) return;
