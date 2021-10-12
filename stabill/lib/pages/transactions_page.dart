@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'
         DocumentReference,
         DocumentSnapshot,
         CollectionReference,
+        QueryDocumentSnapshot,
         QuerySnapshot;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -78,6 +79,32 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final header = StreamBuilder<DocumentSnapshot<Account>>(
+      stream: _accountStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError ||
+            snapshot.connectionState == ConnectionState.waiting) {
+          return const AccountSummaryCard(
+            totalCurrentBalance: 0,
+            totalAvailableBalance: 0,
+          );
+        }
+
+        final Account? account = snapshot.data!.data();
+
+        if (account != null) {
+          return AccountSummaryCard(
+            totalCurrentBalance: account.currentBalance,
+            totalAvailableBalance: account.availableBalance,
+          );
+        }
+        return const AccountSummaryCard(
+          totalCurrentBalance: 0,
+          totalAvailableBalance: 0,
+        );
+      },
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: AnimatedSwitcher(
@@ -178,118 +205,91 @@ class _TransactionsPageState extends State<TransactionsPage> {
           )
         ],
       ),
-      body: HeaderList(
-        header: StreamBuilder<DocumentSnapshot<Account>>(
-          stream: _accountStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError ||
-                snapshot.connectionState == ConnectionState.waiting) {
-              return const AccountSummaryCard(
-                totalCurrentBalance: 0,
-                totalAvailableBalance: 0,
-              );
-            }
+      body: StreamBuilder<QuerySnapshot<Transaction>>(
+        stream: _transactionsStream,
+        builder: (context, snapshot) {
+          List<QueryDocumentSnapshot<Transaction>> transactionData = [];
+          if (snapshot.data != null) transactionData = snapshot.data!.docs;
 
-            final Account? account = snapshot.data!.data();
-
-            if (account != null) {
-              return AccountSummaryCard(
-                totalCurrentBalance: account.currentBalance,
-                totalAvailableBalance: account.availableBalance,
-              );
-            }
-            return const AccountSummaryCard(
-              totalCurrentBalance: 0,
-              totalAvailableBalance: 0,
-            );
-          },
-        ),
-        listBody: StreamBuilder<QuerySnapshot<Transaction>>(
-          stream: _transactionsStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return const Text('Something went wrong');
-            }
-
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            var transactionData = snapshot.data!.docs;
-            if (transactionData.isEmpty) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.payment, size: 64),
-                  Text("Add a new transaction!"),
-                ],
-              );
-            }
-
+          transactionData = transactionData
+              .where((element) => !element.data().hidden)
+              .toList();
+          if (isSearching) {
+            final String query = searchController.text.toLowerCase();
             transactionData = transactionData
-                .where((element) => !element.data().hidden)
+                .where(
+                  (element) =>
+                      element.data().name.toLowerCase().contains(query),
+                )
                 .toList();
-            if (isSearching) {
-              final String query = searchController.text.toLowerCase();
-              transactionData = transactionData
-                  .where(
-                    (element) =>
-                        element.data().name.toLowerCase().contains(query),
-                  )
-                  .toList();
-            }
+          }
 
-            transactionData.sort(
-              (a, b) => b.data().timestamp.compareTo(a.data().timestamp),
-            );
+          transactionData.sort(
+            (a, b) => b.data().timestamp.compareTo(a.data().timestamp),
+          );
 
-            return ListView.builder(
-              itemCount: transactionData.length,
-              itemBuilder: (context, index) {
-                final Transaction transaction = transactionData[index].data();
-                final String transactionID = transactionData[index].id;
+          return HeaderList(
+            header: header,
+            error: snapshot.hasError,
+            onError: const Center(child: Text('Something went wrong')),
+            isLoading: snapshot.connectionState == ConnectionState.waiting,
+            onLoading: const Center(child: CircularProgressIndicator()),
+            onEmpty: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: const [
+                Icon(Icons.payment, size: 64),
+                Text(
+                  "Add a new transaction!",
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+            itemCount: transactionData.length,
+            itemBuilder: (context, index) {
+              final Transaction transaction = transactionData[index].data();
+              final String transactionID = transactionData[index].id;
 
-                return TransactionCard(
-                  transaction: transaction,
-                  query: searchController.text,
-                  onSelected: (selectedAction) async {
-                    switch (selectedAction) {
-                      case TransactionAction.hide:
-                        await hideTransaction(transactionID, transaction);
-                        break;
-                      case TransactionAction.clear:
-                        await context
-                            .read<DataProvider>()
-                            .clearTransaction(widget.account, transaction);
-                        break;
-                      case TransactionAction.move:
-                        moveTransaction(transactionID, transaction);
-                        break;
-                      case TransactionAction.edit:
-                        await editTransaction(transactionID, transaction);
-                        break;
-                      case TransactionAction.delete:
-                        final bool confirm = await ConfirmDialog.show(
-                          context,
-                          "Delete Transaction",
-                          "Are you sure you want to delete the transaction '${transaction.name}'?",
-                          confirmColor: Colors.red,
-                        );
-                        if (confirm) {
-                          if (!mounted) return;
-                          await context.read<DataProvider>().deleteTransaction(
-                                widget.account,
-                                transaction,
-                              );
-                        }
-                        break;
-                    }
-                  },
-                );
-              },
-            );
-          },
-        ),
+              return TransactionCard(
+                transaction: transaction,
+                query: searchController.text,
+                onSelected: (selectedAction) async {
+                  switch (selectedAction) {
+                    case TransactionAction.hide:
+                      await hideTransaction(transactionID, transaction);
+                      break;
+                    case TransactionAction.clear:
+                      await context
+                          .read<DataProvider>()
+                          .clearTransaction(widget.account, transaction);
+                      break;
+                    case TransactionAction.move:
+                      moveTransaction(transactionID, transaction);
+                      break;
+                    case TransactionAction.edit:
+                      await editTransaction(transactionID, transaction);
+                      break;
+                    case TransactionAction.delete:
+                      final bool confirm = await ConfirmDialog.show(
+                        context,
+                        "Delete Transaction",
+                        "Are you sure you want to delete the transaction '${transaction.name}'?",
+                        confirmColor: Colors.red,
+                      );
+                      if (confirm) {
+                        if (!mounted) return;
+                        await context.read<DataProvider>().deleteTransaction(
+                              widget.account,
+                              transaction,
+                            );
+                      }
+                      break;
+                  }
+                },
+              );
+            },
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {

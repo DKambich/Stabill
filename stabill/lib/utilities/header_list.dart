@@ -3,12 +3,26 @@ import 'package:stabill/utilities/measure_size.dart';
 
 class HeaderList extends StatefulWidget {
   final Widget? header;
-  final Widget? listBody;
+  final Widget Function(BuildContext, int) itemBuilder;
+  final int itemCount;
+  final Widget? onEmpty;
+  final bool? isLoading;
+  final Widget? onLoading;
+  final bool? error;
+  final Widget? onError;
+  final ScrollController? controller;
 
   const HeaderList({
     Key? key,
     this.header,
-    this.listBody,
+    required this.itemBuilder,
+    required this.itemCount,
+    this.onEmpty,
+    this.isLoading,
+    this.onLoading,
+    this.error,
+    this.onError,
+    this.controller,
   }) : super(key: key);
 
   @override
@@ -24,18 +38,34 @@ class _HeaderListState extends State<HeaderList> {
       valueListenable: _headerSize,
       child: null,
       builder: (BuildContext context, Size value, Widget? child) {
+        Widget body = const SizedBox.shrink();
+        if (widget.error ?? false) {
+          body = Padding(
+            padding: EdgeInsets.only(top: value.height),
+            child: widget.onError ?? body,
+          );
+        } else if (widget.isLoading ?? false) {
+          body = Padding(
+            padding: EdgeInsets.only(top: value.height),
+            child: widget.onLoading ?? body,
+          );
+        } else if (widget.itemCount == 0) {
+          body = Padding(
+            padding: EdgeInsets.only(top: value.height),
+            child: widget.onEmpty ?? body,
+          );
+        } else {
+          body = ListView.builder(
+            controller: widget.controller,
+            padding: EdgeInsets.only(top: value.height),
+            itemCount: widget.itemCount,
+            itemBuilder: widget.itemBuilder,
+          );
+        }
+
         return Stack(
           children: [
-            Column(
-              children: [
-                SizedBox(
-                  height: value.height + 1,
-                ),
-                Expanded(
-                  child: widget.listBody ?? const SizedBox.shrink(),
-                )
-              ],
-            ),
+            body,
             MeasureSize(
               sizeValueNotifier: _headerSize,
               child: widget.header,

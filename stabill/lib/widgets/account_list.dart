@@ -54,23 +54,8 @@ class _AccountListState extends State<AccountList> {
     return StreamBuilder<QuerySnapshot<Account>>(
       stream: _accountsStream,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Something went wrong');
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Column(
-            children: const [
-              AccountSummaryCard(
-                totalCurrentBalance: 0,
-                totalAvailableBalance: 0,
-              ),
-              Expanded(child: Center(child: CircularProgressIndicator())),
-            ],
-          );
-        }
-
-        final accountData = snapshot.data!.docs;
+        List<QueryDocumentSnapshot<Account>> accountData = [];
+        if (snapshot.data != null) accountData = snapshot.data!.docs;
 
         int totalCurrentBalance = 0;
         int totalAvailableBalance = 0;
@@ -83,78 +68,64 @@ class _AccountListState extends State<AccountList> {
 
         accountData.forEach(totalBalances);
 
-        if (accountData.isEmpty) {
-          return Column(
-            children: [
-              AccountSummaryCard(
-                totalCurrentBalance: totalCurrentBalance,
-                totalAvailableBalance: totalAvailableBalance,
-              ),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(
-                        Icons.savings,
-                        size: 64,
-                      ),
-                      Text("Get started by adding a new account!"),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
-        }
-
         return HeaderList(
           header: AccountSummaryCard(
             totalCurrentBalance: totalCurrentBalance,
             totalAvailableBalance: totalAvailableBalance,
           ),
-          listBody: ListView.builder(
-            controller: _scrollController,
-            itemCount: accountData.length,
-            itemBuilder: (ctx, index) {
-              final Account account = accountData[index].data();
-              final String accountID = accountData[index].id;
-              return AccountCard(
-                key: Key(accountID),
-                account: account,
-                onTap: () {
-                  widget.shouldHideFAB(false);
-                  Navigator.of(context).pushNamed(
-                    TransactionsPage.routeName,
-                    arguments: account,
-                  );
-                },
-                actions: getAccountActions(),
-                onSelected: (AccountAction selectedAction) async {
-                  switch (selectedAction) {
-                    case AccountAction.edit:
-                      EditAccountModal.show(context, accountID);
-                      break;
-                    case AccountAction.delete:
-                      final bool confirm = await ConfirmDialog.show(
-                        context,
-                        "Delete Account",
-                        "Are you sure you want to delete the account '${account.name}'?",
-                        confirmColor: Colors.red,
-                      );
-                      if (confirm) {
-                        if (!mounted) return;
-                        this
-                            .context
-                            .read<DataProvider>()
-                            .deleteAccount(account);
-                      }
-                      break;
-                  }
-                },
-              );
-            },
+          controller: _scrollController,
+          error: snapshot.hasError,
+          onError: const Text('Something went wrong'),
+          isLoading: snapshot.connectionState == ConnectionState.waiting,
+          onLoading: const Center(child: CircularProgressIndicator()),
+          onEmpty: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(
+                  Icons.savings,
+                  size: 64,
+                ),
+                Text("Get started by adding a new account!"),
+              ],
+            ),
           ),
+          itemCount: accountData.length,
+          itemBuilder: (ctx, index) {
+            final Account account = accountData[index].data();
+            final String accountID = accountData[index].id;
+            return AccountCard(
+              key: Key(accountID),
+              account: account,
+              onTap: () {
+                widget.shouldHideFAB(false);
+                Navigator.of(context).pushNamed(
+                  TransactionsPage.routeName,
+                  arguments: account,
+                );
+              },
+              actions: getAccountActions(),
+              onSelected: (AccountAction selectedAction) async {
+                switch (selectedAction) {
+                  case AccountAction.edit:
+                    EditAccountModal.show(context, accountID);
+                    break;
+                  case AccountAction.delete:
+                    final bool confirm = await ConfirmDialog.show(
+                      context,
+                      "Delete Account",
+                      "Are you sure you want to delete the account '${account.name}'?",
+                      confirmColor: Colors.red,
+                    );
+                    if (confirm) {
+                      if (!mounted) return;
+                      this.context.read<DataProvider>().deleteAccount(account);
+                    }
+                    break;
+                }
+              },
+            );
+          },
         );
       },
     );

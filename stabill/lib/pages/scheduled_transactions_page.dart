@@ -49,48 +49,40 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
           }
         },
       ),
-      body: HeaderList(
-        listBody: StreamBuilder<QuerySnapshot<ScheduledTransaction>>(
-          stream: _scheduledStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return const Text('Something went wrong');
-            }
+      body: StreamBuilder<QuerySnapshot<ScheduledTransaction>>(
+        stream: _scheduledStream,
+        builder: (context, snapshot) {
+          List<QueryDocumentSnapshot<ScheduledTransaction>> scheduledData = [];
+          if (snapshot.data != null) scheduledData = snapshot.data!.docs;
 
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final scheduledData = snapshot.data!.docs;
-            if (scheduledData.isEmpty) {
-              // Figure out why all this rendering is weird
-              return Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.more_time_outlined,
-                          size: 64,
-                        ),
-                        Text("Schedule a transaction!"),
-                      ],
-                    ),
+          return HeaderList(
+            error: snapshot.hasError,
+            onError: const Text('Something went wrong'),
+            isLoading: snapshot.connectionState == ConnectionState.waiting,
+            onLoading: const Center(child: CircularProgressIndicator()),
+            onEmpty: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.more_time_outlined,
+                        size: 64,
+                      ),
+                      Text("Schedule a transaction!"),
+                    ],
                   ),
-                ],
-              );
-            }
-
-            return ListView.builder(
-              itemCount: scheduledData.length,
-              itemBuilder: (context, index) {
-                final ScheduledTransaction item = scheduledData[index].data();
-                return ScheduledTransactionCard(scheduledTransaction: item);
-              },
-            );
-          },
-        ),
+                ),
+              ],
+            ),
+            itemBuilder: (context, index) {
+              final ScheduledTransaction item = scheduledData[index].data();
+              return ScheduledTransactionCard(scheduledTransaction: item);
+            },
+            itemCount: scheduledData.length,
+          );
+        },
       ),
     );
   }
