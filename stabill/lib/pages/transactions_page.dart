@@ -10,21 +10,15 @@ import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart';
+import 'package:stabill/pages/transaction_form_page.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/header_list.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/cards/transaction_card.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
-import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 import 'package:stabill/widgets/prompts/balance_correction_prompt.dart';
 import 'package:stabill/widgets/prompts/transfer_funds_prompt.dart';
 import 'package:stabill/widgets/prompts/transfer_transaction_prompt.dart';
-
-class TransactionArguments {
-  final String accountID;
-  final Account account;
-  TransactionArguments(this.accountID, this.account);
-}
 
 class TransactionsPage extends StatefulWidget {
   static const String routeName = "/transactions";

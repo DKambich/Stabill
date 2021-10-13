@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/scheduled_transaction.dart';
+import 'package:stabill/pages/scheduled_transaction_form_page.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/header_list.dart';
 import 'package:stabill/widgets/cards/scheduled_transaction_card.dart';
-import 'package:stabill/widgets/modals/scheduled_transaction_form_modal.dart';
 
 class ScheduledTransactionsPage extends StatefulWidget {
   static const String routeName = "/scheduledTransactions";

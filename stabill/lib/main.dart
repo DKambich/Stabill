@@ -5,14 +5,14 @@ import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
+import 'package:stabill/pages/scheduled_transaction_form_page.dart';
 import 'package:stabill/pages/scheduled_transactions_page.dart';
 import 'package:stabill/pages/settings_page.dart';
+import 'package:stabill/pages/transaction_form_page.dart';
 import 'package:stabill/pages/transactions_page.dart';
 import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/providers/root_provider.dart';
 import 'package:stabill/utilities/initializer.dart';
-import 'package:stabill/widgets/modals/scheduled_transaction_form_modal.dart';
-import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 
 void main() {
   runApp(Stabill());
