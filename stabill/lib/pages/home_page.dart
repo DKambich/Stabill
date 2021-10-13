@@ -10,7 +10,7 @@ import 'package:stabill/pages/settings_page.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/account_list.dart';
 import 'package:stabill/widgets/modals/create_account_modal.dart';
-import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
+import 'package:stabill/widgets/prompts/transfer_funds_prompt.dart';
 
 class HomePage extends StatefulWidget {
   static const String routeName = "/home";

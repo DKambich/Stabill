@@ -17,8 +17,8 @@ import 'package:stabill/widgets/cards/transaction_card.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 import 'package:stabill/widgets/modals/balance_correction_modal.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
-import 'package:stabill/widgets/modals/transfer_funds_modal.dart';
 import 'package:stabill/widgets/modals/transfer_transaction_modal.dart';
+import 'package:stabill/widgets/prompts/transfer_funds_prompt.dart';
 
 class TransactionArguments {
   final String accountID;
