@@ -33,7 +33,6 @@ class Account {
   }
 
   @override
-  // TODO: implement hashCode
   int get hashCode =>
       id.hashCode ^
       name.hashCode ^

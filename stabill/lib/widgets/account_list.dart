@@ -12,7 +12,7 @@ import 'package:stabill/utilities/header_list.dart';
 import 'package:stabill/widgets/cards/account_card.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
-import 'package:stabill/widgets/modals/edit_account_modal.dart';
+import 'package:stabill/widgets/prompts/edit_account_prompt.dart';
 
 class AccountList extends StatefulWidget {
   final Function(bool) shouldHideFAB;
@@ -108,7 +108,7 @@ class _AccountListState extends State<AccountList> {
               onSelected: (AccountAction selectedAction) async {
                 switch (selectedAction) {
                   case AccountAction.edit:
-                    EditAccountModal.show(context, accountID);
+                    EditAccountPrompt.show(context, accountID);
                     break;
                   case AccountAction.delete:
                     final bool confirm = await ConfirmDialog.show(

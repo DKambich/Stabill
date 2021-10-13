@@ -35,28 +35,7 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
     return Prompt(
       title: "Create Account",
       onCancel: () => Navigator.pop(context),
-      onConfirm: () async {
-        if (_formKey.currentState!.validate()) {
-          // Setup the new account
-          final Account account = Account(
-            name: _accountController.text,
-          );
-
-          // Get the starting balance
-          final int startingBalance = int.parse(
-            _balanceController.text.replaceAll(RegExp(r"[^\d]"), ""),
-          );
-
-          // Create the new Account
-          await context.read<DataProvider>().createAccount(
-                account,
-                startingBalance,
-              );
-
-          if (!mounted) return;
-          Navigator.pop(context);
-        }
-      },
+      onConfirm: submitForm,
       formBody: Form(
         key: _formKey,
         child: Column(
@@ -83,6 +62,7 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
               enableInteractiveSelection: false,
               inputFormatters: [DollarTextInputFormatter(maxDigits: 8)],
               keyboardType: TextInputType.number,
+              onFieldSubmitted: (_) => submitForm(),
               textCapitalization: TextCapitalization.words,
               textInputAction: TextInputAction.done,
             ),
@@ -90,6 +70,29 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
         ),
       ),
     );
+  }
+
+  Future<void> submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      // Setup the new account
+      final Account account = Account(
+        name: _accountController.text,
+      );
+
+      // Get the starting balance
+      final int startingBalance = int.parse(
+        _balanceController.text.replaceAll(RegExp(r"[^\d]"), ""),
+      );
+
+      // Create the new Account
+      await context.read<DataProvider>().createAccount(
+            account,
+            startingBalance,
+          );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+    }
   }
 
   @override

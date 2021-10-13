@@ -114,25 +114,7 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
         return Prompt(
           title: "Transfer Funds",
           onCancel: () => Navigator.pop(context),
-          onConfirm: () async {
-            // Validate the form
-            if (_formKey.currentState!.validate()) {
-              // Get the amount to transfer
-              final int transferAmount = int.parse(
-                _balanceController.text.replaceAll(RegExp(r"[^\d]"), ""),
-              );
-
-              // Transfer the amount
-              await context.read<DataProvider>().transferFunds(
-                    _fromAccount,
-                    _toAccount,
-                    transferAmount,
-                  );
-
-              if (!mounted) return;
-              Navigator.pop(context);
-            }
-          },
+          onConfirm: submitForm,
           formBody: Form(
             key: _formKey,
             child: Column(
@@ -160,7 +142,8 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
                   enableInteractiveSelection: false,
                   inputFormatters: [DollarTextInputFormatter(maxDigits: 7)],
                   keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.go,
+                  onFieldSubmitted: (_) => submitForm(),
+                  textInputAction: TextInputAction.done,
                   validator: (amount) =>
                       (amount == null || amount == "" || amount == "\$0.00")
                           ? 'Transfer amount cannot be zero'
@@ -172,6 +155,26 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
         );
       },
     );
+  }
+
+  Future<void> submitForm() async {
+    // Validate the form
+    if (_formKey.currentState!.validate()) {
+      // Get the amount to transfer
+      final int transferAmount = int.parse(
+        _balanceController.text.replaceAll(RegExp(r"[^\d]"), ""),
+      );
+
+      // Transfer the amount
+      await context.read<DataProvider>().transferFunds(
+            _fromAccount,
+            _toAccount,
+            transferAmount,
+          );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+    }
   }
 
   @override
