@@ -40,36 +40,43 @@ exports.processScheduledTransactions = functions.pubsub
       .where("enabled", "=", true)
       .where("timestamp", "<", admin.firestore.Timestamp.now());
 
-    const docs = await query.get();
-    docs.forEach(function (doc) {
-      const docData = doc.data();
-      doc.ref.parent.parent.collection("transactions").add({
-        name: docData.name,
-        amount: docData.amount,
-        checkNumber: docData.checkNumber,
-        memo: docData.memo,
-        timestamp: docData.timestamp,
-        cleared: docData.cleared,
-        hidden: docData.hideIfCleared ? docData.cleared : false,
-        method: docData.method,
+    const retrievedTransactions = await query.get();
+
+    // For each document
+    retrievedTransactions.forEach(function (transaction) {
+      const transactionData = transaction.data();
+      const parentAccount = transaction.ref.parent.parent;
+
+      // Add a transaction from the ScheduledTransaction metadata
+      parentAccount.collection("transactions").add({
+        name: transactionData.name,
+        amount: transactionData.amount,
+        checkNumber: transactionData.checkNumber,
+        memo: transactionData.memo,
+        timestamp: transactionData.timestamp,
+        cleared: transactionData.cleared,
+        hidden: transactionData.hideIfCleared ? transactionData.cleared : false,
+        method: transactionData.method,
       });
 
+      // Calculate the Account balance deltas
       const currentDelta =
-        docData.amount *
-        (docData.method == "TransactionType.Withdrawal" ? -1 : 1);
-      const availDelta = docData.cleared ? currentDelta : 0;
+      transactionData.amount *
+        (transactionData.method == "TransactionType.withdrawal" ? -1 : 1);
+      const availDelta = transactionData.cleared ? currentDelta : 0;
 
-      doc.ref.parent.parent.update({
+      // Update the Account balances
+      parentAccount.update({
         availableBalance: admin.firestore.FieldValue.increment(availDelta),
         currentBalance: admin.firestore.FieldValue.increment(currentDelta),
       });
 
-      const frequency = docData.frequency;
-      console.log(frequency);
-      const nextDate = docData.timestamp.toDate();
-      switch (frequency) {
+      // Update the ScheduledTransaction fields 
+      const nextDate = transactionData.timestamp.toDate();
+      const updates = {};
+      switch (transactionData.frequency) {
         case "Frequency.once":
-          docData.enabled = false;
+          updates["enabled"] = false;
           break;
         case "Frequency.daily":
           nextDate.setDate(nextDate.getDate() + 1);
@@ -91,8 +98,8 @@ exports.processScheduledTransactions = functions.pubsub
           nextDate.setFullYear(nextDate.getFullYear() + 1);
           break;
       }
-      docData.timestamp = nextDate;
-      doc.ref.update(docData);
+      updates["timestamp"] = nextDate;
+      transaction.ref.update(updates);
     });
-    console.debug(`This function found ${docs.size} documents`);
+    console.debug(`This function updated ${retrievedTransactions.size} documents`);
   });
