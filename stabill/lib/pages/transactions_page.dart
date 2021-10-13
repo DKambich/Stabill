@@ -15,9 +15,9 @@ import 'package:stabill/utilities/header_list.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/cards/transaction_card.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
-import 'package:stabill/widgets/modals/balance_correction_modal.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
 import 'package:stabill/widgets/modals/transfer_transaction_modal.dart';
+import 'package:stabill/widgets/prompts/balance_correction_prompt.dart';
 import 'package:stabill/widgets/prompts/transfer_funds_prompt.dart';
 
 class TransactionArguments {
@@ -174,7 +174,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             onSelected: (TransactionPageAction selected) async {
               switch (selected) {
                 case TransactionPageAction.correction:
-                  BalanceCorrectionModal.show(context, widget.account.id);
+                  BalanceCorrectionPrompt.show(context, widget.account.id);
                   break;
                 case TransactionPageAction.transfer:
                   TransferFundsPrompt.show(
