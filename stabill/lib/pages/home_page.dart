@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                 SpeedDialChild(
                   child: const Icon(Icons.swap_horiz),
                   label: "Make Transfer",
-                  onTap: () => TransferFundsModal.show(context),
+                  onTap: () => TransferFundsPrompt.show(context),
                 ),
                 SpeedDialChild(
                   child: const Icon(Icons.schedule_outlined),

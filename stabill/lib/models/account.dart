@@ -26,4 +26,17 @@ class Account {
       'currentBalance': currentBalance,
     };
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is Account && other.id == id;
+  }
+
+  @override
+  // TODO: implement hashCode
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      availableBalance.hashCode ^
+      currentBalance.hashCode;
 }

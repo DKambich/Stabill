@@ -177,7 +177,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   BalanceCorrectionModal.show(context, widget.account.id);
                   break;
                 case TransactionPageAction.transfer:
-                  TransferFundsModal.show(
+                  TransferFundsPrompt.show(
                     context,
                     defaultAccountID: widget.account.id,
                   );

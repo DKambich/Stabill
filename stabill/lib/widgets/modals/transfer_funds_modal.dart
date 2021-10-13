@@ -4,39 +4,33 @@ import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
+import 'package:stabill/widgets/prompts/prompt.dart';
 
-class TransferFundsModal extends StatefulWidget {
+class TransferFundsPrompt extends StatefulWidget {
   final String? defaultAccountID;
 
-  const TransferFundsModal({Key? key, this.defaultAccountID}) : super(key: key);
+  const TransferFundsPrompt({Key? key, this.defaultAccountID})
+      : super(key: key);
 
   @override
-  _TransferFundsModalState createState() => _TransferFundsModalState();
+  _TransferFundsPromptState createState() => _TransferFundsPromptState();
 
   static void show(BuildContext context, {String? defaultAccountID}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
-      ),
-      builder: (_) => TransferFundsModal(defaultAccountID: defaultAccountID),
+    Prompt.show(
+      context,
+      TransferFundsPrompt(defaultAccountID: defaultAccountID),
     );
   }
 }
 
-class _TransferFundsModalState extends State<TransferFundsModal> {
+class _TransferFundsPromptState extends State<TransferFundsPrompt> {
   // Firebase Variables
   late Future<QuerySnapshot<Account>> _accountsFuture;
 
   // Form Variables
   late GlobalKey<FormState> _formKey;
-  late String _fromAccountID;
-  late String _toAccountID;
-  late String? _dropdownErrorText;
+  late Account _fromAccount;
+  late Account _toAccount;
   late TextEditingController _balanceController;
 
   @override
@@ -48,24 +42,9 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
     // Initialize Form variables
     _formKey = GlobalKey<FormState>();
 
-    _fromAccountID = _toAccountID = "";
-    _dropdownErrorText = null;
-
+    _fromAccount = Account();
+    _toAccount = Account();
     _balanceController = TextEditingController(text: r"$0.00");
-    // _balanceController.addListener(() {
-    //   // Format the TextField text to be a dollar string
-    //   String formatStr = Account.formatDollarStr(_balanceController.text);
-
-    //   // Replace the TextField text with the format string
-    //   _balanceController.value = _balanceController.value.copyWith(
-    //     text: formatStr,
-    //     selection: TextSelection(
-    //       baseOffset: formatStr.length,
-    //       extentOffset: formatStr.length,
-    //     ),
-    //     composing: TextRange.empty,
-    //   );
-    // });
 
     super.initState();
   }
@@ -107,138 +86,90 @@ class _TransferFundsModalState extends State<TransferFundsModal> {
             snapshot.data!.docs;
 
         // Set the default account IDs if they are not initialized
-        if (_fromAccountID == "" || _toAccountID == "") {
+        if (_fromAccount.id == "" || _toAccount.id == "") {
+          // Use the provided default account if specified
           if (widget.defaultAccountID != null) {
-            _fromAccountID = widget.defaultAccountID!;
-            _toAccountID = widget.defaultAccountID!;
+            _fromAccount = accounts
+                .firstWhere((account) => account.id == widget.defaultAccountID)
+                .data();
+
+            _toAccount = _fromAccount;
           } else {
-            _fromAccountID = accounts[0].id;
-            _toAccountID = accounts[1].id;
+            _fromAccount = accounts[0].data();
+            _toAccount = accounts[1].data();
           }
         }
 
         // Map each account to a DropdownMenuItem
-        final List<DropdownMenuItem<String>> dropdownItems = accounts
+        final List<DropdownMenuItem<Account>> dropdownItems = accounts
             .map(
               (value) => DropdownMenuItem(
-                value: value.id,
+                value: value.data(),
                 child: Text(value.data().name),
               ),
             )
             .toList();
 
-        return SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 48.0,
-              right: 48.0,
-              top: 24,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-            ),
+        return Prompt(
+          title: "Transfer Funds",
+          onCancel: () => Navigator.pop(context),
+          onConfirm: () async {
+            // Validate the form
+            if (_formKey.currentState!.validate()) {
+              // Get the amount to transfer
+              final int transferAmount = int.parse(
+                _balanceController.text.replaceAll(RegExp(r"[^\d]"), ""),
+              );
+
+              // Initiate the transfer
+              await context.read<DataProvider>().transferFunds(
+                    _fromAccount,
+                    _toAccount,
+                    transferAmount,
+                  );
+
+              if (!mounted) return;
+              Navigator.pop(context);
+            }
+          },
+          formBody: Form(
+            key: _formKey,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  "Transfer Funds",
-                  style: TextStyle(fontSize: 20),
-                  textAlign: TextAlign.center,
+                DropdownButtonFormField<Account>(
+                  decoration: const InputDecoration(labelText: "Transfer from"),
+                  items: dropdownItems,
+                  value: _fromAccount,
+                  onChanged: (Account? newValue) =>
+                      setState(() => _fromAccount = newValue ?? _fromAccount),
                 ),
-                InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: "Transfer from",
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  child: DropdownButton(
-                    value: _fromAccountID,
-                    items: dropdownItems,
-                    menuMaxHeight: 200,
-                    isExpanded: true,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _fromAccountID = newValue ?? "";
-                      });
-                    },
-                  ),
+                DropdownButtonFormField<Account>(
+                  decoration: const InputDecoration(labelText: "Transfer to"),
+                  items: dropdownItems,
+                  value: _toAccount,
+                  onChanged: (Account? newValue) =>
+                      setState(() => _toAccount = newValue ?? _toAccount),
+                  validator: (account) => account == _fromAccount
+                      ? 'Transfer accounts cannot be the same'
+                      : null,
                 ),
-                InputDecorator(
-                  decoration: InputDecoration(
-                    errorText: _dropdownErrorText,
-                    labelText: "Transfer to",
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  child: DropdownButton(
-                    value: _toAccountID,
-                    items: dropdownItems,
-                    menuMaxHeight: 200,
-                    isExpanded: true,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _toAccountID = newValue ?? "";
-                      });
-                    },
-                  ),
+                TextFormField(
+                  controller: _balanceController,
+                  decoration: const InputDecoration(labelText: "Amount"),
+                  enableInteractiveSelection: false,
+                  inputFormatters: [DollarTextInputFormatter(maxDigits: 7)],
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.go,
+                  validator: (amount) =>
+                      (amount == null || amount == "" || amount == "\$0.00")
+                          ? 'Transfer amount cannot be zero'
+                          : null,
                 ),
-                Form(
-                  key: _formKey,
-                  child: TextFormField(
-                    controller: _balanceController,
-                    decoration: const InputDecoration(labelText: "Amount"),
-                    enableInteractiveSelection: false,
-                    inputFormatters: [DollarTextInputFormatter(maxDigits: 7)],
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.go,
-                    validator: (value) {
-                      if (value == null || value == "" || value == "\$0.00") {
-                        return 'Transfer amount cannot be zero';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ElevatedButton(
-                    onPressed: () => initiateTransfer(),
-                    child: const Text("Complete Transfer"),
-                  ),
-                )
               ],
             ),
           ),
         );
       },
     );
-  }
-
-  Future<void> initiateTransfer() async {
-    // Validate the form
-    bool validForm = _fromAccountID != _toAccountID;
-    validForm &= _formKey.currentState!.validate();
-
-    // If the form is valid, transfer the funds
-    if (validForm) {
-      // Get the amount to transfer
-      final int amount = int.parse(
-        _balanceController.text.replaceAll(RegExp(r"[^\d]"), ""),
-      );
-      final DataProvider dataProvider = context.read<DataProvider>();
-      final Account fromAccount = await dataProvider.getAccount(_fromAccountID);
-      final Account toAccount = await dataProvider.getAccount(_toAccountID);
-
-      await dataProvider.transferFunds(fromAccount, toAccount, amount);
-      if (!mounted) return;
-
-      Navigator.pop(context);
-    } else {
-      // Set error text manually for the DropDown if the accounts are the same
-      setState(() {
-        _dropdownErrorText = _fromAccountID == _toAccountID
-            ? "Transfer accounts cannot be the same"
-            : null;
-      });
-    }
   }
 }
