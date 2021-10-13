@@ -9,7 +9,7 @@ import 'package:stabill/pages/scheduled_transactions_page.dart';
 import 'package:stabill/pages/settings_page.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/account_list.dart';
-import 'package:stabill/widgets/modals/create_account_modal.dart';
+import 'package:stabill/widgets/modals/create_account_prompt.dart';
 import 'package:stabill/widgets/prompts/transfer_funds_prompt.dart';
 
 class HomePage extends StatefulWidget {
@@ -128,7 +128,7 @@ class _HomePageState extends State<HomePage> {
                 SpeedDialChild(
                   child: const Icon(Icons.savings),
                   label: "Add Account",
-                  onTap: () => CreateAccountModal.show(context),
+                  onTap: () => CreateAccountPrompt.show(context),
                 ),
                 SpeedDialChild(
                   child: const Icon(Icons.swap_horiz),

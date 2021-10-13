@@ -29,24 +29,25 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
 
   // Form Variables
   late GlobalKey<FormState> _formKey;
+  late TextEditingController _balanceController;
+
   late Account _fromAccount;
   late Account _toAccount;
-  late TextEditingController _balanceController;
 
   @override
   void initState() {
+    super.initState();
+
     // Initialize Firebase variables
     _accountsFuture =
         context.read<DataProvider>().getAccountsCollection().get();
 
     // Initialize Form variables
     _formKey = GlobalKey<FormState>();
+    _balanceController = TextEditingController(text: "\$0.00");
 
     _fromAccount = Account();
     _toAccount = Account();
-    _balanceController = TextEditingController(text: r"$0.00");
-
-    super.initState();
   }
 
   @override
@@ -121,7 +122,7 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
                 _balanceController.text.replaceAll(RegExp(r"[^\d]"), ""),
               );
 
-              // Initiate the transfer
+              // Transfer the amount
               await context.read<DataProvider>().transferFunds(
                     _fromAccount,
                     _toAccount,
@@ -171,5 +172,11 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _balanceController.dispose();
   }
 }
