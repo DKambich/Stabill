@@ -34,6 +34,9 @@
 - Improvement: Delete user data upon deleting account
   - https://firebase.google.com/docs/functions/auth-events#trigger_a_function_on_user_deletion
 
+- Enhancement: Convert Cloud Functions to TypeScript
+  - https://firebase.google.com/docs/functions/typescript#migrating_an_existing_javascript_project_to_typescript
+
 ## Accounts
 
 - UI: Display Account List ✅

@@ -48,15 +48,19 @@ class _HomePageState extends State<HomePage> {
             onSelected: (HomePageAction selected) async {
               switch (selected) {
                 case HomePageAction.import:
-                  final FilePickerResult? result =
-                      await FilePicker.platform.pickFiles(
-                    allowedExtensions: ['csv'],
-                    type: FileType.custom,
-                  );
-                  if (result != null) {
-                    final File csv = File(result.files[0].path!);
-                    if (!mounted) return;
-                    await context.read<DataProvider>().importCSV(csv);
+                  try {
+                    final FilePickerResult? result =
+                        await FilePicker.platform.pickFiles(
+                      allowedExtensions: ['csv'],
+                      type: FileType.custom,
+                    );
+                    if (result != null) {
+                      final File csv = File(result.files[0].path!);
+                      if (!mounted) return;
+                      await context.read<DataProvider>().importCSV(csv);
+                    }
+                  } catch (e) {
+                    // TODO: Show there is an error
                   }
                   break;
                 case HomePageAction.export:
