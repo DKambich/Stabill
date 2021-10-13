@@ -16,9 +16,9 @@ import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/cards/transaction_card.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 import 'package:stabill/widgets/modals/transaction_form_modal.dart';
-import 'package:stabill/widgets/modals/transfer_transaction_modal.dart';
 import 'package:stabill/widgets/prompts/balance_correction_prompt.dart';
 import 'package:stabill/widgets/prompts/transfer_funds_prompt.dart';
+import 'package:stabill/widgets/prompts/transfer_transaction_prompt.dart';
 
 class TransactionArguments {
   final String accountID;
@@ -330,7 +330,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   void moveTransaction(String transactionID, Transaction transaction) {
-    TransferTransactionModal.show(
+    TransferTransactionPrompt.show(
       context,
       transaction,
       transactionID,
