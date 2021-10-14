@@ -154,12 +154,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
               ),
               child: isSearching
                   ? const Icon(
-                      Icons.close,
-                      key: ValueKey<IconData>(Icons.close),
+                      Icons.close_rounded,
+                      key: ValueKey<IconData>(Icons.close_rounded),
                     )
                   : const Icon(
-                      Icons.search,
-                      key: ValueKey<IconData>(Icons.search),
+                      Icons.search_rounded,
+                      key: ValueKey<IconData>(Icons.search_rounded),
                     ),
             ),
           ),
@@ -229,7 +229,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: const [
-                Icon(Icons.payment, size: 64),
+                Icon(Icons.payment_rounded, size: 64),
                 Text(
                   "Add a new transaction!",
                   textAlign: TextAlign.center,
@@ -293,7 +293,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 .addTransaction(widget.account, createdTransaction);
           }
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -337,7 +337,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       const PopupMenuItem<TransactionPageAction>(
         value: TransactionPageAction.correction,
         child: ListTile(
-          leading: Icon(Icons.price_change),
+          leading: Icon(Icons.price_change_rounded),
           title: Text("Balance Correction"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
@@ -346,7 +346,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       const PopupMenuItem<TransactionPageAction>(
         value: TransactionPageAction.reveal,
         child: ListTile(
-          leading: Icon(Icons.visibility),
+          leading: Icon(Icons.visibility_rounded),
           title: Text("Reveal Transactions"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
@@ -355,7 +355,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       const PopupMenuItem<TransactionPageAction>(
         value: TransactionPageAction.transfer,
         child: ListTile(
-          leading: Icon(Icons.swap_horiz),
+          leading: Icon(Icons.swap_horiz_rounded),
           title: Text("Transfer Funds"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,

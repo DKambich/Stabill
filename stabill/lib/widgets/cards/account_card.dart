@@ -15,7 +15,7 @@ class AccountCard extends StatelessWidget {
     PopupMenuItem<AccountAction>(
       value: AccountAction.edit,
       child: ListTile(
-        leading: Icon(Icons.edit),
+        leading: Icon(Icons.edit_rounded),
         title: Text("Edit"),
         contentPadding: EdgeInsets.zero,
         visualDensity: VisualDensity.compact,
@@ -24,7 +24,7 @@ class AccountCard extends StatelessWidget {
     PopupMenuItem<AccountAction>(
       value: AccountAction.delete,
       child: ListTile(
-        leading: Icon(Icons.delete),
+        leading: Icon(Icons.delete_rounded),
         title: Text("Delete"),
         contentPadding: EdgeInsets.zero,
         visualDensity: VisualDensity.compact,

@@ -36,7 +36,7 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
         title: const Text("Scheduled Transactions"),
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_rounded),
         onPressed: () async {
           final ScheduledTransaction? scheduled = await Navigator.pushNamed(
             context,
@@ -67,7 +67,7 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Icon(
-                        Icons.more_time_outlined,
+                        Icons.more_time_rounded,
                         size: 64,
                       ),
                       Text("Schedule a transaction!"),

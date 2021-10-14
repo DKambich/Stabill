@@ -118,7 +118,7 @@ class _TransactionModalState extends State<TransactionModal> {
                 Navigator.of(context).pop<Transaction>(savedTransaction);
               }
             },
-            icon: const Icon(Icons.check),
+            icon: const Icon(Icons.check_rounded),
           )
         ],
       ),

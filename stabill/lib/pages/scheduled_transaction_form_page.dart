@@ -124,7 +124,7 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                     .pop<ScheduledTransaction>(savedTransaction);
               }
             },
-            icon: const Icon(Icons.check),
+            icon: const Icon(Icons.check_rounded),
           )
         ],
       ),

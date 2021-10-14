@@ -83,7 +83,7 @@ class _AccountListState extends State<AccountList> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
                 Icon(
-                  Icons.savings,
+                  Icons.savings_rounded,
                   size: 64,
                 ),
                 Text("Get started by adding a new account!"),
@@ -140,7 +140,7 @@ class _AccountListState extends State<AccountList> {
       PopupMenuItem<AccountAction>(
         value: AccountAction.edit,
         child: ListTile(
-          leading: Icon(Icons.edit),
+          leading: Icon(Icons.edit_rounded),
           title: Text("Edit"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
@@ -149,7 +149,7 @@ class _AccountListState extends State<AccountList> {
       PopupMenuItem<AccountAction>(
         value: AccountAction.delete,
         child: ListTile(
-          leading: Icon(Icons.delete),
+          leading: Icon(Icons.delete_rounded),
           title: Text("Delete"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,

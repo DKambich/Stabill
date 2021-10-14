@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                 const PopupMenuItem<HomePageAction>(
                   value: HomePageAction.import,
                   child: ListTile(
-                    leading: Icon(Icons.file_download_outlined),
+                    leading: Icon(Icons.file_download_rounded),
                     title: Text("Import Data"),
                     contentPadding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
                 const PopupMenuItem<HomePageAction>(
                   value: HomePageAction.export,
                   child: ListTile(
-                    leading: Icon(Icons.file_upload_outlined),
+                    leading: Icon(Icons.file_upload_rounded),
                     title: Text("Export Data"),
                     contentPadding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
@@ -93,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                 const PopupMenuItem<HomePageAction>(
                   value: HomePageAction.settings,
                   child: ListTile(
-                    leading: Icon(Icons.settings),
+                    leading: Icon(Icons.settings_rounded),
                     title: Text("Settings"),
                     contentPadding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
@@ -126,17 +126,17 @@ class _HomePageState extends State<HomePage> {
               spaceBetweenChildren: 8,
               children: [
                 SpeedDialChild(
-                  child: const Icon(Icons.savings),
+                  child: const Icon(Icons.savings_rounded),
                   label: "Add Account",
                   onTap: () => CreateAccountPrompt.show(context),
                 ),
                 SpeedDialChild(
-                  child: const Icon(Icons.swap_horiz),
+                  child: const Icon(Icons.swap_horiz_rounded),
                   label: "Make Transfer",
                   onTap: () => TransferFundsPrompt.show(context),
                 ),
                 SpeedDialChild(
-                  child: const Icon(Icons.schedule_outlined),
+                  child: const Icon(Icons.schedule_rounded),
                   label: "Schedule Transactions",
                   onTap: () {
                     Navigator.pushNamed(
@@ -146,17 +146,16 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               ],
-              child: const Icon(Icons.account_balance),
             )
           : null,
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance),
+            icon: Icon(Icons.account_balance_rounded),
             label: "Accounts",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.insights),
+            icon: Icon(Icons.insights_rounded),
             label: "Insights",
           ),
         ],

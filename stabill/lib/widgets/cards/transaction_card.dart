@@ -100,7 +100,7 @@ class TransactionCard extends StatelessWidget {
         const PopupMenuItem<TransactionAction>(
           value: TransactionAction.hide,
           child: ListTile(
-            leading: Icon(Icons.visibility_off),
+            leading: Icon(Icons.visibility_off_rounded),
             title: Text("Hide"),
             contentPadding: EdgeInsets.zero,
             visualDensity: VisualDensity.compact,
@@ -110,7 +110,7 @@ class TransactionCard extends StatelessWidget {
         const PopupMenuItem<TransactionAction>(
           value: TransactionAction.clear,
           child: ListTile(
-            leading: Icon(Icons.check),
+            leading: Icon(Icons.check_rounded),
             title: Text("Mark Cleared"),
             contentPadding: EdgeInsets.zero,
             visualDensity: VisualDensity.compact,
@@ -119,7 +119,7 @@ class TransactionCard extends StatelessWidget {
       const PopupMenuItem<TransactionAction>(
         value: TransactionAction.move,
         child: ListTile(
-          leading: Icon(Icons.swap_horiz),
+          leading: Icon(Icons.swap_horiz_rounded),
           title: Text("Move"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
@@ -128,7 +128,7 @@ class TransactionCard extends StatelessWidget {
       const PopupMenuItem<TransactionAction>(
         value: TransactionAction.edit,
         child: ListTile(
-          leading: Icon(Icons.edit),
+          leading: Icon(Icons.edit_rounded),
           title: Text("Edit"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
@@ -137,7 +137,7 @@ class TransactionCard extends StatelessWidget {
       const PopupMenuItem<TransactionAction>(
         value: TransactionAction.delete,
         child: ListTile(
-          leading: Icon(Icons.delete),
+          leading: Icon(Icons.delete_rounded),
           title: Text("Delete"),
           contentPadding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,

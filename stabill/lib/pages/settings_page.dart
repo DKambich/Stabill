@@ -15,6 +15,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool val = false;
+
   @override
   Widget build(BuildContext context) {
     final ThemeMode mode = context.watch<PreferenceProvider>().themeMode;
@@ -26,12 +28,20 @@ class _SettingsPageState extends State<SettingsPage> {
       body: Column(
         children: [
           ListTile(
-            leading: Icon(
-              brightness == Brightness.light
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
+            leading: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  brightness == Brightness.light
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
+                ),
+              ],
             ),
-            title: const Text("Toggle theme"),
+            title: const Text("Theme"),
+            subtitle: const Text(
+              "Set the theme used in the app",
+            ),
             onTap: () async => context.read<PreferenceProvider>().setThemeMode(
                   await ThemePicker.show(
                     context,
@@ -39,9 +49,36 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
           ),
+          SwitchListTile(
+            secondary: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  val
+                      ? Icons.notifications_rounded
+                      : Icons.notifications_off_rounded,
+                ),
+              ],
+            ),
+            title: const Text("Notifications"),
+            subtitle: const Text(
+              "Recieve notifications when scheduled transactions process",
+            ),
+            value: val,
+            onChanged: (value) {
+              setState(() {
+                val = value;
+              });
+            },
+          ),
+          const Divider(),
           ListTile(
-            leading: const Icon(Icons.logout),
+            leading: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [Icon(Icons.logout_rounded)],
+            ),
             title: const Text("Sign out"),
+            subtitle: const Text("Sign out of your account on this device"),
             onTap: () async {
               context.read<AuthProvider>().signOut();
               Navigator.of(context).pushNamedAndRemoveUntil(
@@ -51,8 +88,12 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.delete_forever_outlined),
+            leading: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [Icon(Icons.delete_forever_rounded)],
+            ),
             title: const Text("Delete Account"),
+            subtitle: const Text("Delete your account and any associated data"),
             onTap: () async {
               // Show delete account dialog
             },

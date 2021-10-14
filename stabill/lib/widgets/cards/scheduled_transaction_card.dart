@@ -14,7 +14,7 @@ class ScheduledTransactionCard extends StatelessWidget {
     PopupMenuItem<ScheduledTransactionAction>(
       value: ScheduledTransactionAction.edit,
       child: ListTile(
-        leading: Icon(Icons.edit),
+        leading: Icon(Icons.edit_rounded),
         title: Text("Edit"),
         contentPadding: EdgeInsets.zero,
         visualDensity: VisualDensity.compact,
@@ -23,7 +23,7 @@ class ScheduledTransactionCard extends StatelessWidget {
     PopupMenuItem<ScheduledTransactionAction>(
       value: ScheduledTransactionAction.delete,
       child: ListTile(
-        leading: Icon(Icons.delete),
+        leading: Icon(Icons.delete_rounded),
         title: Text("Delete"),
         contentPadding: EdgeInsets.zero,
         visualDensity: VisualDensity.compact,
