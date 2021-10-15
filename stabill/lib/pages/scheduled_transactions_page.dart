@@ -6,6 +6,7 @@ import 'package:stabill/pages/scheduled_transaction_form_page.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/header_list.dart';
 import 'package:stabill/widgets/cards/scheduled_transaction_card.dart';
+import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 
 class ScheduledTransactionsPage extends StatefulWidget {
   static const String routeName = "/scheduledTransactions";
@@ -100,11 +101,17 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
                       }
                       break;
                     case ScheduledTransactionAction.delete:
-                      await context
-                          .read<DataProvider>()
-                          .deleteScheduledTransaction(
-                            item,
-                          );
+                      if (await ConfirmDialog.show(
+                        context,
+                        "Delete Scheduled Transaction",
+                        "Are you sure you want to delete the scheduled transaction '${item.transaction.name}'?",
+                      )) {
+                        await context
+                            .read<DataProvider>()
+                            .deleteScheduledTransaction(
+                              item,
+                            );
+                      }
                       break;
                     case null:
                       break;
