@@ -78,7 +78,39 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
             ),
             itemBuilder: (context, index) {
               final ScheduledTransaction item = scheduledData[index].data();
-              return ScheduledTransactionCard(scheduledTransaction: item);
+              return ScheduledTransactionCard(
+                scheduledTransaction: item,
+                onSelect: (action) async {
+                  switch (action) {
+                    case ScheduledTransactionAction.edit:
+                      final ScheduledTransaction? scheduled =
+                          await Navigator.pushNamed(
+                        context,
+                        ScheduledTransactionModal.routeName,
+                        arguments: item,
+                      );
+                      if (!mounted) return;
+                      if (scheduled != null) {
+                        await context
+                            .read<DataProvider>()
+                            .updateScheduledTransaction(
+                              item,
+                              scheduled,
+                            );
+                      }
+                      break;
+                    case ScheduledTransactionAction.delete:
+                      await context
+                          .read<DataProvider>()
+                          .deleteScheduledTransaction(
+                            item,
+                          );
+                      break;
+                    case null:
+                      break;
+                  }
+                },
+              );
             },
             itemCount: scheduledData.length,
           );

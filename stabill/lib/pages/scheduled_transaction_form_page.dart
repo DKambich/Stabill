@@ -44,44 +44,50 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
 
   @override
   void initState() {
-    // if (widget.transaction != null) {
-    // isCleared = widget.transaction!.cleared;
-    // method = widget.transaction!.method;
-    // nameController = TextEditingController(text: widget.transaction!.name);
-    // timestamp = widget.transaction!.timestamp;
-    // final String transactionDate =
-    //     DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
-    // dateController = TextEditingController(text: transactionDate);
-    // amountController = TextEditingController(
-    //   text: "\$${(widget.transaction!.amount / 100).toStringAsFixed(2)}",
-    // );
-    // checkNumberController = TextEditingController(
-    //   text:
-    //       "${widget.transaction!.checkNumber != -1 ? widget.transaction!.checkNumber : ""}",
-    // );
-    // memoController = TextEditingController(
-    //   text: widget.transaction!.memo,
-    // );
-    // } else {
-    isCleared = false;
-    enabled = true;
-    hideIfCleared = false;
-    showNotifications = false;
-    frequency = Frequency.once;
-    accountID = "";
-    method = TransactionType.withdrawal;
-    nameController = TextEditingController(text: "");
-    timestamp = DateTime.now();
-    final String transactionDate =
-        DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
-    dateController = TextEditingController(text: transactionDate);
-    amountController = TextEditingController(text: "\$0.00");
-    checkNumberController = TextEditingController(text: "");
-    memoController = TextEditingController(text: "");
-
+    if (widget.transaction != null) {
+      isCleared = widget.transaction!.transaction.cleared;
+      method = widget.transaction!.transaction.method;
+      nameController =
+          TextEditingController(text: widget.transaction!.transaction.name);
+      timestamp = widget.transaction!.transaction.timestamp;
+      final String transactionDate =
+          DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
+      dateController = TextEditingController(text: transactionDate);
+      amountController = TextEditingController(
+        text:
+            "\$${(widget.transaction!.transaction.amount / 100).toStringAsFixed(2)}",
+      );
+      checkNumberController = TextEditingController(
+        text:
+            "${widget.transaction!.transaction.checkNumber != -1 ? widget.transaction!.transaction.checkNumber : ""}",
+      );
+      memoController = TextEditingController(
+        text: widget.transaction!.transaction.memo,
+      );
+      enabled = widget.transaction!.enabled;
+      hideIfCleared = widget.transaction!.hideIfCleared;
+      showNotifications = widget.transaction!.showNotifications;
+      frequency = widget.transaction!.frequency;
+      accountID = widget.transaction!.accountID;
+    } else {
+      isCleared = false;
+      enabled = true;
+      hideIfCleared = false;
+      showNotifications = false;
+      frequency = Frequency.once;
+      accountID = "";
+      method = TransactionType.withdrawal;
+      nameController = TextEditingController(text: "");
+      timestamp = DateTime.now();
+      final String transactionDate =
+          DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
+      dateController = TextEditingController(text: transactionDate);
+      amountController = TextEditingController(text: "\$0.00");
+      checkNumberController = TextEditingController(text: "");
+      memoController = TextEditingController(text: "");
+    }
     accountStream =
         context.read<DataProvider>().getAccountsCollection().snapshots();
-
     super.initState();
   }
 

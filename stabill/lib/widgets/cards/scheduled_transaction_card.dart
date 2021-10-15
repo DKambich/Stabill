@@ -9,6 +9,7 @@ enum ScheduledTransactionAction { edit, delete }
 
 class ScheduledTransactionCard extends StatelessWidget {
   final ScheduledTransaction scheduledTransaction;
+  final void Function(ScheduledTransactionAction?)? onSelect;
 
   static const actions = [
     PopupMenuItem<ScheduledTransactionAction>(
@@ -34,6 +35,7 @@ class ScheduledTransactionCard extends StatelessWidget {
   const ScheduledTransactionCard({
     Key? key,
     required this.scheduledTransaction,
+    this.onSelect,
   }) : super(key: key);
 
   @override
@@ -45,6 +47,7 @@ class ScheduledTransactionCard extends StatelessWidget {
 
     return MenuCard(
       actions: actions,
+      onSelect: onSelect,
       child: Padding(
         padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16, right: 8),
         child: Row(
