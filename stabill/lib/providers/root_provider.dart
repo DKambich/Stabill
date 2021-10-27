@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/providers/messaging_provider.dart';
 import 'package:stabill/providers/preference_provider.dart';
 
 class RootProvider extends StatelessWidget {
@@ -20,10 +22,16 @@ class RootProvider extends StatelessWidget {
           FirebaseFirestore.instance,
           context.watch<AuthProvider>().currentUser,
         ),
-        child: MaterialApp(
-          home: ChangeNotifierProvider(
-            create: (_) => PreferenceProvider(),
-            child: Builder(builder: builder),
+        child: ProxyProvider<AuthProvider, MessageProvider>(
+          update: (context, user, data) => MessageProvider(
+            FirebaseMessaging.instance,
+            context.watch<AuthProvider>().currentUser,
+          ),
+          child: MaterialApp(
+            home: ChangeNotifierProvider(
+              create: (_) => PreferenceProvider(),
+              child: Builder(builder: builder),
+            ),
           ),
         ),
       ),
