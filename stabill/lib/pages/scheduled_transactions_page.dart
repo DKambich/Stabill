@@ -103,7 +103,7 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
                     case ScheduledTransactionAction.delete:
                       if (await ConfirmDialog.show(
                         context,
-                        "Delete Scheduled Transaction",
+                        "Delete Scheduled Transaction?",
                         "Are you sure you want to delete the scheduled transaction '${item.transaction.name}'?",
                       )) {
                         await context
