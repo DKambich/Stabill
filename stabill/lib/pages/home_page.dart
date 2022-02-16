@@ -1,13 +1,8 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:provider/provider.dart';
-import 'package:stabill/constants.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stabill/pages/scheduled_transactions_page.dart';
 import 'package:stabill/pages/settings_page.dart';
-import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/account_list.dart';
 import 'package:stabill/widgets/prompts/create_account_prompt.dart';
 import 'package:stabill/widgets/prompts/transfer_funds_prompt.dart';
@@ -41,7 +36,17 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
+        leadingWidth: 48,
+        leading: Center(
+          child: SvgPicture.asset(
+            "assets/icon/logo_only.svg",
+            fit: BoxFit.scaleDown,
+            width: 28,
+            height: 28,
+          ),
+        ),
         title: const Text("Stabill"),
+        titleSpacing: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_rounded),
