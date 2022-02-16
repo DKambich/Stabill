@@ -36,7 +36,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        leadingWidth: 48,
         leading: Center(
           child: SvgPicture.asset(
             "assets/icon/logo_only.svg",
@@ -61,7 +60,7 @@ class _HomePageState extends State<HomePage> {
           AccountList(
             shouldHideFAB: (bool hide) => shouldHideFAB(hide: hide),
           ),
-          const Center(child: Text("Insights"))
+          // const Center(child: Text("Insights"))
         ],
         onPageChanged: (int index) {
           setState(() {
@@ -99,27 +98,27 @@ class _HomePageState extends State<HomePage> {
               ],
             )
           : null,
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_rounded),
-            label: "Accounts",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.insights_rounded),
-            label: "Insights",
-          ),
-        ],
-        currentIndex: index,
-        onTap: (int index) {
-          setState(
-            () {
-              this.index = index;
-              controller.jumpToPage(index);
-            },
-          );
-        },
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   items: const [
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.account_balance_rounded),
+      //       label: "Accounts",
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.insights_rounded),
+      //       label: "Insights",
+      //     ),
+      //   ],
+      //   currentIndex: index,
+      //   onTap: (int index) {
+      //     setState(
+      //       () {
+      //         this.index = index;
+      //         controller.jumpToPage(index);
+      //       },
+      //     );
+      //   },
+      // ),
     );
   }
 }

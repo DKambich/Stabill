@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/scheduled_transaction.dart';
@@ -15,6 +16,8 @@ import 'package:stabill/providers/root_provider.dart';
 import 'package:stabill/utilities/initializer.dart';
 
 void main() {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(Stabill());
 }
 
