@@ -1,0 +1,32 @@
+name: Flutter Web
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    name: Build Web
+    env:
+      my_secret: ${{secrets.hosting_secret}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'dev'
+      - run: flutter config --enable-web
+      - run: flutter pub get
+      - run: flutter build web --release
+      - run: |
+          cd build/web
+          git init
+          # in line 24 and 25 type your email id and username respectively
+          git config --global user.email daniel.kambich@gmail.com
+          git config --global user.name DKambich 
+          git status
+          # in line 30 after @ add your repo link  
+          git remote add origin https://${{secrets.hosting_secret}}@github.com/DKambich/Stabill.git
+          git checkout -b gh-pages
+          git add --all
+          git commit -m "update"
+          git push origin gh-pages -f
