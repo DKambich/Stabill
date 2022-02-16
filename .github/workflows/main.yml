@@ -13,9 +13,9 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: beta
-      - run: cd stabill
-      - run: flutter pub get
-      - run: flutter test
+      - run: 
+          cd stabill
+          flutter pub get
       - uses: bluefireteam/flutter-gh-pages@v7
         with:
           baseHref: /Stabill/
