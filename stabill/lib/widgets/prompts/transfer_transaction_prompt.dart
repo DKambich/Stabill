@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'
     show QuerySnapshot, QueryDocumentSnapshot;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/providers/data_provider.dart';
@@ -28,9 +29,9 @@ class TransferTransactionPrompt extends StatefulWidget {
     String transactionID,
     String currentAccountID,
   ) {
-    Prompt.show(
-      context,
-      TransferTransactionPrompt(
+    showDialog(
+      context: context,
+      builder: (_) => TransferTransactionPrompt(
         transaction: transaction,
         transactionID: transactionID,
         currentAccountID: currentAccountID,
@@ -111,17 +112,24 @@ class _TransferFundsModalState extends State<TransferTransactionPrompt> {
             )
             .toList();
 
-        return Prompt(
-          title: "Transfer Transaction",
-          onCancel: () => Navigator.pop(context),
-          onConfirm: submitForm,
-          formBody: Column(
+        return AlertDialog(
+          shape: dialogShape,
+          title: const Text("Transfer Transaction"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: submitForm,
+              child: const Text("Confirm"),
+            )
+          ],
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "Select an account to transfer the transaction to",
-                ),
+              const Text(
+                "Select an account to transfer the transaction to",
               ),
               DropdownButtonFormField<Account>(
                 decoration: const InputDecoration(

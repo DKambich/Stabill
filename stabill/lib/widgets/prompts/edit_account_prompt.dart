@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/widgets/prompts/prompt.dart';
@@ -14,7 +15,10 @@ class EditAccountPrompt extends StatefulWidget {
   _EditAccountPromptState createState() => _EditAccountPromptState();
 
   static void show(BuildContext context, String accountID) {
-    Prompt.show(context, EditAccountPrompt(accountID: accountID));
+    showDialog(
+      context: context,
+      builder: (_) => EditAccountPrompt(accountID: accountID),
+    );
   }
 }
 
@@ -33,17 +37,26 @@ class _EditAccountPromptState extends State<EditAccountPrompt> {
 
   @override
   Widget build(BuildContext context) {
-    return Prompt(
-      title: "Edit Account",
-      onCancel: () => Navigator.pop(context),
-      onConfirm: submitForm,
-      formBody: Form(
+    return AlertDialog(
+      shape: dialogShape,
+      title: const Text("Edit Account"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: submitForm,
+          child: const Text("Confirm"),
+        )
+      ],
+      content: Form(
         key: _formKey,
         child: TextFormField(
           autofocus: true,
           controller: _accountController,
           decoration: const InputDecoration(
-            labelText: "New Account Name",
+            labelText: "Account Name",
             floatingLabelBehavior: FloatingLabelBehavior.auto,
           ),
           onFieldSubmitted: (_) => submitForm(),

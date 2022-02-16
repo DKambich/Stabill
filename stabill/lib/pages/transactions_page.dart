@@ -265,8 +265,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     case TransactionAction.delete:
                       final bool confirm = await ConfirmDialog.show(
                         context,
-                        "Delete Transaction",
+                        "Delete Transaction?",
                         "Are you sure you want to delete the transaction '${transaction.name}'?",
+                        confirmText: const Text(
+                          "Confirm",
+                          style: TextStyle(
+                            color: Colors.red,
+                          ),
+                        ),
                       );
                       if (confirm) {
                         if (!mounted) return;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
@@ -11,7 +12,10 @@ class CreateAccountPrompt extends StatefulWidget {
   _CreateAccountPromptState createState() => _CreateAccountPromptState();
 
   static void show(BuildContext context) {
-    Prompt.show(context, const CreateAccountPrompt());
+    showDialog(
+      context: context,
+      builder: (_) => const CreateAccountPrompt(),
+    );
   }
 }
 
@@ -32,13 +36,23 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
 
   @override
   Widget build(BuildContext context) {
-    return Prompt(
-      title: "Create Account",
-      onCancel: () => Navigator.pop(context),
-      onConfirm: submitForm,
-      formBody: Form(
+    return AlertDialog(
+      title: const Text("Create Account"),
+      shape: dialogShape,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: submitForm,
+          child: const Text("Confirm"),
+        )
+      ],
+      content: Form(
         key: _formKey,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
               autofocus: true,

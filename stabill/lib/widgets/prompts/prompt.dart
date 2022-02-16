@@ -64,9 +64,9 @@ class Prompt extends StatelessWidget {
     final DeviceScreenType deviceType =
         getDeviceType(MediaQuery.of(context).size);
 
-    final bool useDialog = deviceType == DeviceScreenType.desktop ||
+    bool useDialog = deviceType == DeviceScreenType.desktop ||
         deviceType == DeviceScreenType.tablet;
-
+    useDialog = true;
     if (useDialog) {
       showDialog(
         context: context,

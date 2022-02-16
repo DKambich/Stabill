@@ -106,6 +106,10 @@ class _SettingsPageState extends State<SettingsPage> {
       context,
       "Logout?",
       "Are you sure you want to logout from your account?",
+      confirmText: const Text(
+        "Confirm",
+        style: TextStyle(color: Colors.red),
+      ),
     );
     if (mounted && shouldLogout) {
       context.read<AuthProvider>().signOut();
@@ -121,6 +125,10 @@ class _SettingsPageState extends State<SettingsPage> {
       context,
       "Delete Account?",
       "Are you sure you want to delete your account and all associated data?",
+      confirmText: const Text(
+        "Confirm",
+        style: TextStyle(color: Colors.red),
+      ),
     );
     if (mounted && shouldDelete) {
       // Delete the account

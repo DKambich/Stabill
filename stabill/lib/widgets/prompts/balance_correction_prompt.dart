@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
@@ -18,7 +19,10 @@ class BalanceCorrectionPrompt extends StatefulWidget {
       _BalanceCorrectionPromptState();
 
   static void show(BuildContext context, String accountID) {
-    Prompt.show(context, BalanceCorrectionPrompt(accountID: accountID));
+    showDialog(
+      context: context,
+      builder: (_) => BalanceCorrectionPrompt(accountID: accountID),
+    );
   }
 }
 
@@ -39,18 +43,25 @@ class _BalanceCorrectionPromptState extends State<BalanceCorrectionPrompt> {
 
   @override
   Widget build(BuildContext context) {
-    return Prompt(
-      title: "Balance Correction",
-      onCancel: () => Navigator.pop(context),
-      onConfirm: submitForm,
-      formBody: Form(
+    return AlertDialog(
+      title: const Text("Balance Correction"),
+      shape: dialogShape,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: submitForm,
+          child: const Text("Confirm"),
+        )
+      ],
+      content: Form(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                "Enter the new balance for this account. This will mark all transactions as cleared and set the account balance to the sepecified value",
-              ),
+            const Text(
+              "Enter the new balance for this account. This will mark all transactions as cleared and set the account balance to the sepecified value",
             ),
             Form(
               key: _formKey,

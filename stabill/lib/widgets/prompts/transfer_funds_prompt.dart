@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
@@ -16,9 +17,9 @@ class TransferFundsPrompt extends StatefulWidget {
   _TransferFundsPromptState createState() => _TransferFundsPromptState();
 
   static void show(BuildContext context, {String? defaultAccountID}) {
-    Prompt.show(
-      context,
-      TransferFundsPrompt(defaultAccountID: defaultAccountID),
+    showDialog(
+      context: context,
+      builder: (_) => TransferFundsPrompt(defaultAccountID: defaultAccountID),
     );
   }
 }
@@ -111,13 +112,23 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
             )
             .toList();
 
-        return Prompt(
-          title: "Transfer Funds",
-          onCancel: () => Navigator.pop(context),
-          onConfirm: submitForm,
-          formBody: Form(
+        return AlertDialog(
+          shape: dialogShape,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: submitForm,
+              child: const Text("Confirm"),
+            )
+          ],
+          title: const Text("Transfer Funds"),
+          content: Form(
             key: _formKey,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<Account>(
                   decoration: const InputDecoration(labelText: "Transfer from"),

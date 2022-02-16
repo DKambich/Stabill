@@ -111,8 +111,14 @@ class _AccountListState extends State<AccountList> {
                   case AccountAction.delete:
                     final bool confirm = await ConfirmDialog.show(
                       context,
-                      "Delete Account",
+                      "Delete Account?",
                       "Are you sure you want to delete the account '${account.name}'?",
+                      confirmText: const Text(
+                        "Confirm",
+                        style: TextStyle(
+                          color: Colors.red,
+                        ),
+                      ),
                     );
                     if (confirm) {
                       if (!mounted) return;

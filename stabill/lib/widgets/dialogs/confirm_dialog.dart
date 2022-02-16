@@ -4,8 +4,8 @@ import 'package:stabill/constants.dart';
 class ConfirmDialog extends StatelessWidget {
   final String title;
   final String message;
-  final String? confirmText;
-  final String? cancelText;
+  final Text? confirmText;
+  final Text? cancelText;
 
   const ConfirmDialog({
     Key? key,
@@ -19,8 +19,8 @@ class ConfirmDialog extends StatelessWidget {
     BuildContext context,
     String title,
     String message, {
-    String? confirmText,
-    String? cancelText,
+    Text? confirmText,
+    Text? cancelText,
   }) async {
     final bool? result = await showDialog<bool>(
       context: context,
@@ -44,11 +44,11 @@ class ConfirmDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop<bool>(false),
-          child: Text(cancelText ?? "Cancel"),
+          child: cancelText ?? const Text("Cancel"),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop<bool>(true),
-          child: Text(confirmText ?? "Confirm"),
+          child: confirmText ?? const Text("Confirm"),
         )
       ],
     );
