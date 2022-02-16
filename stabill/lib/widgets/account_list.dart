@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart'
     show CollectionReference, QuerySnapshot, QueryDocumentSnapshot;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/transactions_page.dart';

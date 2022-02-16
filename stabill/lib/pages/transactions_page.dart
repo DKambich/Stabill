@@ -183,7 +183,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       .get();
 
                   // Show each hidden transaction
-                  void revealTransaction(transaction) {
+                  void revealTransaction(
+                    QueryDocumentSnapshot<Transaction> transaction,
+                  ) {
                     transaction.reference.update(
                       {"hidden": false},
                     );
