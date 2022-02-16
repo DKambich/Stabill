@@ -16,7 +16,8 @@ import 'package:stabill/providers/root_provider.dart';
 import 'package:stabill/utilities/initializer.dart';
 
 void main() {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  final WidgetsBinding widgetsBinding =
+      WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(Stabill());
 }
