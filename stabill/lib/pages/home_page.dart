@@ -43,65 +43,11 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("Stabill"),
         actions: [
-          PopupMenuButton(
-            shape: menuShape,
-            onSelected: (HomePageAction selected) async {
-              switch (selected) {
-                case HomePageAction.import:
-                  try {
-                    final FilePickerResult? result =
-                        await FilePicker.platform.pickFiles(
-                      allowedExtensions: ['csv'],
-                      type: FileType.custom,
-                    );
-                    if (result != null) {
-                      final File csv = File(result.files[0].path!);
-                      if (!mounted) return;
-                      await context.read<DataProvider>().importCSV(csv);
-                    }
-                  } catch (e) {
-                    // TODO: Show there is an error
-                  }
-                  break;
-                case HomePageAction.export:
-                  break;
-                case HomePageAction.settings:
-                  Navigator.of(context).pushNamed(SettingsPage.routeName);
-                  break;
-              }
-            },
-            itemBuilder: (ctx) {
-              return <PopupMenuEntry<HomePageAction>>[
-                const PopupMenuItem<HomePageAction>(
-                  value: HomePageAction.import,
-                  child: ListTile(
-                    leading: Icon(Icons.file_download_rounded),
-                    title: Text("Import Data"),
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-                const PopupMenuItem<HomePageAction>(
-                  value: HomePageAction.export,
-                  child: ListTile(
-                    leading: Icon(Icons.file_upload_rounded),
-                    title: Text("Export Data"),
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-                const PopupMenuItem<HomePageAction>(
-                  value: HomePageAction.settings,
-                  child: ListTile(
-                    leading: Icon(Icons.settings_rounded),
-                    title: Text("Settings"),
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-              ];
-            },
-          )
+          IconButton(
+            icon: const Icon(Icons.settings_rounded),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(SettingsPage.routeName),
+          ),
         ],
       ),
       body: PageView(

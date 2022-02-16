@@ -1,7 +1,11 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
+import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 import 'package:stabill/widgets/dialogs/theme_picker.dart';
@@ -67,6 +71,25 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             leading: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              children: const [Icon(Icons.file_download_rounded)],
+            ),
+            title: const Text("Import Data"),
+            subtitle: const Text("Import data into your account"),
+            onTap: importData,
+          ),
+          ListTile(
+            leading: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [Icon(Icons.file_upload_rounded)],
+            ),
+            title: const Text("Export Data"),
+            subtitle: const Text("Export data out of your account"),
+            onTap: exportData,
+          ),
+          const Divider(),
+          ListTile(
+            leading: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: const [Icon(Icons.logout_rounded)],
             ),
             title: const Text("Sign out"),
@@ -100,6 +123,24 @@ class _SettingsPageState extends State<SettingsPage> {
       val = showNotifications;
     });
   }
+
+  Future<void> importData() async {
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowedExtensions: ['csv'],
+        type: FileType.custom,
+      );
+      if (result != null) {
+        final File csv = File(result.files[0].path!);
+        if (!mounted) return;
+        await context.read<DataProvider>().importCSV(csv);
+      }
+    } catch (e) {
+      // TODO: Show there is an error
+    }
+  }
+
+  Future<void> exportData() async {}
 
   Future<void> showLogoutAccount() async {
     final bool shouldLogout = await ConfirmDialog.show(
