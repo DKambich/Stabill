@@ -16,8 +16,7 @@ jobs:
       - run: |
           cd stabill
           flutter pub get
-      - uses: |
-          cd stabill
-          bluefireteam/flutter-gh-pages@v7
+      - uses: bluefireteam/flutter-gh-pages@v7
         with:
+          workingDir: stabill 
           baseHref: /Stabill/
