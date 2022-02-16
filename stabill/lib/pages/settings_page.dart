@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/providers/preference_provider.dart';
+import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 import 'package:stabill/widgets/dialogs/theme_picker.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -42,12 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: const Text(
               "Set the theme used in the app",
             ),
-            onTap: () async => context.read<PreferenceProvider>().setThemeMode(
-                  await ThemePicker.show(
-                    context,
-                    mode,
-                  ),
-                ),
+            onTap: () => themeSetting(mode),
           ),
           SwitchListTile(
             secondary: Column(
@@ -65,11 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
               "Recieve notifications when scheduled transactions process",
             ),
             value: val,
-            onChanged: (value) {
-              setState(() {
-                val = value;
-              });
-            },
+            onChanged: notificationSetting,
           ),
           const Divider(),
           ListTile(
@@ -79,13 +71,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             title: const Text("Sign out"),
             subtitle: const Text("Sign out of your account on this device"),
-            onTap: () async {
-              context.read<AuthProvider>().signOut();
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                LoginPage.routeName,
-                (route) => false,
-              );
-            },
+            onTap: showLogoutAccount,
           ),
           ListTile(
             leading: Column(
@@ -94,12 +80,50 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             title: const Text("Delete Account"),
             subtitle: const Text("Delete your account and any associated data"),
-            onTap: () async {
-              // Show delete account dialog
-            },
+            onTap: showDeleteAccount,
           ),
         ],
       ),
     );
+  }
+
+  Future<void> themeSetting(ThemeMode currentMode) async {
+    final PreferenceProvider preferenceProvider =
+        context.read<PreferenceProvider>();
+    final ThemeMode newMode = await ThemePicker.show(context, currentMode);
+    preferenceProvider.setThemeMode(newMode);
+  }
+
+  // ignore: avoid_positional_boolean_parameters
+  Future<void> notificationSetting(bool showNotifications) async {
+    setState(() {
+      val = showNotifications;
+    });
+  }
+
+  Future<void> showLogoutAccount() async {
+    final bool shouldLogout = await ConfirmDialog.show(
+      context,
+      "Logout?",
+      "Are you sure you want to logout from your account?",
+    );
+    if (mounted && shouldLogout) {
+      context.read<AuthProvider>().signOut();
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        LoginPage.routeName,
+        (route) => false,
+      );
+    }
+  }
+
+  Future<void> showDeleteAccount() async {
+    final bool shouldDelete = await ConfirmDialog.show(
+      context,
+      "Delete Account?",
+      "Are you sure you want to delete your account and all associated data?",
+    );
+    if (mounted && shouldDelete) {
+      // Delete the account
+    }
   }
 }
