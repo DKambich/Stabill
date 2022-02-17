@@ -6,6 +6,7 @@ import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/pages/login_page.dart';
+import 'package:stabill/pages/reorder_accounts_page.dart';
 import 'package:stabill/pages/scheduled_transaction_form_page.dart';
 import 'package:stabill/pages/scheduled_transactions_page.dart';
 import 'package:stabill/pages/settings_page.dart';
@@ -86,6 +87,8 @@ class Stabill extends StatelessWidget {
       );
     } else if (routeName == SettingsPage.routeName) {
       return MaterialPageRoute(builder: (_) => const SettingsPage());
+    } else if (routeName == ReorderAccountsPage.routeName) {
+      return MaterialPageRoute(builder: (_) => const ReorderAccountsPage());
     } else {
       assert(false, 'Need to implement $routeName');
     }

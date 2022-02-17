@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/pages/transactions_page.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/utilities/header_list.dart';
 import 'package:stabill/widgets/cards/account_card.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
@@ -54,6 +55,12 @@ class _AccountListState extends State<AccountList> {
       builder: (context, snapshot) {
         List<QueryDocumentSnapshot<Account>> accountData = [];
         if (snapshot.data != null) accountData = snapshot.data!.docs;
+
+        final accountOrder = context.watch<PreferenceProvider>().accountOrder;
+        accountData.sort(
+          (a, b) =>
+              accountOrder.indexOf(a.id).compareTo(accountOrder.indexOf(b.id)),
+        );
 
         int totalCurrentBalance = 0;
         int totalAvailableBalance = 0;

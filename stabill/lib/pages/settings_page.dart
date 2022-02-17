@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/pages/login_page.dart';
+import 'package:stabill/pages/reorder_accounts_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/providers/preference_provider.dart';
@@ -62,8 +63,11 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               title: const Text("Reorder Accounts"),
               subtitle: const Text(
-                  "Change the order in which accounts are displayed"),
-              onTap: () {},
+                "Change the order in which accounts are displayed",
+              ),
+              onTap: () => Navigator.of(context).pushNamed(
+                ReorderAccountsPage.routeName,
+              ),
             ),
             SwitchListTile(
               secondary: Column(

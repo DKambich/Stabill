@@ -8,17 +8,21 @@ class PreferenceProvider extends ChangeNotifier {
   late bool pendingPreference;
   final String key3 = "hideCleared";
   late bool hideClearedPreference;
+  final String key4 = "accountOrder";
+  late List<String> accountOrderPreference;
 
   SharedPreferences? _preferences;
 
   ThemeMode get themeMode => mode;
   bool get prioritizePending => pendingPreference;
   bool get hideCleared => hideClearedPreference;
+  List<String> get accountOrder => accountOrderPreference;
 
   PreferenceProvider() {
     mode = ThemeMode.light;
     pendingPreference = false;
     hideClearedPreference = false;
+    accountOrderPreference = [];
     _loadFromPrefs();
   }
 
@@ -40,6 +44,13 @@ class PreferenceProvider extends ChangeNotifier {
   void setHideCleared(bool hideCleared) {
     hideClearedPreference = hideCleared;
     _initPrefs().then((value) => _preferences!.setBool(key3, hideCleared));
+    notifyListeners();
+  }
+
+  void setAccountOrder(List<String> accountOrder) {
+    accountOrderPreference = accountOrder;
+    _initPrefs()
+        .then((value) => _preferences!.setStringList(key4, accountOrder));
     notifyListeners();
   }
 
@@ -87,6 +98,7 @@ class PreferenceProvider extends ChangeNotifier {
     );
     pendingPreference = _preferences!.getBool(key2) ?? false;
     hideClearedPreference = _preferences!.getBool(key3) ?? false;
+    accountOrderPreference = _preferences!.getStringList(key4) ?? [];
     notifyListeners();
   }
 }
