@@ -1,10 +1,12 @@
 import 'package:flutter/widgets.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stabill/utilities/measure_size.dart';
 
 class HeaderList extends StatefulWidget {
   final Widget? header;
   final Widget Function(BuildContext, int) itemBuilder;
   final int itemCount;
+  final double itemHeight;
   final Widget? onEmpty;
   final bool? isLoading;
   final Widget? onLoading;
@@ -17,6 +19,7 @@ class HeaderList extends StatefulWidget {
     this.header,
     required this.itemBuilder,
     required this.itemCount,
+    required this.itemHeight,
     this.onEmpty,
     this.isLoading,
     this.onLoading,
@@ -55,12 +58,26 @@ class _HeaderListState extends State<HeaderList> {
             child: widget.onEmpty ?? body,
           );
         } else {
-          body = ListView.builder(
-            controller: widget.controller,
-            padding: EdgeInsets.only(top: value.height),
-            itemCount: widget.itemCount,
-            itemBuilder: widget.itemBuilder,
-          );
+          body = ResponsiveBuilder(builder: (context, sizingInformation) {
+            int crossAxisCount = 1;
+
+            if (sizingInformation.isDesktop) {
+              crossAxisCount = 3;
+            } else if (sizingInformation.isTablet) {
+              crossAxisCount = 2;
+            }
+
+            return GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                mainAxisExtent: widget.itemHeight,
+              ),
+              controller: widget.controller,
+              padding: EdgeInsets.only(top: value.height),
+              itemCount: widget.itemCount,
+              itemBuilder: widget.itemBuilder,
+            );
+          });
         }
 
         return Stack(

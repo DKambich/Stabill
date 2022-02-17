@@ -44,8 +44,9 @@ class TransactionCard extends StatelessWidget {
                 SubstringHighlight(
                   term: query ?? "",
                   text: transaction.name,
+                  maxLines: 1,
                   textStyle: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: transaction.cleared
                         ? Theme.of(context).brightness == Brightness.light

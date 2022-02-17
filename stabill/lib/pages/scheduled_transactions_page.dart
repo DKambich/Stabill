@@ -120,6 +120,7 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
               );
             },
             itemCount: scheduledData.length,
+            itemHeight: 100,
           );
         },
       ),

@@ -89,6 +89,7 @@ class _AccountListState extends State<AccountList> {
             ),
           ),
           itemCount: accountData.length,
+          itemHeight: 100,
           itemBuilder: (ctx, index) {
             final Account account = accountData[index].data();
             final String accountID = accountData[index].id;

@@ -227,6 +227,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             onError: const Center(child: Text('Something went wrong')),
             isLoading: snapshot.connectionState == ConnectionState.waiting,
             onLoading: const Center(child: CircularProgressIndicator()),
+            itemHeight: 110,
             onEmpty: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
