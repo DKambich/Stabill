@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'
         DocumentReference,
         DocumentSnapshot,
         CollectionReference,
+        Query,
         QueryDocumentSnapshot,
         QuerySnapshot;
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/pages/transaction_form_page.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/utilities/header_list.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/cards/transaction_card.dart';
@@ -56,7 +58,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
     _transactionsCollection =
         dataProvider.getTransactionCollection(widget.account.id);
 
-    _transactionsStream = _transactionsCollection.snapshots();
+    Query<Transaction> transactionQuery = _transactionsCollection
+        .where("hidden", isEqualTo: false)
+        .orderBy("timestamp", descending: true);
+
+    if (context.read<PreferenceProvider>().hideCleared) {
+      transactionQuery = transactionQuery.where("cleared", isEqualTo: false);
+    }
+
+    _transactionsStream = transactionQuery.snapshots();
 
     searchController = TextEditingController();
     searchNode = FocusNode();
@@ -204,9 +214,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
           List<QueryDocumentSnapshot<Transaction>> transactionData = [];
           if (snapshot.data != null) transactionData = snapshot.data!.docs;
 
-          transactionData = transactionData
-              .where((element) => !element.data().hidden)
-              .toList();
+          // transactionData = transactionData
+          //     .where((element) => !element.data().hidden)
+          //     .toList();
           if (isSearching) {
             final String query = searchController.text.toLowerCase();
             transactionData = transactionData
@@ -217,9 +227,21 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 .toList();
           }
 
-          transactionData.sort(
-            (a, b) => b.data().timestamp.compareTo(a.data().timestamp),
-          );
+          if (context.read<PreferenceProvider>().pendingPreference) {
+            final clearedTranscations =
+                List<QueryDocumentSnapshot<Transaction>>.empty(growable: true);
+            final unclearedTransactions =
+                List<QueryDocumentSnapshot<Transaction>>.empty(growable: true);
+            for (QueryDocumentSnapshot<Transaction> t in transactionData) {
+              t.data().cleared
+                  ? clearedTranscations.add(t)
+                  : unclearedTransactions.add(t);
+            }
+            transactionData = [
+              ...unclearedTransactions,
+              ...clearedTranscations
+            ];
+          }
 
           return HeaderList(
             header: header,

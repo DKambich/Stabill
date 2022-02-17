@@ -33,126 +33,129 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text("Settings"),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          sectionHeader("Display"),
-          ListTile(
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  brightness == Brightness.light
-                      ? Icons.light_mode_rounded
-                      : Icons.dark_mode_rounded,
-                ),
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            sectionHeader("Display"),
+            ListTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    brightness == Brightness.light
+                        ? Icons.light_mode_rounded
+                        : Icons.dark_mode_rounded,
+                  ),
+                ],
+              ),
+              title: const Text("Theme"),
+              subtitle: const Text(
+                "Set the theme used in the app",
+              ),
+              onTap: () => themeSetting(mode),
             ),
-            title: const Text("Theme"),
-            subtitle: const Text(
-              "Set the theme used in the app",
+            ListTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [Icon(Icons.format_list_numbered_rounded)],
+              ),
+              title: const Text("Reorder Accounts"),
+              subtitle: const Text(
+                  "Change the order in which accounts are displayed"),
+              onTap: () {},
             ),
-            onTap: () => themeSetting(mode),
-          ),
-          ListTile(
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [Icon(Icons.format_list_numbered_rounded)],
+            SwitchListTile(
+              secondary: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    showNotifications
+                        ? Icons.notifications_rounded
+                        : Icons.notifications_off_rounded,
+                  ),
+                ],
+              ),
+              title: const Text("Notifications"),
+              subtitle: const Text(
+                "Recieve notifications when scheduled transactions process",
+              ),
+              value: showNotifications,
+              onChanged: notificationSetting,
             ),
-            title: const Text("Reorder Accounts"),
-            subtitle:
-                const Text("Change the order in which accounts are displayed"),
-            onTap: () {},
-          ),
-          SwitchListTile(
-            secondary: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  showNotifications
-                      ? Icons.notifications_rounded
-                      : Icons.notifications_off_rounded,
-                ),
-              ],
+            SwitchListTile(
+              secondary: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [Icon(Icons.pending_actions_rounded)],
+              ),
+              title: const Text("Prioritize Pending Transactions"),
+              subtitle: const Text(
+                "Show pending transactions before cleared transactions",
+              ),
+              value: prioritizePending,
+              onChanged: pendingTransactionSetting,
             ),
-            title: const Text("Notifications"),
-            subtitle: const Text(
-              "Recieve notifications when scheduled transactions process",
+            SwitchListTile(
+              secondary: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    hideCleared
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility_rounded,
+                  ),
+                ],
+              ),
+              title: const Text("Hide Cleared Transactions"),
+              subtitle: const Text(
+                "Hide transactions that are cleared",
+              ),
+              value: hideCleared,
+              onChanged: clearedTransactionSetting,
             ),
-            value: showNotifications,
-            onChanged: notificationSetting,
-          ),
-          SwitchListTile(
-            secondary: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [Icon(Icons.pending_actions_rounded)],
+            const Divider(),
+            sectionHeader("Data"),
+            ListTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [Icon(Icons.file_download_rounded)],
+              ),
+              title: const Text("Import Data"),
+              subtitle: const Text("Import data into your account"),
+              onTap: importData,
             ),
-            title: const Text("Prioritize Pending Transactions"),
-            subtitle: const Text(
-              "Show pending transactions before cleared transactions",
+            ListTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [Icon(Icons.file_upload_rounded)],
+              ),
+              title: const Text("Export Data"),
+              subtitle: const Text("Export data from your account"),
+              onTap: exportData,
             ),
-            value: prioritizePending,
-            onChanged: pendingTransactionSetting,
-          ),
-          SwitchListTile(
-            secondary: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  hideCleared
-                      ? Icons.visibility_off_rounded
-                      : Icons.visibility_rounded,
-                ),
-              ],
+            const Divider(),
+            sectionHeader("Account"),
+            ListTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [Icon(Icons.logout_rounded)],
+              ),
+              title: const Text("Sign out"),
+              subtitle: const Text("Sign out of your account on this device"),
+              onTap: showLogoutAccount,
             ),
-            title: const Text("Hide Cleared Transactions"),
-            subtitle: const Text(
-              "Hide transactions that are cleared",
+            ListTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [Icon(Icons.delete_forever_rounded)],
+              ),
+              title: const Text("Delete Account"),
+              subtitle:
+                  const Text("Delete your account and any associated data"),
+              onTap: showDeleteAccount,
             ),
-            value: hideCleared,
-            onChanged: clearedTransactionSetting,
-          ),
-          const Divider(),
-          sectionHeader("Data"),
-          ListTile(
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [Icon(Icons.file_download_rounded)],
-            ),
-            title: const Text("Import Data"),
-            subtitle: const Text("Import data into your account"),
-            onTap: importData,
-          ),
-          ListTile(
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [Icon(Icons.file_upload_rounded)],
-            ),
-            title: const Text("Export Data"),
-            subtitle: const Text("Export data from your account"),
-            onTap: exportData,
-          ),
-          const Divider(),
-          sectionHeader("Account"),
-          ListTile(
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [Icon(Icons.logout_rounded)],
-            ),
-            title: const Text("Sign out"),
-            subtitle: const Text("Sign out of your account on this device"),
-            onTap: showLogoutAccount,
-          ),
-          ListTile(
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [Icon(Icons.delete_forever_rounded)],
-            ),
-            title: const Text("Delete Account"),
-            subtitle: const Text("Delete your account and any associated data"),
-            onTap: showDeleteAccount,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
