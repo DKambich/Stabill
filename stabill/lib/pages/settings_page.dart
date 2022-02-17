@@ -20,14 +20,15 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool showNotifications = false,
-      prioritizePending = false,
-      hideCleared = false;
+  bool showNotifications = false;
 
   @override
   Widget build(BuildContext context) {
     final ThemeMode mode = context.watch<PreferenceProvider>().themeMode;
     final Brightness brightness = Theme.of(context).brightness;
+    final bool prioritizePending =
+        context.watch<PreferenceProvider>().prioritizePending;
+    final bool hideCleared = context.watch<PreferenceProvider>().hideCleared;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
@@ -188,16 +189,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // ignore: avoid_positional_boolean_parameters
   Future<void> pendingTransactionSetting(bool prioritizePending) async {
-    setState(() {
-      this.prioritizePending = prioritizePending;
-    });
+    context.read<PreferenceProvider>().setPrioritizePending(prioritizePending);
   }
 
   // ignore: avoid_positional_boolean_parameters
   Future<void> clearedTransactionSetting(bool hideCleared) async {
-    setState(() {
-      this.hideCleared = hideCleared;
-    });
+    context.read<PreferenceProvider>().setHideCleared(hideCleared);
   }
 
   Future<void> importData() async {

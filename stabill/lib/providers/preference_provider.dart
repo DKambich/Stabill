@@ -4,18 +4,42 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PreferenceProvider extends ChangeNotifier {
   final String key = "theme";
   late ThemeMode mode;
+  final String key2 = "prioritizePending";
+  late bool pendingPreference;
+  final String key3 = "hideCleared";
+  late bool hideClearedPreference;
+
   SharedPreferences? _preferences;
 
   ThemeMode get themeMode => mode;
+  bool get prioritizePending => pendingPreference;
+  bool get hideCleared => hideClearedPreference;
 
   PreferenceProvider() {
     mode = ThemeMode.light;
+    pendingPreference = false;
+    hideClearedPreference = false;
     _loadFromPrefs();
   }
 
   void setThemeMode(ThemeMode newMode) {
     mode = newMode;
-    _saveToPrefs();
+    _initPrefs().then((value) => _preferences!.setString(key, mode.toString()));
+    notifyListeners();
+  }
+
+  // ignore: avoid_positional_boolean_parameters
+  void setPrioritizePending(bool prioritizePending) {
+    pendingPreference = prioritizePending;
+    _initPrefs()
+        .then((value) => _preferences!.setBool(key2, prioritizePending));
+    notifyListeners();
+  }
+
+  // ignore: avoid_positional_boolean_parameters
+  void setHideCleared(bool hideCleared) {
+    hideClearedPreference = hideCleared;
+    _initPrefs().then((value) => _preferences!.setBool(key3, hideCleared));
     notifyListeners();
   }
 
@@ -61,11 +85,8 @@ class PreferenceProvider extends ChangeNotifier {
       (type) => type.toString() == theme,
       orElse: () => ThemeMode.light,
     );
+    pendingPreference = _preferences!.getBool(key2) ?? false;
+    hideClearedPreference = _preferences!.getBool(key3) ?? false;
     notifyListeners();
-  }
-
-  Future<void> _saveToPrefs() async {
-    await _initPrefs();
-    _preferences!.setString(key, mode.toString());
   }
 }

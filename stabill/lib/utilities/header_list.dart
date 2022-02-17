@@ -70,9 +70,10 @@ class _HeaderListState extends State<HeaderList> {
 
               return GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    mainAxisExtent: widget.itemHeight,
-                    mainAxisSpacing: 4),
+                  crossAxisCount: crossAxisCount,
+                  mainAxisExtent: widget.itemHeight,
+                  mainAxisSpacing: 4,
+                ),
                 controller: widget.controller,
                 padding: EdgeInsets.only(top: value.height),
                 itemCount: widget.itemCount,
