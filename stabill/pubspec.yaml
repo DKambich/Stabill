@@ -31,10 +31,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-flutter_native_splash:
-  image: assets/icon/logo_original_512.png
+flutter_native_splash:  
   color: "#4caf50"
   color_dark: "#303030"
+  image: "assets/icon/logo_only.png"
   fullscreen: true
 
 flutter_icons:

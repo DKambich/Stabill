@@ -49,6 +49,7 @@ class _ReorderAccountsPageState extends State<ReorderAccountsPage> {
           children: [
             ListTile(
               title: Text(_accounts[index].data().name),
+              subtitle: Text(_accounts[index].id),
             ),
             const Divider(
               height: 1,

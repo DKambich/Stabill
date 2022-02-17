@@ -30,8 +30,6 @@ class Initializer extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.active) {
               final User? user = snapshot.data;
               WidgetsBinding.instance!.addPostFrameCallback((_) {
-                FlutterNativeSplash.remove();
-
                 if (user != null) {
                   Navigator.of(context)
                       .pushReplacementNamed(HomePage.routeName);
