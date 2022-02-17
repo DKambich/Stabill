@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart'
-    show CollectionReference, QueryDocumentSnapshot;
+    show QueryDocumentSnapshot;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

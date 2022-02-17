@@ -232,10 +232,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 List<QueryDocumentSnapshot<Transaction>>.empty(growable: true);
             final unclearedTransactions =
                 List<QueryDocumentSnapshot<Transaction>>.empty(growable: true);
-            for (QueryDocumentSnapshot<Transaction> t in transactionData) {
-              t.data().cleared
-                  ? clearedTranscations.add(t)
-                  : unclearedTransactions.add(t);
+            for (final transaction in transactionData) {
+              transaction.data().cleared
+                  ? clearedTranscations.add(transaction)
+                  : unclearedTransactions.add(transaction);
             }
             transactionData = [
               ...unclearedTransactions,

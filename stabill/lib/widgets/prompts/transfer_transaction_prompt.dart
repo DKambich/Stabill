@@ -6,7 +6,6 @@ import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/providers/data_provider.dart';
-import 'package:stabill/widgets/prompts/prompt.dart';
 
 class TransferTransactionPrompt extends StatefulWidget {
   final String currentAccountID;

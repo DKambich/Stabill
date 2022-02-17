@@ -4,7 +4,6 @@ import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
-import 'package:stabill/widgets/prompts/prompt.dart';
 
 class CreateAccountPrompt extends StatefulWidget {
   const CreateAccountPrompt({Key? key}) : super(key: key);
