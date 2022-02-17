@@ -58,26 +58,28 @@ class _HeaderListState extends State<HeaderList> {
             child: widget.onEmpty ?? body,
           );
         } else {
-          body = ResponsiveBuilder(builder: (context, sizingInformation) {
-            int crossAxisCount = 1;
+          body = ResponsiveBuilder(
+            builder: (context, sizingInformation) {
+              int crossAxisCount = 1;
 
-            if (sizingInformation.isDesktop) {
-              crossAxisCount = 3;
-            } else if (sizingInformation.isTablet) {
-              crossAxisCount = 2;
-            }
+              if (sizingInformation.isDesktop) {
+                crossAxisCount = 3;
+              } else if (sizingInformation.isTablet) {
+                crossAxisCount = 2;
+              }
 
-            return GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                mainAxisExtent: widget.itemHeight,
-              ),
-              controller: widget.controller,
-              padding: EdgeInsets.only(top: value.height),
-              itemCount: widget.itemCount,
-              itemBuilder: widget.itemBuilder,
-            );
-          });
+              return GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisExtent: widget.itemHeight,
+                    mainAxisSpacing: 4),
+                controller: widget.controller,
+                padding: EdgeInsets.only(top: value.height),
+                itemCount: widget.itemCount,
+                itemBuilder: widget.itemBuilder,
+              );
+            },
+          );
         }
 
         return Stack(

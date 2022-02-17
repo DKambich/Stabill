@@ -20,7 +20,9 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool val = false;
+  bool showNotifications = false,
+      prioritizePending = false,
+      hideCleared = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,9 @@ class _SettingsPageState extends State<SettingsPage> {
         title: const Text("Settings"),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          sectionHeader("Display"),
           ListTile(
             leading: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -49,12 +53,22 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             onTap: () => themeSetting(mode),
           ),
+          ListTile(
+            leading: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [Icon(Icons.format_list_numbered_rounded)],
+            ),
+            title: const Text("Reorder Accounts"),
+            subtitle:
+                const Text("Change the order in which accounts are displayed"),
+            onTap: () {},
+          ),
           SwitchListTile(
             secondary: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  val
+                  showNotifications
                       ? Icons.notifications_rounded
                       : Icons.notifications_off_rounded,
                 ),
@@ -64,10 +78,41 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: const Text(
               "Recieve notifications when scheduled transactions process",
             ),
-            value: val,
+            value: showNotifications,
             onChanged: notificationSetting,
           ),
+          SwitchListTile(
+            secondary: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [Icon(Icons.pending_actions_rounded)],
+            ),
+            title: const Text("Prioritize Pending Transactions"),
+            subtitle: const Text(
+              "Show pending transactions before cleared transactions",
+            ),
+            value: prioritizePending,
+            onChanged: pendingTransactionSetting,
+          ),
+          SwitchListTile(
+            secondary: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  hideCleared
+                      ? Icons.visibility_off_rounded
+                      : Icons.visibility_rounded,
+                ),
+              ],
+            ),
+            title: const Text("Hide Cleared Transactions"),
+            subtitle: const Text(
+              "Hide transactions that are cleared",
+            ),
+            value: hideCleared,
+            onChanged: clearedTransactionSetting,
+          ),
           const Divider(),
+          sectionHeader("Data"),
           ListTile(
             leading: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -83,10 +128,11 @@ class _SettingsPageState extends State<SettingsPage> {
               children: const [Icon(Icons.file_upload_rounded)],
             ),
             title: const Text("Export Data"),
-            subtitle: const Text("Export data out of your account"),
+            subtitle: const Text("Export data from your account"),
             onTap: exportData,
           ),
           const Divider(),
+          sectionHeader("Account"),
           ListTile(
             leading: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -110,6 +156,22 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget sectionHeader(String text) {
+    return Padding(
+      padding:
+          const EdgeInsets.only(left: 15.0, right: 15.0, bottom: 6.0, top: 15),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.secondary,
+          fontWeight: FontWeight.bold,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
   Future<void> themeSetting(ThemeMode currentMode) async {
     final PreferenceProvider preferenceProvider =
         context.read<PreferenceProvider>();
@@ -120,7 +182,21 @@ class _SettingsPageState extends State<SettingsPage> {
   // ignore: avoid_positional_boolean_parameters
   Future<void> notificationSetting(bool showNotifications) async {
     setState(() {
-      val = showNotifications;
+      this.showNotifications = showNotifications;
+    });
+  }
+
+  // ignore: avoid_positional_boolean_parameters
+  Future<void> pendingTransactionSetting(bool prioritizePending) async {
+    setState(() {
+      this.prioritizePending = prioritizePending;
+    });
+  }
+
+  // ignore: avoid_positional_boolean_parameters
+  Future<void> clearedTransactionSetting(bool hideCleared) async {
+    setState(() {
+      this.hideCleared = hideCleared;
     });
   }
 
