@@ -1,6 +1,7 @@
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
 import 'dart:io';
+import 'package:stabill/utilities/mobile_download.dart'
+    if (dart.library.html) 'package:stabill/utilities/web_download.dart'
+    as downloader;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -227,33 +228,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> exportData() async {
     final String fileName =
-        'StabillExport-${DateFormat("MM-dd-yyyy-kk-mm-ss").format(DateTime.now())}.csv';
-    if (kIsWeb) {
-      // Create the CSV from the Account data
-      final String csv = await context.read<DataProvider>().exportCSV();
-      // Create a Blob to download from the CSV data
-      final csvBlob = html.Blob([csv], 'text/plain', 'native');
-      // Create and click on the Anchor element to download the file
-      final webAnchor =
-          html.AnchorElement(href: html.Url.createObjectUrlFromBlob(csvBlob))
-            ..setAttribute("download", fileName)
-            ..click();
-      //Remove the web anchor from the page
-      webAnchor.remove();
-    } else if (Platform.isAndroid) {
-      // Store the path to the downloads folder
-      const String exportPath = '/storage/emulated/0/Download/Stabill/Exports';
-      // Check if the app has permission to export the file
-      if (await Permission.storage.request().isGranted &&
-          await Permission.manageExternalStorage.request().isGranted) {
-        // Create a the file
-        final File file = File('$exportPath/$fileName');
-        file.createSync(recursive: true);
-        // Create the CSV from the Account data and write it to the file
-        final String csv = await context.read<DataProvider>().exportCSV();
-        file.writeAsStringSync(csv);
-      }
-    }
+        'StabillExport-${DateFormat("MM-dd-yyyy-kk-mm-ss").format(DateTime.now())}.txt';
+    String csv = "a,b,c\n1,2,3";
+    // final String csv = await context.read<DataProvider>().exportCSV();
+
+    downloader.downloadFile(fileName, csv);
     // TODO: Notify that the user of where the file was stored
   }
 
