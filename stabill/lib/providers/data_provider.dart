@@ -7,7 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart'
         FieldValue,
         FirebaseFirestore,
         Query,
-        QueryDocumentSnapshot,
         QuerySnapshot,
         WriteBatch;
 import 'package:csv/csv.dart';
@@ -386,6 +385,7 @@ class DataProvider {
   }
 
   Future<String> exportCSV() async {
+    // Store the CSV headers
     const List<String> csvHeaders = [
       "AccountID",
       "Account_Name",
@@ -399,17 +399,20 @@ class DataProvider {
       "Memo"
     ];
 
+    // Create a list to store the rows of the CSV
     final List<List<dynamic>> csvList = [csvHeaders];
 
-    QuerySnapshot<Account> accounts = await getAccountsCollection().get();
-
+    // Get and loop through the list of accounts
+    final QuerySnapshot<Account> accounts = await getAccountsCollection().get();
     for (final accountSnapshot in accounts.docs) {
-      Account account = accountSnapshot.data();
-      QuerySnapshot<Transaction> transactions =
-          await getTransactionCollection(account.id).orderBy("timestamp").get();
+      final Account account = accountSnapshot.data();
 
+      // Get a loop through the list of transactions of the current account
+      final QuerySnapshot<Transaction> transactions =
+          await getTransactionCollection(account.id).orderBy("timestamp").get();
       for (final transactionSnapshot in transactions.docs) {
-        Transaction transaction = transactionSnapshot.data();
+        final Transaction transaction = transactionSnapshot.data();
+        // Add a row in the CSV for the current transaction
         csvList.add([
           account.id,
           account.name,
@@ -417,6 +420,7 @@ class DataProvider {
           transaction.amount,
           transaction.checkNumber,
           transaction.cleared.toString().toUpperCase(),
+          // ignore: prefer_if_elements_to_conditional_expressions
           transaction.method == TransactionType.deposit ? "TRUE" : "FALSE",
           transaction.timestamp.millisecondsSinceEpoch,
           transaction.hidden.toString().toUpperCase(),

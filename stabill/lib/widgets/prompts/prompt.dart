@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'package:stabill/constants.dart';
 
 class Prompt extends StatelessWidget {
@@ -61,28 +60,13 @@ class Prompt extends StatelessWidget {
   }
 
   static void show(BuildContext context, Widget prompt) {
-    final DeviceScreenType deviceType =
-        getDeviceType(MediaQuery.of(context).size);
-
-    bool useDialog = deviceType == DeviceScreenType.desktop ||
-        deviceType == DeviceScreenType.tablet;
-    useDialog = true;
-    if (useDialog) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          shape: dialogShape,
-          contentPadding: EdgeInsets.zero,
-          content: prompt,
-        ),
-      );
-    } else {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        shape: modalShape,
-        builder: (_) => prompt,
-      );
-    }
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: dialogShape,
+        contentPadding: EdgeInsets.zero,
+        content: prompt,
+      ),
+    );
   }
 }

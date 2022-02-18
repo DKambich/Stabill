@@ -1,12 +1,10 @@
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 import 'dart:io';
 
-import 'dart:convert';
-import 'dart:html' as html;
-import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -231,28 +229,32 @@ class _SettingsPageState extends State<SettingsPage> {
     final String fileName =
         'StabillExport-${DateFormat("MM-dd-yyyy-kk-mm-ss").format(DateTime.now())}.csv';
     if (kIsWeb) {
-      // TODO: Add web downloads
-      // final String csv = await context.read<DataProvider>().exportCSV();
-      final String csv = ListToCsvConverter().convert([
-        ["a", "b", "c"],
-        [1, 2, 3]
-      ]);
-      var blob = html.Blob([csv], 'text/plain', 'native');
-      final anchor = html.AnchorElement(
-          href: html.Url.createObjectUrlFromBlob(blob).toString())
-        ..setAttribute("download", fileName)
-        ..click();
+      // Create the CSV from the Account data
+      final String csv = await context.read<DataProvider>().exportCSV();
+      // Create a Blob to download from the CSV data
+      final csvBlob = html.Blob([csv], 'text/plain', 'native');
+      // Create and click on the Anchor element to download the file
+      final webAnchor =
+          html.AnchorElement(href: html.Url.createObjectUrlFromBlob(csvBlob))
+            ..setAttribute("download", fileName)
+            ..click();
+      //Remove the web anchor from the page
+      webAnchor.remove();
     } else if (Platform.isAndroid) {
+      // Store the path to the downloads folder
       const String exportPath = '/storage/emulated/0/Download/Stabill/Exports';
+      // Check if the app has permission to export the file
       if (await Permission.storage.request().isGranted &&
           await Permission.manageExternalStorage.request().isGranted) {
+        // Create a the file
         final File file = File('$exportPath/$fileName');
         file.createSync(recursive: true);
+        // Create the CSV from the Account data and write it to the file
         final String csv = await context.read<DataProvider>().exportCSV();
         file.writeAsStringSync(csv);
-        // TODO: Notify that the user of where the file was stored
       }
     }
+    // TODO: Notify that the user of where the file was stored
   }
 
   Future<void> showLogoutAccount() async {
