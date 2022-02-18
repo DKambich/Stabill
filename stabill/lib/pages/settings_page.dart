@@ -1,7 +1,14 @@
 import 'dart:io';
 
+import 'dart:convert';
+import 'dart:html' as html;
+import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/reorder_accounts_page.dart';
@@ -220,7 +227,33 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> exportData() async {}
+  Future<void> exportData() async {
+    final String fileName =
+        'StabillExport-${DateFormat("MM-dd-yyyy-kk-mm-ss").format(DateTime.now())}.csv';
+    if (kIsWeb) {
+      // TODO: Add web downloads
+      // final String csv = await context.read<DataProvider>().exportCSV();
+      final String csv = ListToCsvConverter().convert([
+        ["a", "b", "c"],
+        [1, 2, 3]
+      ]);
+      var blob = html.Blob([csv], 'text/plain', 'native');
+      final anchor = html.AnchorElement(
+          href: html.Url.createObjectUrlFromBlob(blob).toString())
+        ..setAttribute("download", fileName)
+        ..click();
+    } else if (Platform.isAndroid) {
+      const String exportPath = '/storage/emulated/0/Download/Stabill/Exports';
+      if (await Permission.storage.request().isGranted &&
+          await Permission.manageExternalStorage.request().isGranted) {
+        final File file = File('$exportPath/$fileName');
+        file.createSync(recursive: true);
+        final String csv = await context.read<DataProvider>().exportCSV();
+        file.writeAsStringSync(csv);
+        // TODO: Notify that the user of where the file was stored
+      }
+    }
+  }
 
   Future<void> showLogoutAccount() async {
     final bool shouldLogout = await ConfirmDialog.show(

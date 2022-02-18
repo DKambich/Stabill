@@ -7,7 +7,10 @@ import 'package:cloud_firestore/cloud_firestore.dart'
         FieldValue,
         FirebaseFirestore,
         Query,
+        QueryDocumentSnapshot,
+        QuerySnapshot,
         WriteBatch;
+import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/scheduled_transaction.dart';
@@ -380,6 +383,49 @@ class DataProvider {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<String> exportCSV() async {
+    const List<String> csvHeaders = [
+      "AccountID",
+      "Account_Name",
+      "Transaction_Name",
+      "Amount",
+      "Check_No",
+      "Has_Cleared",
+      "Transaction_Type",
+      "Creation_Date",
+      "Is_Hidden",
+      "Memo"
+    ];
+
+    final List<List<dynamic>> csvList = [csvHeaders];
+
+    QuerySnapshot<Account> accounts = await getAccountsCollection().get();
+
+    for (final accountSnapshot in accounts.docs) {
+      Account account = accountSnapshot.data();
+      QuerySnapshot<Transaction> transactions =
+          await getTransactionCollection(account.id).orderBy("timestamp").get();
+
+      for (final transactionSnapshot in transactions.docs) {
+        Transaction transaction = transactionSnapshot.data();
+        csvList.add([
+          account.id,
+          account.name,
+          transaction.name,
+          transaction.amount,
+          transaction.checkNumber,
+          transaction.cleared.toString().toUpperCase(),
+          transaction.method == TransactionType.deposit ? "TRUE" : "FALSE",
+          transaction.timestamp.millisecondsSinceEpoch,
+          transaction.hidden.toString().toUpperCase(),
+          transaction.memo
+        ]);
+      }
+    }
+
+    return const ListToCsvConverter().convert(csvList);
   }
 
   // Transaction Methods
