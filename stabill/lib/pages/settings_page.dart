@@ -229,8 +229,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> exportData() async {
     final String fileName =
         'StabillExport-${DateFormat("MM-dd-yyyy-kk-mm-ss").format(DateTime.now())}.txt';
-    String csv = "a,b,c\n1,2,3";
-    // final String csv = await context.read<DataProvider>().exportCSV();
+
+    final String csv = await context.read<DataProvider>().exportCSV();
 
     downloader.downloadFile(fileName, csv);
     // TODO: Notify that the user of where the file was stored
