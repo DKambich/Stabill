@@ -60,37 +60,25 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               onTap: () => themeSetting(mode),
             ),
-            ListTile(
-              leading: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [Icon(Icons.format_list_numbered_rounded)],
-              ),
-              title: const Text("Reorder Accounts"),
-              subtitle: const Text(
-                "Change the order in which accounts are displayed",
-              ),
-              onTap: () => Navigator.of(context).pushNamed(
-                ReorderAccountsPage.routeName,
-              ),
-            ),
-            SwitchListTile(
-              secondary: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    showNotifications
-                        ? Icons.notifications_rounded
-                        : Icons.notifications_off_rounded,
-                  ),
-                ],
-              ),
-              title: const Text("Notifications"),
-              subtitle: const Text(
-                "Recieve notifications when scheduled transactions process",
-              ),
-              value: showNotifications,
-              onChanged: notificationSetting,
-            ),
+
+            // SwitchListTile(
+            //   secondary: Column(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       Icon(
+            //         showNotifications
+            //             ? Icons.notifications_rounded
+            //             : Icons.notifications_off_rounded,
+            //       ),
+            //     ],
+            //   ),
+            //   title: const Text("Notifications"),
+            //   subtitle: const Text(
+            //     "Recieve notifications when scheduled transactions process",
+            //   ),
+            //   value: showNotifications,
+            //   onChanged: notificationSetting,
+            // ),
             SwitchListTile(
               secondary: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -123,6 +111,19 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const Divider(),
             sectionHeader("Data"),
+            ListTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [Icon(Icons.format_list_numbered_rounded)],
+              ),
+              title: const Text("Reorder Accounts"),
+              subtitle: const Text(
+                "Change the order in which accounts are shown",
+              ),
+              onTap: () => Navigator.of(context).pushNamed(
+                ReorderAccountsPage.routeName,
+              ),
+            ),
             ListTile(
               leading: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
