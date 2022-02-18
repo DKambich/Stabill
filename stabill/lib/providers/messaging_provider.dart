@@ -6,8 +6,9 @@ class MessageProvider {
   final User? user;
 
   MessageProvider(
-      //this.firebaseMessaging,
-      this.user);
+    //this.firebaseMessaging,
+    this.user,
+  );
 
   Future<bool> requestPermissions() async {
     return false;
@@ -16,7 +17,7 @@ class MessageProvider {
   Future<void> subscribe() async {
     try {
       if (user == null) throw Exception("User is not signed in");
-      final String uid = user!.uid;
+      // final String uid = user!.uid;
       // await firebaseMessaging.subscribeToTopic(uid);
     } catch (e) {
       rethrow;
@@ -26,7 +27,7 @@ class MessageProvider {
   Future<void> unsubscribe() async {
     try {
       if (user == null) throw Exception("User is not signed in");
-      final String uid = user!.uid;
+      // final String uid = user!.uid;
       // await firebaseMessaging.unsubscribeFromTopic(uid);
     } catch (e) {
       rethrow;

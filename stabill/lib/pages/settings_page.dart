@@ -1,19 +1,17 @@
 import 'dart:io';
-import 'package:stabill/utilities/mobile_download.dart'
-    if (dart.library.html) 'package:stabill/utilities/web_download.dart'
-    as downloader;
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/pages/login_page.dart';
 import 'package:stabill/pages/reorder_accounts_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/providers/preference_provider.dart';
+import 'package:stabill/utilities/mobile_download.dart'
+    if (dart.library.html) 'package:stabill/utilities/web_download.dart'
+    as downloader;
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 import 'package:stabill/widgets/dialogs/theme_picker.dart';
 
@@ -228,7 +226,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> exportData() async {
     final String fileName =
-        'StabillExport-${DateFormat("MM-dd-yyyy-kk-mm-ss").format(DateTime.now())}.txt';
+        'StabillExport-${DateFormat("MM-dd-yyyy-kk-mm-ss").format(DateTime.now())}.csv';
 
     final String csv = await context.read<DataProvider>().exportCSV();
 
