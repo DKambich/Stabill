@@ -63,118 +63,153 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> signUp() async {}
+
   void forgotPassword() {}
 
   @override
   Widget build(BuildContext context) {
-    double logoSize = MediaQuery.of(context).size.width / 3;
+    final double logoSize = MediaQuery.of(context).size.width / 3;
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Hero(
-                  tag: "logo",
-                  child: SvgPicture.asset(
-                    "assets/icon/logo_only.svg",
-                    width: logoSize,
-                    height: logoSize,
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Hero(
+                        tag: "logo",
+                        child: SvgPicture.asset(
+                          "assets/icon/logo_only.svg",
+                          width: logoSize,
+                          height: logoSize,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 50,
+                      ),
+                      TextFormField(
+                        controller: emailController,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.person_rounded,
+                            color: Colors.white,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(cardRadius),
+                            borderSide: BorderSide.none,
+                          ),
+                          hintStyle: TextStyle(
+                            color: Colors.white,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white24,
+                          hintText: 'Email',
+                        ),
+                        style: const TextStyle(color: Colors.white),
+                        validator: emailValidator,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      TextFormField(
+                        controller: passwordController,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.password_rounded,
+                            color: Colors.white,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(cardRadius),
+                            borderSide: BorderSide.none,
+                          ),
+                          hintStyle: TextStyle(
+                            color: Colors.white,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white24,
+                          hintText: 'Password',
+                        ),
+                        style: const TextStyle(color: Colors.white),
+                        validator: passwordValidator,
+                        obscureText: true,
+                        keyboardType: TextInputType.visiblePassword,
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (val) => logIn(),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      ElevatedButton(
+                        onPressed: logIn,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(60),
+                          primary: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(cardRadius),
+                          ),
+                        ),
+                        child: const Text(
+                          'Log In',
+                          style: TextStyle(color: Colors.green, fontSize: 16),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          text: "Forgot your password?",
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = forgotPassword,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(
-                  height: 50,
-                ),
-                TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.person_rounded,
-                      color: Colors.white,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(cardRadius),
-                      borderSide: BorderSide.none,
-                    ),
-                    hintStyle: TextStyle(
-                      color: Colors.white,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white24,
-                    hintText: 'Email',
-                  ),
-                  style: const TextStyle(color: Colors.white),
-                  validator: emailValidator,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                TextFormField(
-                  controller: passwordController,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.password_rounded,
-                      color: Colors.white,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(cardRadius),
-                      borderSide: BorderSide.none,
-                    ),
-                    hintStyle: TextStyle(
-                      color: Colors.white,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white24,
-                    hintText: 'Password',
-                  ),
-                  style: const TextStyle(color: Colors.white),
-                  validator: passwordValidator,
-                  obscureText: true,
-                  keyboardType: TextInputType.visiblePassword,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (val) => logIn(),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                ElevatedButton(
-                  onPressed: logIn,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(60),
-                    primary: Colors.white,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(cardRadius),
-                    ),
-                  ),
-                  child: const Text(
-                    'Log In',
-                    style: TextStyle(color: Colors.green, fontSize: 16),
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                RichText(
-                  text: TextSpan(
-                    text: "Forgot your password?",
-                    recognizer: TapGestureRecognizer()..onTap = forgotPassword,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: RichText(
+              text: TextSpan(
+                text: "Don't have an account?",
+                children: [
+                  TextSpan(
+                    text: " Sign Up",
+                    recognizer: TapGestureRecognizer()..onTap = signUp,
                     style: const TextStyle(
                       color: Colors.white,
+                      fontWeight: FontWeight.bold,
                       fontSize: 14,
                       decoration: TextDecoration.underline,
                     ),
                   ),
+                ],
+                recognizer: TapGestureRecognizer()..onTap = signUp,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  decoration: TextDecoration.underline,
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
