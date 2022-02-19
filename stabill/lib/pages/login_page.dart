@@ -124,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
                         controller: passwordController,
                         decoration: const InputDecoration(
                           prefixIcon: Icon(
-                            Icons.password_rounded,
+                            Icons.lock_rounded,
                             color: Colors.white,
                           ),
                           border: OutlineInputBorder(
