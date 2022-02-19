@@ -37,11 +37,14 @@ class _HomePageState extends State<HomePage> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: Center(
-          child: SvgPicture.asset(
-            "assets/icon/logo_only.svg",
-            fit: BoxFit.scaleDown,
-            width: 28,
-            height: 28,
+          child: Hero(
+            tag: "logo",
+            child: SvgPicture.asset(
+              "assets/icon/logo_only.svg",
+              fit: BoxFit.scaleDown,
+              width: 28,
+              height: 28,
+            ),
           ),
         ),
         title: const Text("Stabill"),

@@ -1,5 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
 
@@ -49,65 +52,123 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> logIn() async {
+    if (_formKey.currentState!.validate()) {
+      await context.read<AuthProvider>().signIn(
+            email: emailController.text,
+            password: passwordController.text,
+          );
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+    }
+  }
+
+  void forgotPassword() {}
+
   @override
   Widget build(BuildContext context) {
     double logoSize = MediaQuery.of(context).size.width / 3;
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Image.asset(
-                  "assets/icon/logo_android.png",
-                  width: logoSize,
-                  height: logoSize,
-                ),
-                Text("Login to your account"),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: TextFormField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      labelText: "Email",
-                      hintText: "someone@example.com",
-                    ),
-                    validator: emailValidator,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
+                Hero(
+                  tag: "logo",
+                  child: SvgPicture.asset(
+                    "assets/icon/logo_only.svg",
+                    width: logoSize,
+                    height: logoSize,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: TextFormField(
-                    controller: passwordController,
-                    decoration: const InputDecoration(
-                      labelText: "Password",
+                const SizedBox(
+                  height: 50,
+                ),
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.person_rounded,
+                      color: Colors.white,
                     ),
-                    validator: passwordValidator,
-                    obscureText: true,
-                    keyboardType: TextInputType.visiblePassword,
-                    textInputAction: TextInputAction.done,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(cardRadius),
+                      borderSide: BorderSide.none,
+                    ),
+                    hintStyle: TextStyle(
+                      color: Colors.white,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white24,
+                    hintText: 'Email',
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                  validator: emailValidator,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                TextFormField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.password_rounded,
+                      color: Colors.white,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(cardRadius),
+                      borderSide: BorderSide.none,
+                    ),
+                    hintStyle: TextStyle(
+                      color: Colors.white,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white24,
+                    hintText: 'Password',
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                  validator: passwordValidator,
+                  obscureText: true,
+                  keyboardType: TextInputType.visiblePassword,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (val) => logIn(),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                ElevatedButton(
+                  onPressed: logIn,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(60),
+                    primary: Colors.white,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(cardRadius),
+                    ),
+                  ),
+                  child: const Text(
+                    'Log In',
+                    style: TextStyle(color: Colors.green, fontSize: 16),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ElevatedButton(
-                    child: const Text("Login"),
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        await context.read<AuthProvider>().signIn(
-                              email: emailController.text,
-                              password: passwordController.text,
-                            );
-                        if (!mounted) return;
-                        Navigator.of(context)
-                            .pushReplacementNamed(HomePage.routeName);
-                      }
-                    },
+                const SizedBox(
+                  height: 16,
+                ),
+                RichText(
+                  text: TextSpan(
+                    text: "Forgot your password?",
+                    recognizer: TapGestureRecognizer()..onTap = forgotPassword,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
               ],

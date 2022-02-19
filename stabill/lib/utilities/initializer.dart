@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
@@ -18,16 +17,16 @@ class Initializer extends StatefulWidget {
 }
 
 class _InitializerState extends State<Initializer> {
-  late StreamSubscription<User?> sub;
+  late StreamSubscription<User?> authSubscription;
 
   @override
   void initState() {
-    sub = context.read<AuthProvider>().authState.listen((user) {
-      if (user != null) {
-        Navigator.of(context).pushReplacementNamed(HomePage.routeName);
-      } else {
-        Navigator.of(context).pushReplacementNamed(LoginPage.routeName);
-      }
+    // Listen to the initial sign in state of the user
+    authSubscription = context.read<AuthProvider>().authState.listen((user) {
+      // Navigate based on the user's sign in state
+      final String route =
+          user != null ? HomePage.routeName : LoginPage.routeName;
+      Navigator.of(context).pushReplacementNamed(route);
     });
     super.initState();
   }
@@ -35,7 +34,7 @@ class _InitializerState extends State<Initializer> {
   @override
   void dispose() {
     super.dispose();
-    sub.cancel();
+    authSubscription.cancel();
   }
 
   @override
