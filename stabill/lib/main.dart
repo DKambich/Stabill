@@ -1,5 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/firebase_options.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/models/transaction.dart';
@@ -15,7 +17,10 @@ import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/providers/root_provider.dart';
 import 'package:stabill/utilities/initializer.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final FirebaseOptions options = DefaultFirebaseOptions.currentPlatform;
+  await Firebase.initializeApp(options: options);
   runApp(Stabill());
 }
 

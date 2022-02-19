@@ -49,6 +49,7 @@ flutter_icons:
 
 flutter:
   assets:
+    - assets/icon/logo_android.png
     - assets/icon/logo_only.png
     - assets/icon/logo_only.svg
   uses-material-design: true

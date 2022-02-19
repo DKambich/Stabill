@@ -51,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    double logoSize = MediaQuery.of(context).size.width / 3;
     return Scaffold(
       body: Center(
         child: Padding(
@@ -60,6 +61,12 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Image.asset(
+                  "assets/icon/logo_android.png",
+                  width: logoSize,
+                  height: logoSize,
+                ),
+                Text("Login to your account"),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextFormField(
