@@ -23,11 +23,10 @@ class AuthProvider {
 
   Future<String> signIn({String email = "", String password = ""}) async {
     try {
-      UserCredential cred = await firebaseAuth.signInWithEmailAndPassword(
+      await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      print(cred.user);
       return "Signed in!";
     } on FirebaseAuthException catch (e) {
       return e.message ?? "An exception occured at sign in";

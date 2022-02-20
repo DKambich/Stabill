@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stabill/constants.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/providers/auth_provider.dart';
 
 class ResetPasswordDialog extends StatefulWidget {

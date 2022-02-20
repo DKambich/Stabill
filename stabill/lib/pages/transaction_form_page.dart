@@ -210,10 +210,10 @@ class _TransactionModalState extends State<TransactionModal> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
                   child: CheckboxListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(cardRadius),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(fieldRadius),
                     ),
-                    tileColor: Color.fromRGBO(240, 240, 240, 1),
+                    tileColor: formFieldFill(Theme.of(context).brightness),
                     value: isCleared,
                     onChanged: (_) {
                       setState(() {
@@ -229,8 +229,9 @@ class _TransactionModalState extends State<TransactionModal> {
                       const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
                   child: Container(
                     decoration: BoxDecoration(
-                        color: Color.fromRGBO(240, 240, 240, 1),
-                        borderRadius: BorderRadius.all(cardRadius)),
+                      color: formFieldFill(Theme.of(context).brightness),
+                      borderRadius: const BorderRadius.all(fieldRadius),
+                    ),
                     child: Row(
                       children: [
                         Flexible(
@@ -259,7 +260,7 @@ class _TransactionModalState extends State<TransactionModal> {
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
                   child: TextFormField(
                     controller: memoController,
                     decoration: textInputDecoration(

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 // Constant Shapes
 
 const cardRadius = Radius.circular(12);
+const fieldRadius = cardRadius;
 const modalRadius = Radius.circular(24);
 
 const cardShape = RoundedRectangleBorder(
@@ -29,15 +29,15 @@ const defaultTextInputDecoration = InputDecoration(
   ),
   iconColor: Colors.grey,
   border: OutlineInputBorder(
-    borderRadius: BorderRadius.all(cardRadius),
+    borderRadius: BorderRadius.all(fieldRadius),
     borderSide: BorderSide.none,
   ),
   focusedBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(cardRadius),
+    borderRadius: BorderRadius.all(fieldRadius),
     borderSide: BorderSide(color: Colors.green, width: 2),
   ),
   errorBorder: OutlineInputBorder(
-    borderRadius: BorderRadius.all(cardRadius),
+    borderRadius: BorderRadius.all(fieldRadius),
     borderSide: BorderSide(color: Colors.red, width: 2),
   ),
 );
@@ -52,4 +52,10 @@ InputDecoration textInputDecoration({String? hintText, IconData? prefixIcon}) {
         : null,
     hintText: hintText,
   );
+}
+
+Color formFieldFill(Brightness themeBrightness) {
+  return themeBrightness == Brightness.light
+      ? const Color(0x0A000000)
+      : const Color(0x1AFFFFFF);
 }
