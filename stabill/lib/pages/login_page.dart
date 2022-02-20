@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                             color: Colors.white,
                           ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(cardRadius),
+                            borderRadius: BorderRadius.all(fieldRadius),
                             borderSide: BorderSide.none,
                           ),
                           hintStyle: TextStyle(
@@ -131,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                             color: Colors.white,
                           ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(cardRadius),
+                            borderRadius: BorderRadius.all(fieldRadius),
                             borderSide: BorderSide.none,
                           ),
                           hintStyle: TextStyle(
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                           minimumSize: const Size.fromHeight(60),
                           primary: Colors.white,
                           shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(cardRadius),
+                            borderRadius: BorderRadius.all(fieldRadius),
                           ),
                         ),
                         child: const Text(
