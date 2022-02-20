@@ -56,9 +56,9 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
             TextFormField(
               autofocus: true,
               controller: _accountController,
-              decoration: const InputDecoration(
-                labelText: "Account Name",
-                floatingLabelBehavior: FloatingLabelBehavior.auto,
+              decoration: textInputDecoration(
+                hintText: "Account Name",
+                prefixIcon: Icons.account_balance_rounded,
               ),
               textCapitalization: TextCapitalization.words,
               textInputAction: TextInputAction.next,
@@ -66,11 +66,14 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
                   ? 'Account name is too short'
                   : null,
             ),
+            SizedBox(
+              height: 16,
+            ),
             TextFormField(
               controller: _balanceController,
-              decoration: const InputDecoration(
-                labelText: "Starting Balance",
-                floatingLabelBehavior: FloatingLabelBehavior.auto,
+              decoration: textInputDecoration(
+                hintText: "Starting Balance",
+                prefixIcon: Icons.attach_money_rounded,
               ),
               enableInteractiveSelection: false,
               inputFormatters: [DollarTextInputFormatter(maxDigits: 8)],
