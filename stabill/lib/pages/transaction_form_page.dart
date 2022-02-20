@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
@@ -133,11 +134,16 @@ class _TransactionModalState extends State<TransactionModal> {
             child: Column(
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 8,
+                  ),
                   child: TextFormField(
                     controller: nameController,
-                    decoration: const InputDecoration(labelText: "Name"),
+                    decoration: textInputDecoration(
+                      hintText: "Name",
+                      prefixIcon: Icons.label_rounded,
+                    ),
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
                     textCapitalization: TextCapitalization.words,
@@ -151,10 +157,13 @@ class _TransactionModalState extends State<TransactionModal> {
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
                   child: TextFormField(
                     controller: amountController,
-                    decoration: const InputDecoration(labelText: "Amount"),
+                    decoration: textInputDecoration(
+                      hintText: "Amount",
+                      prefixIcon: Icons.attach_money_rounded,
+                    ),
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
                     validator: (String? text) {
@@ -170,21 +179,26 @@ class _TransactionModalState extends State<TransactionModal> {
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
                   child: TextFormField(
                     controller: dateController,
-                    decoration: const InputDecoration(labelText: "Date"),
+                    decoration: textInputDecoration(
+                      hintText: "Date",
+                      prefixIcon: Icons.event_rounded,
+                    ),
                     readOnly: true,
                     onTap: showDateTime,
                   ),
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
                   child: TextFormField(
                     controller: checkNumberController,
-                    decoration:
-                        const InputDecoration(labelText: "Check Number"),
+                    decoration: textInputDecoration(
+                      hintText: "Check Number",
+                      prefixIcon: Icons.pin,
+                    ),
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
@@ -192,46 +206,66 @@ class _TransactionModalState extends State<TransactionModal> {
                     ],
                   ),
                 ),
-                CheckboxListTile(
-                  value: isCleared,
-                  onChanged: (_) {
-                    setState(() {
-                      isCleared = !isCleared;
-                    });
-                  },
-                  title: const Text("Mark as cleared"),
-                  controlAffinity: ListTileControlAffinity.leading,
-                ),
-                Row(
-                  children: [
-                    Flexible(
-                      child: RadioListTile<TransactionType>(
-                        title: const Text("Withdrawal"),
-                        value: TransactionType.withdrawal,
-                        groupValue: method,
-                        onChanged: (TransactionType? value) => setState(
-                          () => method = TransactionType.withdrawal,
-                        ),
-                      ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+                  child: CheckboxListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(cardRadius),
                     ),
-                    Flexible(
-                      child: RadioListTile<TransactionType>(
-                        title: const Text("Deposit"),
-                        value: TransactionType.deposit,
-                        groupValue: method,
-                        onChanged: (TransactionType? value) => setState(
-                          () => method = TransactionType.deposit,
-                        ),
-                      ),
-                    ),
-                  ],
+                    tileColor: Color.fromRGBO(240, 240, 240, 1),
+                    value: isCleared,
+                    onChanged: (_) {
+                      setState(() {
+                        isCleared = !isCleared;
+                      });
+                    },
+                    title: const Text("Mark as cleared"),
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Color.fromRGBO(240, 240, 240, 1),
+                        borderRadius: BorderRadius.all(cardRadius)),
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: RadioListTile<TransactionType>(
+                            title: const Text("Withdrawal"),
+                            value: TransactionType.withdrawal,
+                            groupValue: method,
+                            onChanged: (TransactionType? value) => setState(
+                              () => method = TransactionType.withdrawal,
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          child: RadioListTile<TransactionType>(
+                            title: const Text("Deposit"),
+                            value: TransactionType.deposit,
+                            groupValue: method,
+                            onChanged: (TransactionType? value) => setState(
+                              () => method = TransactionType.deposit,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
                   child: TextFormField(
                     controller: memoController,
-                    decoration: const InputDecoration(labelText: "Memo"),
+                    decoration: textInputDecoration(
+                      hintText: "Memo",
+                      prefixIcon: Icons.sticky_note_2_rounded,
+                    ),
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
                     textCapitalization: TextCapitalization.sentences,
