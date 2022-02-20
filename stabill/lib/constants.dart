@@ -21,3 +21,35 @@ const topCardShape = RoundedRectangleBorder(
   borderRadius:
       BorderRadius.only(bottomLeft: cardRadius, bottomRight: cardRadius),
 );
+
+const defaultTextInputDecoration = InputDecoration(
+  filled: true,
+  hintStyle: TextStyle(
+    color: Colors.grey,
+  ),
+  iconColor: Colors.grey,
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.all(cardRadius),
+    borderSide: BorderSide.none,
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.all(cardRadius),
+    borderSide: BorderSide(color: Colors.green, width: 2),
+  ),
+  errorBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.all(cardRadius),
+    borderSide: BorderSide(color: Colors.red, width: 2),
+  ),
+);
+
+InputDecoration textInputDecoration({String? hintText, IconData? prefixIcon}) {
+  return defaultTextInputDecoration.copyWith(
+    prefixIcon: prefixIcon != null
+        ? Icon(
+            prefixIcon,
+            color: Colors.grey,
+          )
+        : null,
+    hintText: hintText,
+  );
+}

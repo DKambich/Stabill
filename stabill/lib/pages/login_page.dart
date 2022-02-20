@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/pages/home_page.dart';
 import 'package:stabill/providers/auth_provider.dart';
+import 'package:stabill/widgets/dialogs/reset_password_dialog.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routeName = "/login";
@@ -65,7 +66,9 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> signUp() async {}
 
-  void forgotPassword() {}
+  void forgotPassword() {
+    ResetPasswordDialog.show(context);
+  }
 
   @override
   Widget build(BuildContext context) {
