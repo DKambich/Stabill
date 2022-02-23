@@ -130,10 +130,9 @@ class _TransferFundsModalState extends State<TransferTransactionPrompt> {
               const Text(
                 "Select an account to transfer the transaction to",
               ),
+              dialogFieldSpace,
               DropdownButtonFormField<Account>(
-                decoration: const InputDecoration(
-                  labelText: "Transfer to",
-                ),
+                decoration: textInputDecoration(labelText: "Transfer To"),
                 items: dropdownItems,
                 value: _selectedAccount,
                 onChanged: (Account? newValue) => setState(

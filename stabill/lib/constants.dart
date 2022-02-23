@@ -22,15 +22,24 @@ const topCardShape = RoundedRectangleBorder(
       BorderRadius.only(bottomLeft: cardRadius, bottomRight: cardRadius),
 );
 
+const formFieldSpace = SizedBox(
+  height: 8,
+);
+
+const dialogFieldSpace = SizedBox(
+  height: 16,
+);
+
 const defaultTextInputDecoration = InputDecoration(
   filled: true,
   hintStyle: TextStyle(
     color: Colors.grey,
   ),
+  labelStyle: TextStyle(color: Colors.grey),
   iconColor: Colors.grey,
-  border: OutlineInputBorder(
+  enabledBorder: OutlineInputBorder(
     borderRadius: BorderRadius.all(fieldRadius),
-    borderSide: BorderSide.none,
+    borderSide: BorderSide(color: Colors.grey, width: 2),
   ),
   focusedBorder: OutlineInputBorder(
     borderRadius: BorderRadius.all(fieldRadius),
@@ -42,7 +51,13 @@ const defaultTextInputDecoration = InputDecoration(
   ),
 );
 
-InputDecoration textInputDecoration({String? hintText, IconData? prefixIcon}) {
+const checkboxFieldShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(fieldRadius),
+  side: BorderSide(color: Colors.grey, width: 2),
+);
+
+InputDecoration textInputDecoration(
+    {String? labelText, String? hintText, IconData? prefixIcon}) {
   return defaultTextInputDecoration.copyWith(
     prefixIcon: prefixIcon != null
         ? Icon(
@@ -50,6 +65,7 @@ InputDecoration textInputDecoration({String? hintText, IconData? prefixIcon}) {
             color: Colors.grey,
           )
         : null,
+    labelText: labelText,
     hintText: hintText,
   );
 }

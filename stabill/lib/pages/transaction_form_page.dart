@@ -63,21 +63,6 @@ class _TransactionModalState extends State<TransactionModal> {
       checkNumberController = TextEditingController(text: "");
       memoController = TextEditingController(text: "");
     }
-
-    // amountController.addListener(() {
-    //   String dollarStr = Account.formatDollarStr(amountController.text
-    //       .substring(0, min(amountController.text.length, 10)));
-
-    //   amountController.value = amountController.value.copyWith(
-    //     text: dollarStr,
-    //     selection: TextSelection(
-    //       baseOffset: dollarStr.length,
-    //       extentOffset: dollarStr.length,
-    //     ),
-    //     composing: TextRange.empty,
-    //   );
-    // });
-
     super.initState();
   }
 
@@ -133,15 +118,17 @@ class _TransactionModalState extends State<TransactionModal> {
             key: _formKey,
             child: Column(
               children: [
+                formFieldSpace,
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12.0,
                     vertical: 8,
                   ),
                   child: TextFormField(
+                    autofocus: true,
                     controller: nameController,
                     decoration: textInputDecoration(
-                      hintText: "Name",
+                      labelText: "Name",
                       prefixIcon: Icons.label_rounded,
                     ),
                     keyboardType: TextInputType.text,
@@ -161,7 +148,7 @@ class _TransactionModalState extends State<TransactionModal> {
                   child: TextFormField(
                     controller: amountController,
                     decoration: textInputDecoration(
-                      hintText: "Amount",
+                      labelText: "Amount",
                       prefixIcon: Icons.attach_money_rounded,
                     ),
                     keyboardType: TextInputType.number,
@@ -183,7 +170,7 @@ class _TransactionModalState extends State<TransactionModal> {
                   child: TextFormField(
                     controller: dateController,
                     decoration: textInputDecoration(
-                      hintText: "Date",
+                      labelText: "Date",
                       prefixIcon: Icons.event_rounded,
                     ),
                     readOnly: true,
@@ -196,7 +183,7 @@ class _TransactionModalState extends State<TransactionModal> {
                   child: TextFormField(
                     controller: checkNumberController,
                     decoration: textInputDecoration(
-                      hintText: "Check Number",
+                      labelText: "Check Number",
                       prefixIcon: Icons.pin,
                     ),
                     keyboardType: TextInputType.number,
@@ -210,9 +197,7 @@ class _TransactionModalState extends State<TransactionModal> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
                   child: CheckboxListTile(
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(fieldRadius),
-                    ),
+                    shape: checkboxFieldShape,
                     tileColor: formFieldFill(Theme.of(context).brightness),
                     value: isCleared,
                     onChanged: (_) {
@@ -231,6 +216,7 @@ class _TransactionModalState extends State<TransactionModal> {
                     decoration: BoxDecoration(
                       color: formFieldFill(Theme.of(context).brightness),
                       borderRadius: const BorderRadius.all(fieldRadius),
+                      border: Border.all(color: Colors.grey, width: 2),
                     ),
                     child: Row(
                       children: [
@@ -264,7 +250,7 @@ class _TransactionModalState extends State<TransactionModal> {
                   child: TextFormField(
                     controller: memoController,
                     decoration: textInputDecoration(
-                      hintText: "Memo",
+                      labelText: "Memo",
                       prefixIcon: Icons.sticky_note_2_rounded,
                     ),
                     keyboardType: TextInputType.multiline,
@@ -272,6 +258,7 @@ class _TransactionModalState extends State<TransactionModal> {
                     textCapitalization: TextCapitalization.sentences,
                   ),
                 ),
+                formFieldSpace,
               ],
             ),
           ),

@@ -57,7 +57,7 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
               autofocus: true,
               controller: _accountController,
               decoration: textInputDecoration(
-                hintText: "Account Name",
+                labelText: "Account Name",
                 prefixIcon: Icons.account_balance_rounded,
               ),
               textCapitalization: TextCapitalization.words,
@@ -72,7 +72,7 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
             TextFormField(
               controller: _balanceController,
               decoration: textInputDecoration(
-                hintText: "Starting Balance",
+                labelText: "Starting Balance",
                 prefixIcon: Icons.attach_money_rounded,
               ),
               enableInteractiveSelection: false,

@@ -130,14 +130,15 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<Account>(
-                  decoration: const InputDecoration(labelText: "Transfer from"),
+                  decoration: textInputDecoration(labelText: "Transfer From"),
                   items: dropdownItems,
                   value: _fromAccount,
                   onChanged: (Account? newValue) =>
                       setState(() => _fromAccount = newValue ?? _fromAccount),
                 ),
+                dialogFieldSpace,
                 DropdownButtonFormField<Account>(
-                  decoration: const InputDecoration(labelText: "Transfer to"),
+                  decoration: textInputDecoration(labelText: "Transfer To"),
                   items: dropdownItems,
                   value: _toAccount,
                   onChanged: (Account? newValue) =>
@@ -146,9 +147,15 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
                       ? 'Transfer accounts cannot be the same'
                       : null,
                 ),
+                SizedBox(
+                  height: 16,
+                ),
                 TextFormField(
                   controller: _balanceController,
-                  decoration: const InputDecoration(labelText: "Amount"),
+                  decoration: textInputDecoration(
+                    labelText: "Amount",
+                    prefixIcon: Icons.attach_money_rounded,
+                  ),
                   enableInteractiveSelection: false,
                   inputFormatters: [DollarTextInputFormatter(maxDigits: 7)],
                   keyboardType: TextInputType.number,

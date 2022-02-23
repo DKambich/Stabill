@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
 import 'package:stabill/models/scheduled_transaction.dart';
 import 'package:stabill/models/transaction.dart';
@@ -166,14 +167,18 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    formFieldSpace,
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 4,
+                        horizontal: 12.0,
+                        vertical: 8,
                       ),
                       child: TextFormField(
                         controller: nameController,
-                        decoration: const InputDecoration(labelText: "Name"),
+                        decoration: textInputDecoration(
+                          labelText: "Name",
+                          prefixIcon: Icons.label_rounded,
+                        ),
                         keyboardType: TextInputType.text,
                         textInputAction: TextInputAction.next,
                         textCapitalization: TextCapitalization.words,
@@ -187,12 +192,15 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 4,
+                        horizontal: 12.0,
+                        vertical: 8,
                       ),
                       child: TextFormField(
                         controller: amountController,
-                        decoration: const InputDecoration(labelText: "Amount"),
+                        decoration: textInputDecoration(
+                          labelText: "Amount",
+                          prefixIcon: Icons.attach_money_rounded,
+                        ),
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
                         validator: (String? text) {
@@ -212,13 +220,15 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 4,
+                        horizontal: 12.0,
+                        vertical: 8,
                       ),
                       child: TextFormField(
                         controller: checkNumberController,
-                        decoration:
-                            const InputDecoration(labelText: "Check Number"),
+                        decoration: textInputDecoration(
+                          labelText: "Check Number",
+                          prefixIcon: Icons.pin,
+                        ),
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.next,
                         inputFormatters: [
@@ -227,49 +237,73 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                         ],
                       ),
                     ),
-                    CheckboxListTile(
-                      value: isCleared,
-                      onChanged: (_) {
-                        setState(() {
-                          isCleared = !isCleared;
-                          if (!isCleared) hideIfCleared = false;
-                        });
-                      },
-                      title: const Text("Mark as cleared"),
-                      controlAffinity: ListTileControlAffinity.leading,
-                    ),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: RadioListTile<TransactionType>(
-                            title: const Text("Withdrawal"),
-                            value: TransactionType.withdrawal,
-                            groupValue: method,
-                            onChanged: (TransactionType? value) => setState(
-                              () => method = TransactionType.withdrawal,
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          child: RadioListTile<TransactionType>(
-                            title: const Text("Deposit"),
-                            value: TransactionType.deposit,
-                            groupValue: method,
-                            onChanged: (TransactionType? value) => setState(
-                              () => method = TransactionType.deposit,
-                            ),
-                          ),
-                        ),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 8,
+                      ),
+                      child: CheckboxListTile(
+                        shape: checkboxFieldShape,
+                        tileColor: formFieldFill(Theme.of(context).brightness),
+                        value: isCleared,
+                        onChanged: (_) {
+                          setState(() {
+                            isCleared = !isCleared;
+                            if (!isCleared) hideIfCleared = false;
+                          });
+                        },
+                        title: const Text("Mark as cleared"),
+                        controlAffinity: ListTileControlAffinity.leading,
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 4,
+                        horizontal: 12.0,
+                        vertical: 8,
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: formFieldFill(Theme.of(context).brightness),
+                          borderRadius: const BorderRadius.all(fieldRadius),
+                          border: Border.all(color: Colors.grey, width: 2),
+                        ),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: RadioListTile<TransactionType>(
+                                title: const Text("Withdrawal"),
+                                value: TransactionType.withdrawal,
+                                groupValue: method,
+                                onChanged: (TransactionType? value) => setState(
+                                  () => method = TransactionType.withdrawal,
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              child: RadioListTile<TransactionType>(
+                                title: const Text("Deposit"),
+                                value: TransactionType.deposit,
+                                groupValue: method,
+                                onChanged: (TransactionType? value) => setState(
+                                  () => method = TransactionType.deposit,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 8,
                       ),
                       child: TextFormField(
                         controller: memoController,
-                        decoration: const InputDecoration(labelText: "Memo"),
+                        decoration: textInputDecoration(
+                          labelText: "Memo",
+                          prefixIcon: Icons.sticky_note_2_rounded,
+                        ),
                         keyboardType: TextInputType.multiline,
                         maxLines: null,
                         textCapitalization: TextCapitalization.sentences,
@@ -277,111 +311,130 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 4,
+                        horizontal: 12.0,
+                        vertical: 8,
                       ),
                       child: TextFormField(
                         controller: dateController,
-                        decoration:
-                            const InputDecoration(labelText: "Start Date"),
+                        decoration: textInputDecoration(
+                          labelText: "Start Date",
+                          prefixIcon: Icons.event_available_outlined,
+                        ),
                         readOnly: true,
                         onTap: showDateTime,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 4,
+                        horizontal: 12.0,
+                        vertical: 8,
                       ),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
+                      child: DropdownButtonFormField<Frequency>(
+                        decoration: textInputDecoration(
                           labelText: "Frequency",
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
+                          prefixIcon: Icons.timer_rounded,
                         ),
-                        child: DropdownButton<Frequency>(
-                          value: frequency,
-                          items: Frequency.values
-                              .map(
-                                (value) => DropdownMenuItem<Frequency>(
-                                  value: value,
-                                  child: Text(value.toFormattedString()),
-                                ),
-                              )
-                              .toList(),
-                          menuMaxHeight: 200,
-                          isExpanded: true,
-                          onChanged: (Frequency? newValue) {
-                            setState(() {
-                              frequency = newValue ?? frequency;
-                            });
-                          },
-                        ),
+                        items: Frequency.values
+                            .map(
+                              (value) => DropdownMenuItem<Frequency>(
+                                value: value,
+                                child: Text(value.toFormattedString()),
+                              ),
+                            )
+                            .toList(),
+                        menuMaxHeight: 200,
+                        value: frequency,
+                        onChanged: (Frequency? newValue) {
+                          setState(() {
+                            frequency = newValue ?? frequency;
+                          });
+                        },
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 4,
+                        horizontal: 12.0,
+                        vertical: 8,
                       ),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
+                      child: DropdownButtonFormField<String>(
+                        decoration: textInputDecoration(
                           labelText: "Account",
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
+                          prefixIcon: Icons.account_balance_rounded,
                         ),
-                        child: DropdownButton<String>(
-                          value: accountID,
-                          items: accountData.map((doc) {
-                            return DropdownMenuItem<String>(
-                              value: doc.id,
-                              child: Text(doc.data().name),
-                            );
-                          }).toList(),
-                          menuMaxHeight: 200,
-                          isExpanded: true,
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              accountID = newValue ?? accountID;
-                            });
-                          },
-                        ),
+                        items: accountData.map((doc) {
+                          return DropdownMenuItem<String>(
+                            value: doc.id,
+                            child: Text(doc.data().name),
+                          );
+                        }).toList(),
+                        menuMaxHeight: 200,
+                        value: accountID,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            accountID = newValue ?? accountID;
+                          });
+                        },
                       ),
                     ),
-                    CheckboxListTile(
-                      value: showNotifications,
-                      onChanged: (_) {
-                        setState(() {
-                          showNotifications = !showNotifications;
-                        });
-                      },
-                      title: const Text(
-                        "Show notification when transaction is added",
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 8,
                       ),
-                      controlAffinity: ListTileControlAffinity.leading,
+                      child: CheckboxListTile(
+                        value: showNotifications,
+                        shape: checkboxFieldShape,
+                        tileColor: formFieldFill(Theme.of(context).brightness),
+                        onChanged: (_) {
+                          setState(() {
+                            showNotifications = !showNotifications;
+                          });
+                        },
+                        title: const Text(
+                          "Show notification when transaction is added",
+                        ),
+                        controlAffinity: ListTileControlAffinity.leading,
+                      ),
                     ),
-                    CheckboxListTile(
-                      value: hideIfCleared,
-                      onChanged: isCleared
-                          ? (_) {
-                              setState(() {
-                                hideIfCleared = !hideIfCleared;
-                              });
-                            }
-                          : null,
-                      title: const Text("Hide transaction once created"),
-                      controlAffinity: ListTileControlAffinity.leading,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 8,
+                      ),
+                      child: CheckboxListTile(
+                        value: hideIfCleared,
+                        shape: checkboxFieldShape,
+                        tileColor: formFieldFill(Theme.of(context).brightness),
+                        onChanged: isCleared
+                            ? (_) {
+                                setState(() {
+                                  hideIfCleared = !hideIfCleared;
+                                });
+                              }
+                            : null,
+                        title: const Text("Hide transaction once created"),
+                        controlAffinity: ListTileControlAffinity.leading,
+                      ),
                     ),
-                    CheckboxListTile(
-                      value: enabled,
-                      onChanged: (_) {
-                        setState(() {
-                          enabled = !enabled;
-                        });
-                      },
-                      title: const Text("Enabled"),
-                      controlAffinity: ListTileControlAffinity.leading,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 8,
+                      ),
+                      child: CheckboxListTile(
+                        value: enabled,
+                        shape: checkboxFieldShape,
+                        tileColor: formFieldFill(Theme.of(context).brightness),
+                        onChanged: (_) {
+                          setState(() {
+                            enabled = !enabled;
+                          });
+                        },
+                        title: const Text("Enabled"),
+                        controlAffinity: ListTileControlAffinity.leading,
+                      ),
                     ),
+                    formFieldSpace
                   ],
                 ),
               ),

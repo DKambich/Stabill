@@ -71,7 +71,7 @@ class _BalanceCorrectionPromptState extends State<BalanceCorrectionPrompt> {
                 autofocus: true,
                 controller: _balanceController,
                 decoration: textInputDecoration(
-                  hintText: "New Balance",
+                  labelText: "New Balance",
                   prefixIcon: Icons.attach_money_rounded,
                 ),
                 enableInteractiveSelection: false,
