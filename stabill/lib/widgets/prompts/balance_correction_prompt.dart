@@ -62,9 +62,7 @@ class _BalanceCorrectionPromptState extends State<BalanceCorrectionPrompt> {
             const Text(
               "Enter the new balance for this account. This will mark all transactions as cleared and set the account balance to the sepecified value",
             ),
-            SizedBox(
-              height: 16,
-            ),
+            dialogFieldSpace,
             Form(
               key: _formKey,
               child: TextFormField(

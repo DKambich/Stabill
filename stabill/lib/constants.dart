@@ -56,8 +56,11 @@ const checkboxFieldShape = RoundedRectangleBorder(
   side: BorderSide(color: Colors.grey, width: 2),
 );
 
-InputDecoration textInputDecoration(
-    {String? labelText, String? hintText, IconData? prefixIcon}) {
+InputDecoration textInputDecoration({
+  String? labelText,
+  String? hintText,
+  IconData? prefixIcon,
+}) {
   return defaultTextInputDecoration.copyWith(
     prefixIcon: prefixIcon != null
         ? Icon(
@@ -74,4 +77,35 @@ Color formFieldFill(Brightness themeBrightness) {
   return themeBrightness == Brightness.light
       ? const Color(0x0A000000)
       : const Color(0x1AFFFFFF);
+}
+
+String? emailValidator(
+  String? email, {
+  String errorMessage = "Email is invalid",
+}) {
+  if (email == null) {
+    return null;
+  }
+  const String pattern =
+      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+  final RegExp regex = RegExp(pattern);
+  if (!regex.hasMatch(email)) {
+    return errorMessage;
+  } else {
+    return null;
+  }
+}
+
+String? passwordValidator(
+  String? value, {
+  String lengthErrorMessage = "Password must be longer than 6 characters",
+}) {
+  if (value == null) {
+    return null;
+  }
+  if (value.length < 6) {
+    return lengthErrorMessage;
+  } else {
+    return null;
+  }
 }

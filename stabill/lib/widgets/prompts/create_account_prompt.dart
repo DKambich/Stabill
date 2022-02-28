@@ -66,9 +66,7 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
                   ? 'Account name is too short'
                   : null,
             ),
-            SizedBox(
-              height: 16,
-            ),
+            dialogFieldSpace,
             TextFormField(
               controller: _balanceController,
               decoration: textInputDecoration(

@@ -147,9 +147,7 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
                       ? 'Transfer accounts cannot be the same'
                       : null,
                 ),
-                SizedBox(
-                  height: 16,
-                ),
+                dialogFieldSpace,
                 TextFormField(
                   controller: _balanceController,
                   decoration: textInputDecoration(
