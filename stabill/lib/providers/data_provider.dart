@@ -207,7 +207,7 @@ class DataProvider {
     );
   }
 
-  // TODO: Convert to transaction since reading account balance
+  // TODO: Convert to Firestore transaction since reading account balance
   Future<void> updateBalance(Account account, int newBalance) async {
     final int oldBalance = account.currentBalance;
 
