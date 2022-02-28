@@ -28,31 +28,6 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
   }
 
-  String? emailValidator(String? value) {
-    if (value == null) {
-      return null;
-    }
-    const String pattern =
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    final RegExp regex = RegExp(pattern);
-    if (!regex.hasMatch(value)) {
-      return 'Email format is invalid';
-    } else {
-      return null;
-    }
-  }
-
-  String? passwordValidator(String? value) {
-    if (value == null) {
-      return null;
-    }
-    if (value.length < 6) {
-      return 'Password must be longer than 6 characters';
-    } else {
-      return null;
-    }
-  }
-
   Future<void> logIn() async {
     if (_formKey.currentState!.validate()) {
       await context.read<AuthProvider>().signIn(
@@ -120,9 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                       ),
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      dialogFieldSpace,
                       TextFormField(
                         controller: passwordController,
                         decoration: const InputDecoration(
@@ -148,9 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                         textInputAction: TextInputAction.done,
                         onFieldSubmitted: (val) => logIn(),
                       ),
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      dialogFieldSpace,
                       ElevatedButton(
                         onPressed: logIn,
                         style: ElevatedButton.styleFrom(
@@ -165,9 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                           style: TextStyle(color: Colors.green, fontSize: 16),
                         ),
                       ),
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      dialogFieldSpace,
                       RichText(
                         text: TextSpan(
                           text: "Forgot your password?",

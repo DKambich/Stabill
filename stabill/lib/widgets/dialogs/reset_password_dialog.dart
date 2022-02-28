@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/providers/auth_provider.dart';
@@ -27,23 +28,9 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
       if (await context
           .read<AuthProvider>()
           .resetPassword(emailController.text)) {
-        //TODO: Notify user an error occured
+        Fluttertoast.showToast(msg: "Failed to reset password, try again");
       }
-      Navigator.of(context).pop();
-    }
-  }
-
-  String? emailValidator(String? value) {
-    if (value == null) {
-      return null;
-    }
-    const String pattern =
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    final RegExp regex = RegExp(pattern);
-    if (!regex.hasMatch(value)) {
-      return 'Email format is invalid';
-    } else {
-      return null;
+      if (mounted) Navigator.of(context).pop();
     }
   }
 
@@ -59,9 +46,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
             const Text(
               "Enter your email to receive a link to reset your password",
             ),
-            const SizedBox(
-              height: 16,
-            ),
+            dialogFieldSpace,
             TextFormField(
               autofocus: true,
               controller: emailController,
