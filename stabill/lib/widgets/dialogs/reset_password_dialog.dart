@@ -26,8 +26,9 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
       if (await context
-          .read<AuthProvider>()
-          .resetPassword(emailController.text)) {
+              .read<AuthProvider>()
+              .resetPassword(emailController.text) ==
+          false) {
         Fluttertoast.showToast(msg: "Failed to reset password, try again");
       }
       if (mounted) Navigator.of(context).pop();

@@ -242,7 +242,7 @@ class DataProvider {
     await incrementBalance(account, transaction: correction);
   }
 
-  Future<void> transferFunds(
+  Future<bool> transferFunds(
     Account fromAccount,
     Account toAccount,
     int transferAmount,
@@ -266,8 +266,9 @@ class DataProvider {
 
       // Add the deposit Transasction to the to Account
       await addTransaction(toAccount, transaction);
+      return false;
     } catch (e) {
-      rethrow;
+      return true;
     }
   }
 

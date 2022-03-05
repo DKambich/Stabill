@@ -186,14 +186,16 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
       );
 
       // Transfer the amount
-      await context.read<DataProvider>().transferFunds(
-            _fromAccount,
-            _toAccount,
-            transferAmount,
-          );
+      if (await context.read<DataProvider>().transferFunds(
+                _fromAccount,
+                _toAccount,
+                transferAmount,
+              ) ==
+          false) {
+        Fluttertoast.showToast(msg: "Failed to transfer funds, try again");
+      }
 
-      if (!mounted) return;
-      Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
     }
   }
 

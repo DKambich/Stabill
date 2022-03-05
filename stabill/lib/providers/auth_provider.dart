@@ -9,29 +9,27 @@ class AuthProvider {
 
   User? get currentUser => firebaseAuth.currentUser;
 
-  Future<String> signUp({String email = "", String password = ""}) async {
+  Future<bool> signUp({String email = "", String password = ""}) async {
     try {
       await firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return "Signed up!";
-    } on FirebaseAuthException catch (e) {
-      return e.message ?? "An exception occured at sign up";
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
-  Future<String> signIn({String email = "", String password = ""}) async {
+  Future<bool> signIn({String email = "", String password = ""}) async {
     try {
       await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return "Signed in!";
-    } on FirebaseAuthException catch (e) {
-      return e.message ?? "An exception occured at sign in";
+      return true;
     } catch (e) {
-      rethrow;
+      return false;
     }
   }
 
@@ -48,14 +46,17 @@ class AuthProvider {
     }
   }
 
-  Future<void> deleteAccount(String email, String password) async {
+  Future<bool> deleteAccount(String email, String password) async {
     try {
       await currentUser?.reauthenticateWithCredential(
         EmailAuthProvider.credential(email: email, password: password),
       );
+
       await currentUser?.delete();
+
+      return true;
     } catch (e) {
-      rethrow;
+      return false;
     }
   }
 }

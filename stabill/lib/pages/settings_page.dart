@@ -13,6 +13,7 @@ import 'package:stabill/utilities/mobile_download.dart'
     if (dart.library.html) 'package:stabill/utilities/web_download.dart'
     as downloader;
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
+import 'package:stabill/widgets/dialogs/delete_account_dialog.dart';
 import 'package:stabill/widgets/dialogs/theme_picker.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -265,7 +266,10 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
     if (mounted && shouldDelete) {
-      // Delete the account
+      // Reauthenticate and Delete the account
+      if (await DeleteAccountDialog.show(context)) {
+        Navigator.of(context).pushReplacementNamed(LoginPage.routeName);
+      }
     }
   }
 }

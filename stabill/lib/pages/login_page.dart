@@ -1,6 +1,10 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/pages/home_page.dart';
@@ -30,16 +34,36 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> logIn() async {
     if (_formKey.currentState!.validate()) {
-      await context.read<AuthProvider>().signIn(
-            email: emailController.text,
-            password: passwordController.text,
-          );
-      if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+      if (await context.read<AuthProvider>().signIn(
+                email: emailController.text,
+                password: passwordController.text,
+              ) ==
+          false) {
+        Fluttertoast.showToast(
+          msg:
+              "Login failed, please check your email and password then try again",
+        );
+      } else if (mounted) {
+        Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+      }
     }
   }
 
-  Future<void> signUp() async {}
+  Future<void> signUp() async {
+    if (_formKey.currentState!.validate()) {
+      if (await context.read<AuthProvider>().signUp(
+                email: emailController.text,
+                password: passwordController.text,
+              ) ==
+          false) {
+        Fluttertoast.showToast(
+          msg: "Account Creation failed, try again",
+        );
+      } else if (mounted) {
+        Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+      }
+    }
+  }
 
   void forgotPassword() {
     ResetPasswordDialog.show(context);
