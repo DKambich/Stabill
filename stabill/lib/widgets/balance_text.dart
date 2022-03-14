@@ -31,14 +31,27 @@ class BalanceText extends StatelessWidget {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    String balanceText = format.format(balance.toDouble() / 100);
-    if (!showNegativePrefix) {
+  static String formatAmount(
+    double balance, {
+    bool showNegative = false,
+    bool showPostive = false,
+  }) {
+    String balanceText = format.format(balance / 100);
+    if (!showNegative) {
       balanceText = balanceText.substring(1);
-    } else if (balance > 0 && showPositivePrefix) {
+    } else if (balance > 0 && showPostive) {
       balanceText = "+$balanceText";
     }
+    return balanceText;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String balanceText = formatAmount(
+      balance.toDouble(),
+      showNegative: showNegativePrefix,
+      showPostive: showPositivePrefix,
+    );
 
     return AutoSizeText.rich(
       TextSpan(

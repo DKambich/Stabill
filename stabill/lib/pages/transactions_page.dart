@@ -18,6 +18,7 @@ import 'package:stabill/utilities/header_list.dart';
 import 'package:stabill/widgets/cards/account_summary_card.dart';
 import 'package:stabill/widgets/cards/transaction_card.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
+import 'package:stabill/widgets/dialogs/transaction_details_dialog.dart';
 import 'package:stabill/widgets/prompts/balance_correction_prompt.dart';
 import 'package:stabill/widgets/prompts/transfer_funds_prompt.dart';
 import 'package:stabill/widgets/prompts/transfer_transaction_prompt.dart';
@@ -269,6 +270,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
               return TransactionCard(
                 transaction: transaction,
                 query: searchController.text,
+                onTap: () {
+                  TransactionDetailsDialog.show(context, transaction);
+                },
                 onSelected: (selectedAction) async {
                   switch (selectedAction) {
                     case TransactionAction.hide:

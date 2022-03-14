@@ -10,6 +10,7 @@ enum TransactionAction { clear, hide, move, edit, delete }
 class TransactionCard extends StatelessWidget {
   final Transaction transaction;
   final GestureTapDownCallback? onMorePress;
+  final void Function()? onTap;
   final void Function(TransactionAction)? onSelected;
   final String? query;
 
@@ -17,6 +18,7 @@ class TransactionCard extends StatelessWidget {
     Key? key,
     required this.transaction,
     this.onMorePress,
+    this.onTap,
     this.onSelected,
     this.query,
   }) : super(key: key);
@@ -33,12 +35,14 @@ class TransactionCard extends StatelessWidget {
       onSelect: (action) {
         if (action != null && onSelected != null) onSelected!(action);
       },
+      onTap: onTap,
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Expanded(
             flex: 3,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SubstringHighlight(
@@ -46,7 +50,7 @@ class TransactionCard extends StatelessWidget {
                   text: transaction.name,
                   maxLines: 1,
                   textStyle: TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: transaction.cleared
                         ? Theme.of(context).brightness == Brightness.light
@@ -61,26 +65,27 @@ class TransactionCard extends StatelessWidget {
                             : Colors.blue,
                   ),
                 ),
+                // Text(
+                //   "Check Number: ${transaction.checkNumber == -1 ? "None" : transaction.checkNumber}",
+                //   style: TextStyle(
+                //     color: fontColor,
+                //   ),
+                // ),
                 Text(
-                  "Check Number: ${transaction.checkNumber == -1 ? "None" : transaction.checkNumber}",
+                  DateFormat('MM/dd/yyyy hh:mm a')
+                      .format(transaction.timestamp),
                   style: TextStyle(
                     color: fontColor,
                   ),
                 ),
-                Text(
-                  "Date: ${DateFormat('MM/dd/yyyy hh:mm a').format(transaction.timestamp)}",
-                  style: TextStyle(
-                    color: fontColor,
-                  ),
-                ),
-                Text(
-                  "Memo: ${transaction.memo}",
-                  style: TextStyle(
-                    color: fontColor,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                // Text(
+                //   "Memo: ${transaction.memo}",
+                //   style: TextStyle(
+                //     color: fontColor,
+                //   ),
+                //   maxLines: 1,
+                //   overflow: TextOverflow.ellipsis,
+                // ),
               ],
             ),
           ),
