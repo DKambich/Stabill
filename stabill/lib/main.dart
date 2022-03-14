@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/firebase_options.dart';
 import 'package:stabill/models/account.dart';
@@ -29,14 +30,21 @@ class Stabill extends StatelessWidget {
   Widget build(BuildContext context) {
     return RootProvider(
       builder: (context) {
-        return MaterialApp(
-          theme: context.read<PreferenceProvider>().getTheme(
-                context,
-                context.watch<PreferenceProvider>().themeMode,
-              ),
-          title: 'Stabill',
-          home: const Initializer(),
-          onGenerateRoute: generateRoute,
+        return OKToast(
+          radius: 12,
+          backgroundColor: Colors.grey.shade700,
+          textPadding: const EdgeInsets.all(12),
+          position: ToastPosition.bottom,
+          duration: const Duration(seconds: 3),
+          child: MaterialApp(
+            theme: context.read<PreferenceProvider>().getTheme(
+                  context,
+                  context.watch<PreferenceProvider>().themeMode,
+                ),
+            title: 'Stabill',
+            home: const Initializer(),
+            onGenerateRoute: generateRoute,
+          ),
         );
       },
     );

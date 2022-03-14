@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/pages/home_page.dart';
@@ -38,9 +38,8 @@ class _LoginPageState extends State<LoginPage> {
                 password: passwordController.text,
               ) ==
           false) {
-        Fluttertoast.showToast(
-          msg:
-              "Login failed, please check your email and password then try again",
+        showToast(
+          "Login failed, please check your email and password then try again",
         );
       } else if (mounted) {
         Navigator.of(context).pushReplacementNamed(HomePage.routeName);
@@ -55,8 +54,8 @@ class _LoginPageState extends State<LoginPage> {
                 password: passwordController.text,
               ) ==
           false) {
-        Fluttertoast.showToast(
-          msg: "Account Creation failed, try again",
+        showToast(
+          "Account Creation failed, try again",
         );
       } else if (mounted) {
         Navigator.of(context).pushReplacementNamed(HomePage.routeName);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/widgets/balance_text.dart';
@@ -50,9 +50,9 @@ class TransactionDetailsDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               GestureDetector(
-                onLongPress: () {
-                  Fluttertoast.showToast(msg: "Transaction Name Copied");
-                  Clipboard.setData(ClipboardData(text: name));
+                onLongPress: () async {
+                  await Clipboard.setData(ClipboardData(text: name));
+                  showToast("Transaction Name Copied");
                 },
                 child: TextField(
                   controller: TextEditingController(text: name),
@@ -66,9 +66,9 @@ class TransactionDetailsDialog extends StatelessWidget {
               formFieldSpace,
               formFieldSpace,
               GestureDetector(
-                onLongPress: () {
-                  Fluttertoast.showToast(msg: "Transaction Amount Copied");
-                  Clipboard.setData(ClipboardData(text: amount));
+                onLongPress: () async {
+                  await Clipboard.setData(ClipboardData(text: amount));
+                  showToast("Transaction Amount Copied");
                 },
                 child: TextField(
                   controller: TextEditingController(
@@ -84,9 +84,9 @@ class TransactionDetailsDialog extends StatelessWidget {
               formFieldSpace,
               formFieldSpace,
               GestureDetector(
-                onLongPress: () {
-                  Fluttertoast.showToast(msg: "Transaction Date Copied");
-                  Clipboard.setData(ClipboardData(text: timestamp));
+                onLongPress: () async {
+                  await Clipboard.setData(ClipboardData(text: timestamp));
+                  showToast("Transaction Date Copied");
                 },
                 child: TextField(
                   controller: TextEditingController(
@@ -102,10 +102,11 @@ class TransactionDetailsDialog extends StatelessWidget {
               formFieldSpace,
               formFieldSpace,
               GestureDetector(
-                onLongPress: () {
-                  Fluttertoast.showToast(
-                      msg: "Transaction Check Number Copied");
-                  Clipboard.setData(ClipboardData(text: checkNumber));
+                onLongPress: () async {
+                  await Clipboard.setData(ClipboardData(text: checkNumber));
+                  showToast(
+                    "Transaction Check Number Copied",
+                  );
                 },
                 child: TextField(
                   controller: TextEditingController(
@@ -160,9 +161,9 @@ class TransactionDetailsDialog extends StatelessWidget {
               formFieldSpace,
               formFieldSpace,
               GestureDetector(
-                onLongPress: () {
-                  Fluttertoast.showToast(msg: "Transaction Memo Copied");
-                  Clipboard.setData(ClipboardData(text: memo));
+                onLongPress: () async {
+                  await Clipboard.setData(ClipboardData(text: memo));
+                  showToast("Transaction Memo Copied");
                 },
                 child: TextField(
                   controller: TextEditingController(text: memo),

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart'
     show QuerySnapshot, QueryDocumentSnapshot;
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
@@ -86,8 +86,8 @@ class _TransferFundsModalState extends State<TransferTransactionPrompt> {
 
         // If there is no data or there are not enough accounts, notify the user and pop the prompt
         if (!snapshot.hasData || snapshot.data!.docs.length < 2) {
-          Fluttertoast.showToast(
-            msg: "Create at least two accounts to transfer transactions",
+          showToast(
+            "Create at least two accounts to transfer transactions",
           );
           Navigator.pop(context);
           return const SizedBox.shrink();

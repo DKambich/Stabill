@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart' show QuerySnapshot;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/models/account.dart';
@@ -149,8 +149,8 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
 
           final accountData = snapshot.data!.docs;
           if (accountData.isEmpty) {
-            Fluttertoast.showToast(
-              msg: "Create an account before creating a scheduled transaction",
+            showToast(
+              "Create an account before creating a scheduled transaction",
             );
             Navigator.pop(context);
             return const SizedBox();

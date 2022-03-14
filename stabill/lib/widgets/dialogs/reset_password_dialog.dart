@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/providers/auth_provider.dart';
@@ -29,7 +29,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
               .read<AuthProvider>()
               .resetPassword(emailController.text) ==
           false) {
-        Fluttertoast.showToast(msg: "Failed to reset password, try again");
+        showToast("Failed to reset password, try again");
       }
       if (mounted) Navigator.of(context).pop();
     }

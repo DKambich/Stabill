@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/providers/auth_provider.dart';
@@ -31,9 +31,8 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
               .read<AuthProvider>()
               .deleteAccount(emailController.text, passwordController.text) ==
           false) {
-        Fluttertoast.showToast(
-          msg:
-              "Failed to delete account, ensure you used the correct email and password and try again",
+        showToast(
+          "Failed to delete account, ensure you used the correct email and password and try again",
         );
         if (mounted) Navigator.of(context).pop(false);
       }
