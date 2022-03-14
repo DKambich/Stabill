@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/models/transaction.dart';
@@ -28,6 +30,16 @@ class TransactionDetailsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String name = transaction.name;
+    final String amount =
+        BalanceText.formatAmount(transaction.amount.toDouble());
+    final String timestamp =
+        DateFormat('MM/dd/yyyy hh:mm a').format(transaction.timestamp);
+    final String checkNumber = transaction.checkNumber == -1
+        ? "None"
+        : transaction.checkNumber.toString();
+    final String memo = transaction.memo;
+
     return Scaffold(
       appBar: AppBar(title: const Text("Transaction Details")),
       body: SingleChildScrollView(
@@ -37,52 +49,74 @@ class TransactionDetailsDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: TextEditingController(text: transaction.name),
-                decoration: textInputDecoration(
-                  labelText: "Name",
-                  prefixIcon: Icons.label_rounded,
+              GestureDetector(
+                onLongPress: () {
+                  Fluttertoast.showToast(msg: "Transaction Name Copied");
+                  Clipboard.setData(ClipboardData(text: name));
+                },
+                child: TextField(
+                  controller: TextEditingController(text: name),
+                  decoration: textInputDecoration(
+                    labelText: "Name",
+                    prefixIcon: Icons.label_rounded,
+                  ),
+                  enabled: false,
                 ),
-                readOnly: true,
               ),
               formFieldSpace,
               formFieldSpace,
-              TextField(
-                controller: TextEditingController(
-                  text: BalanceText.formatAmount(transaction.amount.toDouble()),
+              GestureDetector(
+                onLongPress: () {
+                  Fluttertoast.showToast(msg: "Transaction Amount Copied");
+                  Clipboard.setData(ClipboardData(text: amount));
+                },
+                child: TextField(
+                  controller: TextEditingController(
+                    text: amount,
+                  ),
+                  decoration: textInputDecoration(
+                    labelText: "Amount",
+                    prefixIcon: Icons.attach_money_rounded,
+                  ),
+                  enabled: false,
                 ),
-                decoration: textInputDecoration(
-                  labelText: "Amount",
-                  prefixIcon: Icons.attach_money_rounded,
-                ),
-                readOnly: true,
               ),
               formFieldSpace,
               formFieldSpace,
-              TextField(
-                controller: TextEditingController(
-                  text: DateFormat('MM/dd/yyyy hh:mm a')
-                      .format(transaction.timestamp),
+              GestureDetector(
+                onLongPress: () {
+                  Fluttertoast.showToast(msg: "Transaction Date Copied");
+                  Clipboard.setData(ClipboardData(text: timestamp));
+                },
+                child: TextField(
+                  controller: TextEditingController(
+                    text: timestamp,
+                  ),
+                  decoration: textInputDecoration(
+                    labelText: "Date",
+                    prefixIcon: Icons.event_rounded,
+                  ),
+                  enabled: false,
                 ),
-                decoration: textInputDecoration(
-                  labelText: "Date",
-                  prefixIcon: Icons.event_rounded,
-                ),
-                readOnly: true,
               ),
               formFieldSpace,
               formFieldSpace,
-              TextField(
-                controller: TextEditingController(
-                  text: transaction.checkNumber == -1
-                      ? "None"
-                      : transaction.checkNumber.toString(),
+              GestureDetector(
+                onLongPress: () {
+                  Fluttertoast.showToast(
+                      msg: "Transaction Check Number Copied");
+                  Clipboard.setData(ClipboardData(text: checkNumber));
+                },
+                child: TextField(
+                  controller: TextEditingController(
+                    text: checkNumber,
+                  ),
+                  decoration: textInputDecoration(
+                    labelText: "Check Number",
+                    prefixIcon: Icons.pin,
+                  ),
+                  enabled: false,
                 ),
-                decoration: textInputDecoration(
-                  labelText: "Check Number",
-                  prefixIcon: Icons.pin,
-                ),
-                readOnly: true,
               ),
               formFieldSpace,
               formFieldSpace,
@@ -125,14 +159,20 @@ class TransactionDetailsDialog extends StatelessWidget {
               ),
               formFieldSpace,
               formFieldSpace,
-              TextField(
-                controller: TextEditingController(text: transaction.memo),
-                decoration: textInputDecoration(
-                  labelText: "Memo",
-                  prefixIcon: Icons.sticky_note_2_rounded,
+              GestureDetector(
+                onLongPress: () {
+                  Fluttertoast.showToast(msg: "Transaction Memo Copied");
+                  Clipboard.setData(ClipboardData(text: memo));
+                },
+                child: TextField(
+                  controller: TextEditingController(text: memo),
+                  decoration: textInputDecoration(
+                    labelText: "Memo",
+                    prefixIcon: Icons.sticky_note_2_rounded,
+                  ),
+                  maxLines: null,
+                  enabled: false,
                 ),
-                maxLines: null,
-                readOnly: true,
               ),
               formFieldSpace,
             ],

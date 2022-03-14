@@ -49,6 +49,10 @@ const defaultTextInputDecoration = InputDecoration(
     borderRadius: BorderRadius.all(fieldRadius),
     borderSide: BorderSide(color: Colors.red, width: 2),
   ),
+  disabledBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.all(fieldRadius),
+    borderSide: BorderSide(color: Colors.grey, width: 2),
+  ),
 );
 
 const checkboxFieldShape = RoundedRectangleBorder(
