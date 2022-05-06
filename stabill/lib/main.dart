@@ -80,6 +80,7 @@ class Stabill extends StatelessWidget {
       return MaterialPageRoute<Transaction>(
         builder: (_) => TransactionModal(
           transaction: transaction,
+          accountID: "",
         ),
         fullscreenDialog: true,
       );

@@ -318,8 +318,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final Transaction? createdTransaction = await Navigator.of(context)
-              .pushNamed<Transaction>(TransactionModal.routeName);
+          final Transaction? createdTransaction =
+              await Navigator.of(context).push(
+            MaterialPageRoute<Transaction>(
+              builder: (BuildContext context) => TransactionModal(
+                accountID: widget.account.id,
+              ),
+              fullscreenDialog: true,
+            ),
+          );
+
+          // = await Navigator.of(context)
+          //     .pushNamed<Transaction>(TransactionModal.routeName);
 
           if (createdTransaction != null) {
             if (!mounted) return;
@@ -339,8 +349,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
   ) async {
     final Transaction? editedTransaction = await Navigator.of(context).push(
       MaterialPageRoute<Transaction>(
-        builder: (BuildContext context) =>
-            TransactionModal(transaction: transaction),
+        builder: (BuildContext context) => TransactionModal(
+          transaction: transaction,
+          accountID: widget.account.id,
+        ),
         fullscreenDialog: true,
       ),
     );

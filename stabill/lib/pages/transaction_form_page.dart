@@ -1,18 +1,26 @@
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart' show QuerySnapshot;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/models/transaction.dart';
+import 'package:stabill/providers/data_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 
 class TransactionModal extends StatefulWidget {
   static const String routeName = "/transaction";
   final Transaction? transaction;
+  final String accountID;
+
   const TransactionModal({
     Key? key,
     // ignore: avoid_init_to_null
     this.transaction = null,
+    required this.accountID,
   }) : super(key: key);
 
   @override
@@ -24,19 +32,35 @@ class _TransactionModalState extends State<TransactionModal> {
 
   late bool isCleared;
   late TransactionType method = TransactionType.withdrawal;
-  late TextEditingController nameController;
+  late String transactionName;
   late TextEditingController amountController;
   late TextEditingController dateController;
   late TextEditingController checkNumberController;
   late TextEditingController memoController;
   late DateTime timestamp;
 
+  late List<String> autocompleteNameOptions;
+
   @override
   void initState() {
+    autocompleteNameOptions = [];
+
+    // Get a reference to the transaction collection for the account
+    final _transactionCollection =
+        context.read<DataProvider>().getTransactionCollection(widget.accountID);
+
+    // Get the 100 most recent transactions
+    _transactionCollection
+        .orderBy("timestamp", descending: true)
+        .limit(100)
+        .get()
+        .then(onLoadAutocompleteOptions);
+
+    // If the transaction exists, update data fields to use it's initial data
     if (widget.transaction != null) {
       isCleared = widget.transaction!.cleared;
       method = widget.transaction!.method;
-      nameController = TextEditingController(text: widget.transaction!.name);
+      transactionName = widget.transaction!.name;
       timestamp = widget.transaction!.timestamp;
       final String transactionDate =
           DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
@@ -54,7 +78,7 @@ class _TransactionModalState extends State<TransactionModal> {
     } else {
       isCleared = false;
       method = TransactionType.withdrawal;
-      nameController = TextEditingController(text: "");
+      transactionName = "";
       timestamp = DateTime.now();
       final String transactionDate =
           DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
@@ -64,6 +88,32 @@ class _TransactionModalState extends State<TransactionModal> {
       memoController = TextEditingController(text: "");
     }
     super.initState();
+  }
+
+  void onLoadAutocompleteOptions(
+    QuerySnapshot<Transaction> recentTransactions,
+  ) {
+    setState(() {
+      final List<String> recentTransactionNames = recentTransactions.docs
+          .map<String>((transaction) => transaction.data().name)
+          .toList();
+
+      final Map<String, int> frequencyMap = <String, int>{};
+      for (final String transactionName in recentTransactionNames) {
+        frequencyMap.update(
+          transactionName,
+          (value) => value + 1,
+          ifAbsent: () => 1,
+        );
+      }
+      final List<String> sortedOptions =
+          frequencyMap.keys.toList(growable: false);
+      sortedOptions.sort((String a, String b) {
+        final int order = frequencyMap[a]!.compareTo(frequencyMap[b]!);
+        return order == 0 ? a.compareTo(b) : order * -1;
+      });
+      autocompleteNameOptions = sortedOptions;
+    });
   }
 
   @override
@@ -96,7 +146,7 @@ class _TransactionModalState extends State<TransactionModal> {
                   checkNumber: checkNumber,
                   cleared: isCleared,
                   memo: memoController.text,
-                  name: nameController.text,
+                  name: transactionName,
                   method: method,
                   timestamp: timestamp,
                 );
@@ -124,21 +174,88 @@ class _TransactionModalState extends State<TransactionModal> {
                     horizontal: 12.0,
                     vertical: 8,
                   ),
-                  child: TextFormField(
-                    autofocus: true,
-                    controller: nameController,
-                    decoration: textInputDecoration(
-                      labelText: "Name",
-                      prefixIcon: Icons.label_rounded,
-                    ),
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.next,
-                    textCapitalization: TextCapitalization.words,
-                    validator: (String? text) {
-                      if (text != null && text.isNotEmpty) {
-                        return null;
-                      }
-                      return "Name must be at least one character";
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Autocomplete(
+                        initialValue: TextEditingValue(text: transactionName),
+                        onSelected: (String selection) => setState(() {
+                          transactionName = selection;
+                        }),
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          return autocompleteNameOptions.where(
+                            (String option) => option
+                                .toLowerCase()
+                                .contains(textEditingValue.text.toLowerCase()),
+                          );
+                        },
+                        fieldViewBuilder: (
+                          BuildContext context,
+                          TextEditingController textEditingController,
+                          FocusNode focusNode,
+                          VoidCallback onFieldSubmitted,
+                        ) {
+                          return TextFormField(
+                            autofocus: true,
+                            controller: textEditingController,
+                            focusNode: focusNode,
+                            decoration: textInputDecoration(
+                              labelText: "Name",
+                              prefixIcon: Icons.label_rounded,
+                            ),
+                            keyboardType: TextInputType.text,
+                            onChanged: (String value) {
+                              setState(() {
+                                transactionName = value;
+                              });
+                            },
+                            onFieldSubmitted: (String value) {
+                              onFieldSubmitted();
+                            },
+                            textInputAction: TextInputAction.next,
+                            textCapitalization: TextCapitalization.words,
+                            validator: (String? text) {
+                              if (text != null && text.isNotEmpty) {
+                                return null;
+                              }
+                              return "Name must be at least one character";
+                            },
+                          );
+                        },
+                        optionsViewBuilder: (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return Align(
+                            alignment: Alignment.topLeft,
+                            child: Material(
+                              elevation: 4.0,
+                              borderRadius: const BorderRadius.all(cardRadius),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxHeight: min(options.length, 3) * 56 + 16,
+                                  maxWidth: constraints.biggest.width,
+                                ),
+                                child: ListView.builder(
+                                  physics: const BouncingScrollPhysics(),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  itemCount: options.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    final String option =
+                                        options.elementAt(index);
+                                    return ListTile(
+                                      title: Text(option),
+                                      onTap: () => onSelected(option),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
                     },
                   ),
                 ),
