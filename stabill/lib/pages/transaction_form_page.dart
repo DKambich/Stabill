@@ -291,7 +291,7 @@ class _TransactionModalState extends State<TransactionModal> {
                       prefixIcon: Icons.event_rounded,
                     ),
                     readOnly: true,
-                    onTap: showDateTime,
+                    onTap: () => showDateTime(timestamp),
                   ),
                 ),
                 Padding(
@@ -384,9 +384,9 @@ class _TransactionModalState extends State<TransactionModal> {
     );
   }
 
-  Future<void> showDateTime() async {
+  Future<void> showDateTime(DateTime? initialDateTime) async {
     // Get the current DateTime
-    final DateTime now = DateTime.now();
+    final DateTime now = initialDateTime ?? DateTime.now();
 
     // Get the selected date or use the current date if canceled
     final DateTime selectedDate = await showDatePicker(
@@ -400,7 +400,7 @@ class _TransactionModalState extends State<TransactionModal> {
     // Get the selected time or use the current time if canceled
     final TimeOfDay selectedTime = await showTimePicker(
           context: context,
-          initialTime: TimeOfDay.now(),
+          initialTime: TimeOfDay.fromDateTime(now),
         ) ??
         TimeOfDay.fromDateTime(now);
 
