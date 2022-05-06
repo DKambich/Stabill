@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:stabill/constants.dart';
 import 'package:stabill/models/transaction.dart';
 import 'package:stabill/providers/data_provider.dart';
+import 'package:stabill/providers/preference_provider.dart';
 import 'package:stabill/utilities/dollar_formatter.dart';
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 
@@ -48,11 +49,13 @@ class _TransactionModalState extends State<TransactionModal> {
     // Get a reference to the transaction collection for the account
     final _transactionCollection =
         context.read<DataProvider>().getTransactionCollection(widget.accountID);
-
+    final PreferenceProvider preferenceProvider =
+        context.read<PreferenceProvider>();
+    final int historyLimit = preferenceProvider.autocompleteHistoryLimit;
     // Get the 100 most recent transactions
     _transactionCollection
         .orderBy("timestamp", descending: true)
-        .limit(100)
+        .limit(historyLimit)
         .get()
         .then(onLoadAutocompleteOptions);
 

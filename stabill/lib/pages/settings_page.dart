@@ -14,6 +14,7 @@ import 'package:stabill/utilities/mobile_download.dart'
     as downloader;
 import 'package:stabill/widgets/dialogs/confirm_dialog.dart';
 import 'package:stabill/widgets/dialogs/delete_account_dialog.dart';
+import 'package:stabill/widgets/dialogs/history_limit_picker.dart';
 import 'package:stabill/widgets/dialogs/theme_picker.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -35,6 +36,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final bool prioritizePending =
         context.watch<PreferenceProvider>().prioritizePending;
     final bool hideCleared = context.watch<PreferenceProvider>().hideCleared;
+    final int historyLimit =
+        context.watch<PreferenceProvider>().autocompleteHistoryLimit;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
@@ -128,6 +131,17 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                children: const [Icon(Icons.history)],
+              ),
+              title: const Text("Autocomplete History Limit"),
+              subtitle: const Text(
+                "Set the history limit to create autocomplete options",
+              ),
+              onTap: () => historyLimitSetting(historyLimit),
+            ),
+            ListTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: const [Icon(Icons.file_download_rounded)],
               ),
               title: const Text("Import Data"),
@@ -208,6 +222,13 @@ class _SettingsPageState extends State<SettingsPage> {
   // ignore: avoid_positional_boolean_parameters
   Future<void> clearedTransactionSetting(bool hideCleared) async {
     context.read<PreferenceProvider>().setHideCleared(hideCleared);
+  }
+
+  Future<void> historyLimitSetting(int currentLimit) async {
+    final PreferenceProvider preferenceProvider =
+        context.read<PreferenceProvider>();
+    final int newLimit = await HistoryLimitPicker.show(context, currentLimit);
+    preferenceProvider.setAutocompleteHistoryLimit(newLimit);
   }
 
   Future<void> importData() async {

@@ -10,7 +10,8 @@ class PreferenceProvider extends ChangeNotifier {
   late bool hideClearedPreference;
   final String key4 = "accountOrder";
   late List<String> accountOrderPreference;
-
+  final String key5 = "autocompleteHistoryLimit";
+  late int autocompleteHistoryLimit;
   SharedPreferences? _preferences;
 
   ThemeMode get themeMode => mode;
@@ -23,6 +24,7 @@ class PreferenceProvider extends ChangeNotifier {
     pendingPreference = false;
     hideClearedPreference = false;
     accountOrderPreference = [];
+    autocompleteHistoryLimit = 50;
     _loadFromPrefs();
   }
 
@@ -51,6 +53,12 @@ class PreferenceProvider extends ChangeNotifier {
     accountOrderPreference = accountOrder;
     _initPrefs()
         .then((value) => _preferences!.setStringList(key4, accountOrder));
+    notifyListeners();
+  }
+
+  void setAutocompleteHistoryLimit(int historyLimit) {
+    autocompleteHistoryLimit = historyLimit;
+    _initPrefs().then((value) => _preferences!.setInt(key5, historyLimit));
     notifyListeners();
   }
 
@@ -99,6 +107,8 @@ class PreferenceProvider extends ChangeNotifier {
     pendingPreference = _preferences!.getBool(key2) ?? false;
     hideClearedPreference = _preferences!.getBool(key3) ?? false;
     accountOrderPreference = _preferences!.getStringList(key4) ?? [];
+    autocompleteHistoryLimit = _preferences!.getInt(key5) ?? 50;
+
     notifyListeners();
   }
 }
