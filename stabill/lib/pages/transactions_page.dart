@@ -59,13 +59,21 @@ class _TransactionsPageState extends State<TransactionsPage> {
     _transactionsCollection =
         dataProvider.getTransactionCollection(widget.account.id);
 
-    Query<Transaction> transactionQuery = _transactionsCollection
-        .where("hidden", isEqualTo: false)
-        .orderBy("timestamp", descending: true);
+    // Build transaction query, filter transactions that are hidden
+    Query<Transaction> transactionQuery =
+        _transactionsCollection.where("hidden", isEqualTo: false);
 
+    // If hiding cleared transactions, filter them out
     if (context.read<PreferenceProvider>().hideCleared) {
       transactionQuery = transactionQuery.where("cleared", isEqualTo: false);
     }
+    // Otherwise, if prioritizing cleared transactions, start ordering by them
+    else if (context.read<PreferenceProvider>().prioritizePending) {
+      transactionQuery = transactionQuery.orderBy("cleared");
+    }
+
+    // Order by timestamp
+    transactionQuery = transactionQuery.orderBy("timestamp", descending: true);
 
     _transactionsStream = transactionQuery.snapshots();
 
@@ -188,7 +196,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   );
                   break;
                 case TransactionPageAction.reveal:
-                  // Get all hiddent transactions
+                  // Get all hidden transactions
                   final transactionUpdates = await _transactionsCollection
                       .where("hidden", isEqualTo: true)
                       .get();
@@ -215,9 +223,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
           List<QueryDocumentSnapshot<Transaction>> transactionData = [];
           if (snapshot.data != null) transactionData = snapshot.data!.docs;
 
-          // transactionData = transactionData
-          //     .where((element) => !element.data().hidden)
-          //     .toList();
           if (isSearching) {
             final String query = searchController.text.toLowerCase();
             transactionData = transactionData
@@ -226,22 +231,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       element.data().name.toLowerCase().contains(query),
                 )
                 .toList();
-          }
-
-          if (context.read<PreferenceProvider>().pendingPreference) {
-            final clearedTranscations =
-                List<QueryDocumentSnapshot<Transaction>>.empty(growable: true);
-            final unclearedTransactions =
-                List<QueryDocumentSnapshot<Transaction>>.empty(growable: true);
-            for (final transaction in transactionData) {
-              transaction.data().cleared
-                  ? clearedTranscations.add(transaction)
-                  : unclearedTransactions.add(transaction);
-            }
-            transactionData = [
-              ...unclearedTransactions,
-              ...clearedTranscations
-            ];
           }
 
           return HeaderList(
