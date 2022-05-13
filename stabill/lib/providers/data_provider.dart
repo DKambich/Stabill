@@ -266,9 +266,9 @@ class DataProvider {
 
       // Add the deposit Transasction to the to Account
       await addTransaction(toAccount, transaction);
-      return false;
-    } catch (e) {
       return true;
+    } catch (e) {
+      return false;
     }
   }
 
