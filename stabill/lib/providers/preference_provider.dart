@@ -1,64 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum PreferenceKey {
+  theme,
+  prioritizePending,
+  hideCleared,
+  accountOrder,
+  autocompleteHistoryLimit
+}
+
 class PreferenceProvider extends ChangeNotifier {
-  final String key = "theme";
-  late ThemeMode mode;
-  final String key2 = "prioritizePending";
-  late bool pendingPreference;
-  final String key3 = "hideCleared";
-  late bool hideClearedPreference;
-  final String key4 = "accountOrder";
-  late List<String> accountOrderPreference;
-  final String key5 = "autocompleteHistoryLimit";
-  late int autocompleteHistoryLimit;
   SharedPreferences? _preferences;
 
-  ThemeMode get themeMode => mode;
+  // Preference Properties
+  late ThemeMode themePreference;
+  late bool pendingPreference;
+  late bool hideClearedPreference;
+  late List<String> accountOrderPreference;
+  late int autocompleteHistoryLimitPreference;
+
+  // Preference Getters
+  ThemeMode get themeMode => themePreference;
   bool get prioritizePending => pendingPreference;
   bool get hideCleared => hideClearedPreference;
   List<String> get accountOrder => accountOrderPreference;
+  int get autocompleteHistoryLimit => autocompleteHistoryLimitPreference;
 
   PreferenceProvider() {
-    mode = ThemeMode.light;
+    themePreference = ThemeMode.light;
     pendingPreference = false;
     hideClearedPreference = false;
     accountOrderPreference = [];
-    autocompleteHistoryLimit = 50;
+    autocompleteHistoryLimitPreference = 50;
     _loadFromPrefs();
   }
 
   void setThemeMode(ThemeMode newMode) {
-    mode = newMode;
-    _initPrefs().then((value) => _preferences!.setString(key, mode.toString()));
+    themePreference = newMode;
+    _initPrefs().then(
+      (value) => _preferences!.setString(
+        PreferenceKey.theme.name,
+        themePreference.toString(),
+      ),
+    );
     notifyListeners();
   }
 
   // ignore: avoid_positional_boolean_parameters
   void setPrioritizePending(bool prioritizePending) {
     pendingPreference = prioritizePending;
-    _initPrefs()
-        .then((value) => _preferences!.setBool(key2, prioritizePending));
+    _initPrefs().then(
+      (value) => _preferences!
+          .setBool(PreferenceKey.prioritizePending.name, prioritizePending),
+    );
     notifyListeners();
   }
 
   // ignore: avoid_positional_boolean_parameters
   void setHideCleared(bool hideCleared) {
     hideClearedPreference = hideCleared;
-    _initPrefs().then((value) => _preferences!.setBool(key3, hideCleared));
+    _initPrefs().then((value) =>
+        _preferences!.setBool(PreferenceKey.hideCleared.name, hideCleared));
     notifyListeners();
   }
 
   void setAccountOrder(List<String> accountOrder) {
     accountOrderPreference = accountOrder;
-    _initPrefs()
-        .then((value) => _preferences!.setStringList(key4, accountOrder));
+    _initPrefs().then((value) => _preferences!
+        .setStringList(PreferenceKey.accountOrder.name, accountOrder));
     notifyListeners();
   }
 
   void setAutocompleteHistoryLimit(int historyLimit) {
-    autocompleteHistoryLimit = historyLimit;
-    _initPrefs().then((value) => _preferences!.setInt(key5, historyLimit));
+    autocompleteHistoryLimitPreference = historyLimit;
+    _initPrefs().then((value) => _preferences!
+        .setInt(PreferenceKey.autocompleteHistoryLimit.name, historyLimit));
     notifyListeners();
   }
 
@@ -98,16 +114,20 @@ class PreferenceProvider extends ChangeNotifier {
 
   Future<void> _loadFromPrefs() async {
     await _initPrefs();
-    final String theme =
-        _preferences!.getString(key) ?? ThemeMode.light.toString();
-    mode = ThemeMode.values.firstWhere(
+    final String theme = _preferences!.getString(PreferenceKey.theme.name) ??
+        ThemeMode.light.toString();
+    themePreference = ThemeMode.values.firstWhere(
       (type) => type.toString() == theme,
       orElse: () => ThemeMode.light,
     );
-    pendingPreference = _preferences!.getBool(key2) ?? false;
-    hideClearedPreference = _preferences!.getBool(key3) ?? false;
-    accountOrderPreference = _preferences!.getStringList(key4) ?? [];
-    autocompleteHistoryLimit = _preferences!.getInt(key5) ?? 50;
+    pendingPreference =
+        _preferences!.getBool(PreferenceKey.prioritizePending.name) ?? false;
+    hideClearedPreference =
+        _preferences!.getBool(PreferenceKey.hideCleared.name) ?? false;
+    accountOrderPreference =
+        _preferences!.getStringList(PreferenceKey.accountOrder.name) ?? [];
+    autocompleteHistoryLimitPreference =
+        _preferences!.getInt(PreferenceKey.autocompleteHistoryLimit.name) ?? 50;
 
     notifyListeners();
   }
