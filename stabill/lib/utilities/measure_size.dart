@@ -18,7 +18,7 @@ class _MeasureSizeState extends State<MeasureSize> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _getSize();
     });
   }

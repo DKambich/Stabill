@@ -39,7 +39,6 @@ class _HeaderListState extends State<HeaderList> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: _headerSize,
-      child: null,
       builder: (BuildContext context, Size value, Widget? child) {
         Widget body = const SizedBox.shrink();
         if (widget.error ?? false) {

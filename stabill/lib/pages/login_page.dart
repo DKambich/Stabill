@@ -89,6 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                           "assets/icon/logo_only.svg",
                           width: logoSize,
                           height: logoSize,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(

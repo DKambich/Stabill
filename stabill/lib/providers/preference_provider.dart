@@ -59,22 +59,28 @@ class PreferenceProvider extends ChangeNotifier {
   // ignore: avoid_positional_boolean_parameters
   void setHideCleared(bool hideCleared) {
     hideClearedPreference = hideCleared;
-    _initPrefs().then((value) =>
-        _preferences!.setBool(PreferenceKey.hideCleared.name, hideCleared));
+    _initPrefs().then(
+      (value) =>
+          _preferences!.setBool(PreferenceKey.hideCleared.name, hideCleared),
+    );
     notifyListeners();
   }
 
   void setAccountOrder(List<String> accountOrder) {
     accountOrderPreference = accountOrder;
-    _initPrefs().then((value) => _preferences!
-        .setStringList(PreferenceKey.accountOrder.name, accountOrder));
+    _initPrefs().then(
+      (value) => _preferences!
+          .setStringList(PreferenceKey.accountOrder.name, accountOrder),
+    );
     notifyListeners();
   }
 
   void setAutocompleteHistoryLimit(int historyLimit) {
     autocompleteHistoryLimitPreference = historyLimit;
-    _initPrefs().then((value) => _preferences!
-        .setInt(PreferenceKey.autocompleteHistoryLimit.name, historyLimit));
+    _initPrefs().then(
+      (value) => _preferences!
+          .setInt(PreferenceKey.autocompleteHistoryLimit.name, historyLimit),
+    );
     notifyListeners();
   }
 

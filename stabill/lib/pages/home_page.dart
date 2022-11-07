@@ -44,6 +44,7 @@ class _HomePageState extends State<HomePage> {
               fit: BoxFit.scaleDown,
               width: 28,
               height: 28,
+              color: Colors.white,
             ),
           ),
         ),
