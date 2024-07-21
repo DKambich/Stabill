@@ -131,7 +131,7 @@ class TransactionDetailsDialog extends StatelessWidget {
               ),
               formFieldSpace,
               formFieldSpace,
-              Container(
+              DecoratedBox(
                 decoration: BoxDecoration(
                   color: formFieldFill(Theme.of(context).brightness),
                   borderRadius: const BorderRadius.all(fieldRadius),

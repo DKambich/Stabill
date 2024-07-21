@@ -397,7 +397,7 @@ class DataProvider {
       "Transaction_Type",
       "Creation_Date",
       "Is_Hidden",
-      "Memo"
+      "Memo",
     ];
 
     // Create a list to store the rows of the CSV
@@ -425,7 +425,7 @@ class DataProvider {
           transaction.method == TransactionType.deposit ? "TRUE" : "FALSE",
           transaction.timestamp.millisecondsSinceEpoch,
           transaction.hidden.toString().toUpperCase(),
-          transaction.memo
+          transaction.memo,
         ]);
       }
     }

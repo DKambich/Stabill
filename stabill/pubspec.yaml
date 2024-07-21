@@ -29,6 +29,7 @@ dependencies:
   shared_preferences: ^2.0.13
   substring_highlight: ^1.0.33
 
+  intl: any
 dev_dependencies:
   flutter_launcher_icons: "^0.9.2"
   flutter_test:

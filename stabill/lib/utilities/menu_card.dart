@@ -74,7 +74,7 @@ class _MenuCardState<T> extends State<MenuCard<T>> {
                     shape: menuShape,
                     padding: EdgeInsets.zero,
                     tooltip: "Show Actions",
-                  )
+                  ),
               ],
             ),
           ),

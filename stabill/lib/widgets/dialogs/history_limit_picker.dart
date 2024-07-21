@@ -62,7 +62,7 @@ class _HistoryLimitPickerState extends State<HistoryLimitPicker> {
         TextButton(
           onPressed: () => Navigator.of(context).pop(selectedLimit),
           child: const Text("Confirm"),
-        )
+        ),
       ],
     );
   }

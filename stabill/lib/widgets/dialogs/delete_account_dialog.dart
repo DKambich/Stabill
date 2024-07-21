@@ -91,7 +91,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
         TextButton(
           onPressed: () => deleteAccount(),
           child: const Text("Confirm"),
-        )
+        ),
       ],
     );
   }

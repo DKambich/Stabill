@@ -53,7 +53,7 @@ class _ReorderAccountsPageState extends State<ReorderAccountsPage> {
             ),
             const Divider(
               height: 1,
-            )
+            ),
           ],
         ),
         itemCount: _accounts.length,

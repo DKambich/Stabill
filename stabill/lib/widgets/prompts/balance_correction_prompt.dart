@@ -53,7 +53,7 @@ class _BalanceCorrectionPromptState extends State<BalanceCorrectionPrompt> {
         TextButton(
           onPressed: submitForm,
           child: const Text("Confirm"),
-        )
+        ),
       ],
       content: Form(
         child: Column(
@@ -74,7 +74,7 @@ class _BalanceCorrectionPromptState extends State<BalanceCorrectionPrompt> {
                 ),
                 enableInteractiveSelection: false,
                 inputFormatters: [
-                  DollarTextInputFormatter(allowNegative: true, maxDigits: 8)
+                  DollarTextInputFormatter(allowNegative: true, maxDigits: 8),
                 ],
                 keyboardType: TextInputType.number,
                 onFieldSubmitted: (_) => submitForm(),

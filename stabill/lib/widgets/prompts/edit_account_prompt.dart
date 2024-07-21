@@ -47,7 +47,7 @@ class _EditAccountPromptState extends State<EditAccountPrompt> {
         TextButton(
           onPressed: submitForm,
           child: const Text("Confirm"),
-        )
+        ),
       ],
       content: Form(
         key: _formKey,

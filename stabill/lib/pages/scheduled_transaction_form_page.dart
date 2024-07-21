@@ -133,7 +133,7 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
               }
             },
             icon: const Icon(Icons.check_rounded),
-          )
+          ),
         ],
       ),
       body: StreamBuilder<QuerySnapshot<Account>>(
@@ -217,7 +217,7 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                           return "Amount must be greater than 0";
                         },
                         inputFormatters: [
-                          DollarTextInputFormatter(maxDigits: 7)
+                          DollarTextInputFormatter(maxDigits: 7),
                         ],
                       ),
                     ),
@@ -236,7 +236,7 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                         textInputAction: TextInputAction.next,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(4)
+                          LengthLimitingTextInputFormatter(4),
                         ],
                       ),
                     ),
@@ -264,7 +264,7 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                         horizontal: 12.0,
                         vertical: 8,
                       ),
-                      child: Container(
+                      child: DecoratedBox(
                         decoration: BoxDecoration(
                           color: formFieldFill(Theme.of(context).brightness),
                           borderRadius: const BorderRadius.all(fieldRadius),
@@ -437,7 +437,7 @@ class _ScheduledTransactionModalState extends State<ScheduledTransactionModal> {
                         controlAffinity: ListTileControlAffinity.leading,
                       ),
                     ),
-                    formFieldSpace
+                    formFieldSpace,
                   ],
                 ),
               ),

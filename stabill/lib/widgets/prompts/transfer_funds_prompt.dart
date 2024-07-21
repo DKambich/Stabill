@@ -67,9 +67,9 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
 
         // If it is loading, show a loading indicator
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Column(
+          return const Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 164.0),
                 child: CircularProgressIndicator(),
@@ -126,7 +126,7 @@ class _TransferFundsPromptState extends State<TransferFundsPrompt> {
             TextButton(
               onPressed: submitForm,
               child: const Text("Confirm"),
-            )
+            ),
           ],
           title: const Text("Transfer Funds"),
           content: Form(

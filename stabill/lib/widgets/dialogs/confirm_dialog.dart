@@ -49,7 +49,7 @@ class ConfirmDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.of(context).pop<bool>(true),
           child: confirmText ?? const Text("Confirm"),
-        )
+        ),
       ],
     );
   }

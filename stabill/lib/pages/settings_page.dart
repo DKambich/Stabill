@@ -84,9 +84,9 @@ class _SettingsPageState extends State<SettingsPage> {
             //   onChanged: notificationSetting,
             // ),
             SwitchListTile(
-              secondary: Column(
+              secondary: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [Icon(Icons.pending_actions_rounded)],
+                children: [Icon(Icons.pending_actions_rounded)],
               ),
               title: const Text("Prioritize Pending Transactions"),
               subtitle: const Text(
@@ -116,9 +116,9 @@ class _SettingsPageState extends State<SettingsPage> {
             const Divider(),
             sectionHeader("Data"),
             ListTile(
-              leading: Column(
+              leading: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [Icon(Icons.format_list_numbered_rounded)],
+                children: [Icon(Icons.format_list_numbered_rounded)],
               ),
               title: const Text("Reorder Accounts"),
               subtitle: const Text(
@@ -129,9 +129,9 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             ListTile(
-              leading: Column(
+              leading: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [Icon(Icons.history)],
+                children: [Icon(Icons.history)],
               ),
               title: const Text("Autocomplete History Limit"),
               subtitle: const Text(
@@ -140,18 +140,18 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () => historyLimitSetting(historyLimit),
             ),
             ListTile(
-              leading: Column(
+              leading: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [Icon(Icons.file_download_rounded)],
+                children: [Icon(Icons.file_download_rounded)],
               ),
               title: const Text("Import Data"),
               subtitle: const Text("Import data into your account"),
               onTap: importData,
             ),
             ListTile(
-              leading: Column(
+              leading: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [Icon(Icons.file_upload_rounded)],
+                children: [Icon(Icons.file_upload_rounded)],
               ),
               title: const Text("Export Data"),
               subtitle: const Text("Export data from your account"),
@@ -160,18 +160,18 @@ class _SettingsPageState extends State<SettingsPage> {
             const Divider(),
             sectionHeader("Account"),
             ListTile(
-              leading: Column(
+              leading: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [Icon(Icons.logout_rounded)],
+                children: [Icon(Icons.logout_rounded)],
               ),
               title: const Text("Sign out"),
               subtitle: const Text("Sign out of your account on this device"),
               onTap: showLogoutAccount,
             ),
             ListTile(
-              leading: Column(
+              leading: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [Icon(Icons.delete_forever_rounded)],
+                children: [Icon(Icons.delete_forever_rounded)],
               ),
               title: const Text("Delete Account"),
               subtitle:

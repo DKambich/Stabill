@@ -61,12 +61,12 @@ class _ScheduledTransactionsPageState extends State<ScheduledTransactionsPage> {
             onError: const Text('Something went wrong'),
             isLoading: snapshot.connectionState == ConnectionState.waiting,
             onLoading: const Center(child: CircularProgressIndicator()),
-            onEmpty: Row(
+            onEmpty: const Row(
               children: [
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Icon(
                         Icons.more_time_rounded,
                         size: 64,

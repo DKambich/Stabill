@@ -68,7 +68,7 @@ class _ThemePickerState extends State<ThemePicker> {
         TextButton(
           onPressed: () => Navigator.of(context).pop(selectedType),
           child: const Text("Confirm"),
-        )
+        ),
       ],
     );
   }

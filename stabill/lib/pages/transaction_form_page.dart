@@ -47,13 +47,13 @@ class _TransactionModalState extends State<TransactionModal> {
     autocompleteNameOptions = [];
 
     // Get a reference to the transaction collection for the account
-    final _transactionCollection =
+    final transactionCollection =
         context.read<DataProvider>().getTransactionCollection(widget.accountID);
     final PreferenceProvider preferenceProvider =
         context.read<PreferenceProvider>();
     final int historyLimit = preferenceProvider.autocompleteHistoryLimit;
     // Get the 100 most recent transactions
-    _transactionCollection
+    transactionCollection
         .orderBy("timestamp", descending: true)
         .limit(historyLimit)
         .get()
@@ -158,7 +158,7 @@ class _TransactionModalState extends State<TransactionModal> {
               }
             },
             icon: const Icon(Icons.check_rounded),
-          )
+          ),
         ],
       ),
       body: Theme(
@@ -309,7 +309,7 @@ class _TransactionModalState extends State<TransactionModal> {
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(4)
+                      LengthLimitingTextInputFormatter(4),
                     ],
                   ),
                 ),
@@ -332,7 +332,7 @@ class _TransactionModalState extends State<TransactionModal> {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-                  child: Container(
+                  child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: formFieldFill(Theme.of(context).brightness),
                       borderRadius: const BorderRadius.all(fieldRadius),

@@ -214,7 +214,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               }
             },
             itemBuilder: (_) => buildPageActions(),
-          )
+          ),
         ],
       ),
       body: StreamBuilder<QuerySnapshot<Transaction>>(
@@ -240,10 +240,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
             isLoading: snapshot.connectionState == ConnectionState.waiting,
             onLoading: const Center(child: CircularProgressIndicator()),
             itemHeight: 110,
-            onEmpty: Column(
+            onEmpty: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: const [
+              children: [
                 Icon(Icons.payment_rounded, size: 64),
                 Text(
                   "Add a new transaction!",

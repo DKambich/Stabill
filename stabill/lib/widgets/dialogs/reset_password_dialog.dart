@@ -72,7 +72,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
         TextButton(
           onPressed: () => resetPassword(),
           child: const Text("Confirm"),
-        )
+        ),
       ],
     );
   }

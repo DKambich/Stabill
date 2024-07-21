@@ -46,7 +46,7 @@ class _CreateAccountPromptState extends State<CreateAccountPrompt> {
         TextButton(
           onPressed: submitForm,
           child: const Text("Confirm"),
-        )
+        ),
       ],
       content: Form(
         key: _formKey,
