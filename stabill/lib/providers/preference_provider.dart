@@ -52,6 +52,7 @@ class PreferenceProvider extends ChangeNotifier {
     }
 
     final theme = ThemeData(
+      useMaterial3: false,
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       primaryColor: Colors.green,
       brightness: brightness,
@@ -103,6 +104,7 @@ class PreferenceProvider extends ChangeNotifier {
       ),
     );
     return theme.copyWith(
+      useMaterial3: false,
       colorScheme: theme.colorScheme.copyWith(
         primary: Colors.green,
         secondary: Colors.red,
