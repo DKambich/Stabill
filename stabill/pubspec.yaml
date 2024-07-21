@@ -10,28 +10,28 @@ environment:
 
 dependencies:
   auto_size_text: ^3.0.0
-  cloud_firestore: "^3.1.8"
-  csv: ^5.0.1
-  file_picker: ^4.4.0
-  firebase_auth: "^3.3.7"
-  firebase_core: "^1.12.0"
+  cloud_firestore: ^5.1.0
+  csv: ^6.0.0
+  file_picker: ^8.0.6
+  firebase_auth: ^5.1.2
+  firebase_core: ^3.2.0
   # firebase_messaging: "^11.1.0"
   flutter:
     sdk: flutter
   flutter_native_splash: ^2.0.4
-  flutter_speed_dial: ^5.0.0+1
-  flutter_svg: ^1.0.3
-  lint: ^1.8.2
+  flutter_speed_dial: ^7.0.0
+  flutter_svg: ^2.0.10+1
+  lint: ^2.3.0
   oktoast: ^3.1.5
-  permission_handler: ^9.1.0
+  permission_handler: ^11.3.1
   provider: ^6.0.2
-  responsive_builder: ^0.4.2
+  responsive_builder: ^0.7.1
   shared_preferences: ^2.0.13
   substring_highlight: ^1.0.33
 
   intl: any
 dev_dependencies:
-  flutter_launcher_icons: "^0.9.2"
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 

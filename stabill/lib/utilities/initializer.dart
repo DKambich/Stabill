@@ -20,15 +20,8 @@ class _InitializerState extends State<Initializer> {
   late StreamSubscription<User?> authSubscription;
 
   @override
-  void initState() {
-    // Listen to the initial sign in state of the user
-    authSubscription = context.read<AuthProvider>().authState.listen((user) {
-      // Navigate based on the user's sign in state
-      final String route =
-          user != null ? HomePage.routeName : LoginPage.routeName;
-      Navigator.of(context).pushReplacementNamed(route);
-    });
-    super.initState();
+  Widget build(BuildContext context) {
+    return const SplashPage();
   }
 
   @override
@@ -38,7 +31,15 @@ class _InitializerState extends State<Initializer> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return const SplashPage();
+  void initState() {
+    // Listen to the initial sign in state of the user
+    authSubscription =
+        context.read<StabillAuthProvider>().authState.listen((user) {
+      // Navigate based on the user's sign in state
+      final String route =
+          user != null ? HomePage.routeName : LoginPage.routeName;
+      Navigator.of(context).pushReplacementNamed(route);
+    });
+    super.initState();
   }
 }

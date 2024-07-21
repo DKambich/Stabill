@@ -25,49 +25,6 @@ class _LoginPageState extends State<LoginPage> {
   late TextEditingController passwordController;
 
   @override
-  void initState() {
-    emailController = TextEditingController();
-    passwordController = TextEditingController();
-    super.initState();
-  }
-
-  Future<void> logIn() async {
-    if (_formKey.currentState!.validate()) {
-      if (await context.read<AuthProvider>().signIn(
-                email: emailController.text,
-                password: passwordController.text,
-              ) ==
-          false) {
-        showToast(
-          "Login failed, please check your email and password then try again",
-        );
-      } else if (mounted) {
-        Navigator.of(context).pushReplacementNamed(HomePage.routeName);
-      }
-    }
-  }
-
-  Future<void> signUp() async {
-    if (_formKey.currentState!.validate()) {
-      if (await context.read<AuthProvider>().signUp(
-                email: emailController.text,
-                password: passwordController.text,
-              ) ==
-          false) {
-        showToast(
-          "Account Creation failed, try again",
-        );
-      } else if (mounted) {
-        Navigator.of(context).pushReplacementNamed(HomePage.routeName);
-      }
-    }
-  }
-
-  void forgotPassword() {
-    ResetPasswordDialog.show(context);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final double logoSize = MediaQuery.of(context).size.width / 3;
     return Scaffold(
@@ -148,7 +105,8 @@ class _LoginPageState extends State<LoginPage> {
                       ElevatedButton(
                         onPressed: logIn,
                         style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(60), backgroundColor: Colors.white,
+                          minimumSize: const Size.fromHeight(60),
+                          backgroundColor: Colors.white,
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(fieldRadius),
                           ),
@@ -206,5 +164,48 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
     );
+  }
+
+  void forgotPassword() {
+    ResetPasswordDialog.show(context);
+  }
+
+  @override
+  void initState() {
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    super.initState();
+  }
+
+  Future<void> logIn() async {
+    if (_formKey.currentState!.validate()) {
+      if (await context.read<StabillAuthProvider>().signIn(
+                email: emailController.text,
+                password: passwordController.text,
+              ) ==
+          false) {
+        showToast(
+          "Login failed, please check your email and password then try again",
+        );
+      } else if (mounted) {
+        Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+      }
+    }
+  }
+
+  Future<void> signUp() async {
+    if (_formKey.currentState!.validate()) {
+      if (await context.read<StabillAuthProvider>().signUp(
+                email: emailController.text,
+                password: passwordController.text,
+              ) ==
+          false) {
+        showToast(
+          "Account Creation failed, try again",
+        );
+      } else if (mounted) {
+        Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+      }
+    }
   }
 }

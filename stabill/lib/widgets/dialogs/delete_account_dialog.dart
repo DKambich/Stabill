@@ -7,6 +7,9 @@ import 'package:stabill/providers/auth_provider.dart';
 class DeleteAccountDialog extends StatefulWidget {
   const DeleteAccountDialog({Key? key}) : super(key: key);
 
+  @override
+  _DeleteAccountDialogState createState() => _DeleteAccountDialogState();
+
   static Future<bool> show(BuildContext context) async {
     return await showDialog<bool?>(
           context: context,
@@ -14,31 +17,12 @@ class DeleteAccountDialog extends StatefulWidget {
         ) ??
         false;
   }
-
-  @override
-  _DeleteAccountDialogState createState() => _DeleteAccountDialogState();
 }
 
 class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  Future<void> deleteAccount() async {
-    FocusScope.of(context).unfocus();
-    if (_formKey.currentState!.validate()) {
-      if (await context
-              .read<AuthProvider>()
-              .deleteAccount(emailController.text, passwordController.text) ==
-          false) {
-        showToast(
-          "Failed to delete account, ensure you used the correct email and password and try again",
-        );
-        if (mounted) Navigator.of(context).pop(false);
-      }
-      if (mounted) Navigator.of(context).pop(true);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,5 +78,21 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
         ),
       ],
     );
+  }
+
+  Future<void> deleteAccount() async {
+    FocusScope.of(context).unfocus();
+    if (_formKey.currentState!.validate()) {
+      if (await context
+              .read<StabillAuthProvider>()
+              .deleteAccount(emailController.text, passwordController.text) ==
+          false) {
+        showToast(
+          "Failed to delete account, ensure you used the correct email and password and try again",
+        );
+        if (mounted) Navigator.of(context).pop(false);
+      }
+      if (mounted) Navigator.of(context).pop(true);
+    }
   }
 }

@@ -7,33 +7,20 @@ import 'package:stabill/providers/auth_provider.dart';
 class ResetPasswordDialog extends StatefulWidget {
   const ResetPasswordDialog({Key? key}) : super(key: key);
 
+  @override
+  _ResetPasswordDialogState createState() => _ResetPasswordDialogState();
+
   static Future<void> show(BuildContext context) async {
     showDialog<bool>(
       context: context,
       builder: (_) => const ResetPasswordDialog(),
     );
   }
-
-  @override
-  _ResetPasswordDialogState createState() => _ResetPasswordDialogState();
 }
 
 class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
-
-  Future<void> resetPassword() async {
-    FocusScope.of(context).unfocus();
-    if (_formKey.currentState!.validate()) {
-      if (await context
-              .read<AuthProvider>()
-              .resetPassword(emailController.text) ==
-          false) {
-        showToast("Failed to reset password, try again");
-      }
-      if (mounted) Navigator.of(context).pop();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,5 +62,18 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
         ),
       ],
     );
+  }
+
+  Future<void> resetPassword() async {
+    FocusScope.of(context).unfocus();
+    if (_formKey.currentState!.validate()) {
+      if (await context
+              .read<StabillAuthProvider>()
+              .resetPassword(emailController.text) ==
+          false) {
+        showToast("Failed to reset password, try again");
+      }
+      if (mounted) Navigator.of(context).pop();
+    }
   }
 }

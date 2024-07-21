@@ -19,13 +19,6 @@ class PreferenceProvider extends ChangeNotifier {
   late List<String> accountOrderPreference;
   late int autocompleteHistoryLimitPreference;
 
-  // Preference Getters
-  ThemeMode get themeMode => themePreference;
-  bool get prioritizePending => pendingPreference;
-  bool get hideCleared => hideClearedPreference;
-  List<String> get accountOrder => accountOrderPreference;
-  int get autocompleteHistoryLimit => autocompleteHistoryLimitPreference;
-
   PreferenceProvider() {
     themePreference = ThemeMode.light;
     pendingPreference = false;
@@ -34,36 +27,88 @@ class PreferenceProvider extends ChangeNotifier {
     autocompleteHistoryLimitPreference = 50;
     _loadFromPrefs();
   }
+  List<String> get accountOrder => accountOrderPreference;
+  int get autocompleteHistoryLimit => autocompleteHistoryLimitPreference;
+  bool get hideCleared => hideClearedPreference;
+  bool get prioritizePending => pendingPreference;
 
-  void setThemeMode(ThemeMode newMode) {
-    themePreference = newMode;
-    _initPrefs().then(
-      (value) => _preferences!.setString(
-        PreferenceKey.theme.name,
-        themePreference.toString(),
+  // Preference Getters
+  ThemeMode get themeMode => themePreference;
+
+  ThemeData getTheme(BuildContext context, ThemeMode mode) {
+    final Brightness brightness;
+    switch (mode) {
+      case ThemeMode.light:
+        brightness = Brightness.light;
+        break;
+      case ThemeMode.dark:
+        brightness = Brightness.dark;
+        break;
+      case ThemeMode.system:
+        brightness = MediaQuery.of(context).platformBrightness;
+        break;
+      default:
+        brightness = Brightness.light;
+    }
+
+    final theme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+      primaryColor: Colors.green,
+      brightness: brightness,
+      checkboxTheme: CheckboxThemeData(
+        fillColor:
+            WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
+            return null;
+          }
+          if (states.contains(WidgetState.selected)) {
+            return Colors.red;
+          }
+          return null;
+        }),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor:
+            WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
+            return null;
+          }
+          if (states.contains(WidgetState.selected)) {
+            return Colors.red;
+          }
+          return null;
+        }),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor:
+            WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
+            return null;
+          }
+          if (states.contains(WidgetState.selected)) {
+            return Colors.red;
+          }
+          return null;
+        }),
+        trackColor:
+            WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
+            return null;
+          }
+          if (states.contains(WidgetState.selected)) {
+            return Colors.red;
+          }
+          return null;
+        }),
       ),
     );
-    notifyListeners();
-  }
-
-  // ignore: avoid_positional_boolean_parameters
-  void setPrioritizePending(bool prioritizePending) {
-    pendingPreference = prioritizePending;
-    _initPrefs().then(
-      (value) => _preferences!
-          .setBool(PreferenceKey.prioritizePending.name, prioritizePending),
+    return theme.copyWith(
+      colorScheme: theme.colorScheme.copyWith(
+        primary: Colors.green,
+        secondary: Colors.red,
+        onSecondary: Colors.white,
+      ),
     );
-    notifyListeners();
-  }
-
-  // ignore: avoid_positional_boolean_parameters
-  void setHideCleared(bool hideCleared) {
-    hideClearedPreference = hideCleared;
-    _initPrefs().then(
-      (value) =>
-          _preferences!.setBool(PreferenceKey.hideCleared.name, hideCleared),
-    );
-    notifyListeners();
   }
 
   void setAccountOrder(List<String> accountOrder) {
@@ -84,56 +129,35 @@ class PreferenceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  ThemeData getTheme(BuildContext context, ThemeMode mode) {
-    final Brightness brightness;
-    switch (mode) {
-      case ThemeMode.light:
-        brightness = Brightness.light;
-        break;
-      case ThemeMode.dark:
-        brightness = Brightness.dark;
-        break;
-      case ThemeMode.system:
-        brightness = MediaQuery.of(context).platformBrightness;
-        break;
-      default:
-        brightness = Brightness.light;
-    }
-
-    final theme = ThemeData(
-      primaryColor: Colors.green,
-      brightness: brightness, checkboxTheme: CheckboxThemeData(
- fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return Colors.red; }
- return null;
- }),
- ), radioTheme: RadioThemeData(
- fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return Colors.red; }
- return null;
- }),
- ), switchTheme: SwitchThemeData(
- thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return Colors.red; }
- return null;
- }),
- trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return Colors.red; }
- return null;
- }),
- ),
+  // ignore: avoid_positional_boolean_parameters
+  void setHideCleared(bool hideCleared) {
+    hideClearedPreference = hideCleared;
+    _initPrefs().then(
+      (value) =>
+          _preferences!.setBool(PreferenceKey.hideCleared.name, hideCleared),
     );
-    return theme.copyWith(
-      colorScheme: theme.colorScheme.copyWith(
-        primary: Colors.green,
-        secondary: Colors.red,
-        onSecondary: Colors.white,
+    notifyListeners();
+  }
+
+  // ignore: avoid_positional_boolean_parameters
+  void setPrioritizePending(bool prioritizePending) {
+    pendingPreference = prioritizePending;
+    _initPrefs().then(
+      (value) => _preferences!
+          .setBool(PreferenceKey.prioritizePending.name, prioritizePending),
+    );
+    notifyListeners();
+  }
+
+  void setThemeMode(ThemeMode newMode) {
+    themePreference = newMode;
+    _initPrefs().then(
+      (value) => _preferences!.setString(
+        PreferenceKey.theme.name,
+        themePreference.toString(),
       ),
     );
+    notifyListeners();
   }
 
   Future<void> _initPrefs() async {

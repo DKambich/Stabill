@@ -15,16 +15,16 @@ class RootProvider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Provider(
-      create: (_) => AuthProvider(FirebaseAuth.instance),
-      child: ProxyProvider<AuthProvider, DataProvider>(
+      create: (_) => StabillAuthProvider(FirebaseAuth.instance),
+      child: ProxyProvider<StabillAuthProvider, DataProvider>(
         update: (context, user, data) => DataProvider(
           FirebaseFirestore.instance,
-          context.watch<AuthProvider>().currentUser,
+          context.watch<StabillAuthProvider>().currentUser,
         ),
-        child: ProxyProvider<AuthProvider, MessageProvider>(
+        child: ProxyProvider<StabillAuthProvider, MessageProvider>(
           update: (context, user, data) => MessageProvider(
             // FirebaseMessaging.instance,
-            context.watch<AuthProvider>().currentUser,
+            context.watch<StabillAuthProvider>().currentUser,
           ),
           child: MaterialApp(
             home: ChangeNotifierProvider(

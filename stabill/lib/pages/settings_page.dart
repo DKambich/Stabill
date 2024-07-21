@@ -184,44 +184,19 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget sectionHeader(String text) {
-    return Padding(
-      padding:
-          const EdgeInsets.only(left: 15.0, right: 15.0, bottom: 6.0, top: 15),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.secondary,
-          fontWeight: FontWeight.bold,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
-
-  Future<void> themeSetting(ThemeMode currentMode) async {
-    final PreferenceProvider preferenceProvider =
-        context.read<PreferenceProvider>();
-    final ThemeMode newMode = await ThemePicker.show(context, currentMode);
-    preferenceProvider.setThemeMode(newMode);
-  }
-
-  // ignore: avoid_positional_boolean_parameters
-  Future<void> notificationSetting(bool showNotifications) async {
-    setState(() {
-      this.showNotifications = showNotifications;
-    });
-  }
-
-  // ignore: avoid_positional_boolean_parameters
-  Future<void> pendingTransactionSetting(bool prioritizePending) async {
-    context.read<PreferenceProvider>().setPrioritizePending(prioritizePending);
-  }
-
   // ignore: avoid_positional_boolean_parameters
   Future<void> clearedTransactionSetting(bool hideCleared) async {
     context.read<PreferenceProvider>().setHideCleared(hideCleared);
+  }
+
+  Future<void> exportData() async {
+    final String fileName =
+        'StabillExport-${DateFormat("MM-dd-yyyy-kk-mm-ss").format(DateTime.now())}.csv';
+
+    final String csv = await context.read<DataProvider>().exportCSV();
+
+    downloader.downloadFile(fileName, csv);
+    // TODO: Notify that the user of where the file was stored
   }
 
   Future<void> historyLimitSetting(int currentLimit) async {
@@ -247,33 +222,32 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> exportData() async {
-    final String fileName =
-        'StabillExport-${DateFormat("MM-dd-yyyy-kk-mm-ss").format(DateTime.now())}.csv';
-
-    final String csv = await context.read<DataProvider>().exportCSV();
-
-    downloader.downloadFile(fileName, csv);
-    // TODO: Notify that the user of where the file was stored
+  // ignore: avoid_positional_boolean_parameters
+  Future<void> notificationSetting(bool showNotifications) async {
+    setState(() {
+      this.showNotifications = showNotifications;
+    });
   }
 
-  Future<void> showLogoutAccount() async {
-    final bool shouldLogout = await ConfirmDialog.show(
-      context,
-      "Logout?",
-      "Are you sure you want to logout from your account?",
-      confirmText: const Text(
-        "Confirm",
-        style: TextStyle(color: Colors.red),
+  // ignore: avoid_positional_boolean_parameters
+  Future<void> pendingTransactionSetting(bool prioritizePending) async {
+    context.read<PreferenceProvider>().setPrioritizePending(prioritizePending);
+  }
+
+  Widget sectionHeader(String text) {
+    return Padding(
+      padding:
+          const EdgeInsets.only(left: 15.0, right: 15.0, bottom: 6.0, top: 15),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.secondary,
+          fontWeight: FontWeight.bold,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
-    if (mounted && shouldLogout) {
-      context.read<AuthProvider>().signOut();
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        LoginPage.routeName,
-        (route) => false,
-      );
-    }
   }
 
   Future<void> showDeleteAccount() async {
@@ -292,5 +266,31 @@ class _SettingsPageState extends State<SettingsPage> {
         Navigator.of(context).pushReplacementNamed(LoginPage.routeName);
       }
     }
+  }
+
+  Future<void> showLogoutAccount() async {
+    final bool shouldLogout = await ConfirmDialog.show(
+      context,
+      "Logout?",
+      "Are you sure you want to logout from your account?",
+      confirmText: const Text(
+        "Confirm",
+        style: TextStyle(color: Colors.red),
+      ),
+    );
+    if (mounted && shouldLogout) {
+      context.read<StabillAuthProvider>().signOut();
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        LoginPage.routeName,
+        (route) => false,
+      );
+    }
+  }
+
+  Future<void> themeSetting(ThemeMode currentMode) async {
+    final PreferenceProvider preferenceProvider =
+        context.read<PreferenceProvider>();
+    final ThemeMode newMode = await ThemePicker.show(context, currentMode);
+    preferenceProvider.setThemeMode(newMode);
   }
 }
