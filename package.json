@@ -1,0 +1,25 @@
+{
+  "name": "stabill",
+  "version": "1.0.0",
+  "description": "You will need to have Docker Desktop and the Supabase CLI installed to run.\r https://supabase.com/docs/guides/local-development",
+  "main": "index.js",
+  "scripts": {
+    "flutter:debug": "cd stabill && flutter run --debug",
+    "flutter:release": "flutter run --release",
+    "supabase:start": "docker desktop start && npx supabase start",
+    "supabase:functions": "npm run supabase:start && npx supabase functions serve",
+    "supabase:stop": "npx supabase stop"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DKambich/Stabill.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/DKambich/Stabill/issues"
+  },
+  "homepage": "https://github.com/DKambich/Stabill#readme"
+}
