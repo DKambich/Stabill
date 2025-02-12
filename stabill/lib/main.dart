@@ -109,7 +109,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text('Login'),
                   ),
             SizedBox(height: 24),
-            loggedIn ? Text("Logged in as $_email") : Text("Not Logged In")
+            loggedIn
+                ? Text("Logged in with email as $_email")
+                : Text("Not Logged In")
           ],
         ),
       ),
