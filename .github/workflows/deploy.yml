@@ -19,20 +19,20 @@ jobs:
           channel: 'stable'
 
       - name: Install Flutter Dependencies
-        working-directory: ./flutter_app
+        working-directory: ./stabill
         run: flutter pub get
 
       - name: Build Flutter Web App
-        working-directory: ./flutter_app
+        working-directory: ./stabill
         run: flutter build web
 
       # Optional: Update the base href if needed (see section below)
       #- name: Update base href
-      #  working-directory: ./flutter_app/build/web
+      #  working-directory: ./stabill/build/web
       #  run: sed -i 's|<base href="/">|<base href="/Stabill/">|' index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: flutter_app/build/web
+          publish_dir: stabill/build/web
