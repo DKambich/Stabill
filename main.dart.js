@@ -75363,7 +75363,7 @@ q=A.asC(m.f,A.amo(l,l,l,l,l,l,l,l,!0,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l
 p=A.k6(l,24,l)
 o=k?A.aqg(A.h6("Logout",l,l,l,l,l,l),m.ga43()):A.aqg(A.h6("Login",l,l,l,l,l,l),m.ga42())
 n=A.k6(l,24,l)
-s=A.alE(A.b([s,r,q,p,o,n,k?A.h6("Logged in as "+m.r,l,l,l,l,l,l):A.h6("Not Logged In",l,l,l,l,l,l)],t.d),B.c3,B.cj,B.qX)
+s=A.alE(A.b([s,r,q,p,o,n,k?A.h6("Logged in with email as "+m.r,l,l,l,l,l,l):A.h6("Not Logged In",l,l,l,l,l,l)],t.d),B.c3,B.cj,B.qX)
 return new A.y2(new A.uc(i,j,new A.Pw(l,l,1/0,56),l),new A.vV(s,B.kf,m.d),l)},
 uH(){var s=0,r=A.G(t.H),q=this,p,o,n,m
 var $async$uH=A.B(function(a,b){if(a===1)return A.D(b,r)
