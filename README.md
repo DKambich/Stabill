@@ -12,6 +12,7 @@ TODO: Add Project Description
 - [ ] Implement user sign-up using Supabase Auth
 - [ ] Implement password reset flow using Supabase Auth
 - [ ] Link users to their data in Supabase
+- [ ] Use [Secure Storage](https://pub.dev/packages/supabase_flutter#a-idcustom-localstorageacustom-localstorage) for user sessions
 
 ## 🏦 Accounts
 - [ ] Allow users to create, rename, archive, and delete accounts
