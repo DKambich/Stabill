@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  String _email = "";
+  String _email = Supabase.instance.client.auth.currentUser?.email ?? "";
 
   @override
   Widget build(BuildContext context) {
