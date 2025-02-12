@@ -1,4 +1,4 @@
-name: Deploy Flutter Web to GitHub Pages
+name: Deploy Flutter Web Build of Stabill to GitHub Pages
 
 on:
   push:
@@ -8,6 +8,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      FLUTTER_APP_DIR: ./stabill  # Base working directory for flutter files
 
     steps:
       - name: Checkout Repository
@@ -16,24 +18,18 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable' # Using stable channel for now, can also specify a version with: flutter-version: '3.10.0'
+          channel: 'stable' # Using stable channel for now, can also specify a version if necessary with: flutter-version: '3.10.0'
 
       - name: Install Flutter Dependencies
-        working-directory: ./stabill
+        working-directory: ${{ env.FLUTTER_APP_DIR }}
         run: flutter pub get
 
       - name: Build Flutter Web App
-        working-directory: ./stabill
-        run: flutter build web --base-href /Stabill/
-
-      # Optional: Update the base href if needed (see section below)
-      #- name: Update base href
-      #  working-directory: ./stabill/build/web
-      #  run: sed -i 's|<base href="/">|<base href="/Stabill/">|' index.html
+        working-directory: ${{ env.FLUTTER_APP_DIR }}
+        run: flutter build web --base-href /Stabill/ # Specify the repo name 'Stabill' as the base href for the app, since using GitHub Pages
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./stabill/build/web
-          force_orphan: true
+          publish_dir: ${{ env.FLUTTER_APP_DIR }}/build/web
