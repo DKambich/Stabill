@@ -24,7 +24,7 @@ jobs:
 
       - name: Build Flutter Web App
         working-directory: ./stabill
-        run: flutter build web
+        run: flutter build web --base-href /Stabill/
 
       # Optional: Update the base href if needed (see section below)
       #- name: Update base href
