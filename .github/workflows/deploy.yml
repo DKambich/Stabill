@@ -3,7 +3,7 @@ name: Deploy Flutter Web to GitHub Pages
 on:
   push:
     branches:
-      - main  # or your default branch
+      - main
 
 jobs:
   build-and-deploy:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: 'stable' # Using stable channel for now, can also specify a version with: flutter-version: '3.10.0'
 
       - name: Install Flutter Dependencies
         working-directory: ./stabill
@@ -32,7 +32,8 @@ jobs:
       #  run: sed -i 's|<base href="/">|<base href="/Stabill/">|' index.html
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: stabill/build/web
+          publish_dir: ./public
+          force_orphan: true
