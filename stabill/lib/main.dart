@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:stabill/data/models/app_user.dart';
+import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -19,28 +22,33 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          // This is the theme of your application.
+          //
+          // TRY THIS: Try running your application with "flutter run". You'll see
+          // the application has a purple toolbar. Then, without quitting the app,
+          // try changing the seedColor in the colorScheme below to Colors.green
+          // and then invoke "hot reload" (save your changes or press the "hot
+          // reload" button in a Flutter-supported IDE, or press "r" if you used
+          // the command line to start the app).
+          //
+          // Notice that the counter didn't reset back to zero; the application
+          // state is not lost during the reload. To reset the state, use hot
+          // restart instead.
+          //
+          // This works for code too, not just values: Most code changes can be
+          // tested with just a hot reload.
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
@@ -68,11 +76,11 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  String _email = Supabase.instance.client.auth.currentUser?.email ?? "";
-
   @override
   Widget build(BuildContext context) {
-    var loggedIn = _email != "";
+    AppUser? loggedInUser = context.watch<AuthProvider>().currentUser;
+    bool loggedIn = loggedInUser != null;
+
     return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
@@ -110,8 +118,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
             SizedBox(height: 24),
             loggedIn
-                ? Text("Logged in with email as $_email")
-                : Text("Not Logged In")
+                ? Text("Logged in with email as ${loggedInUser.email}")
+                : Text("Please Login")
           ],
         ),
       ),
@@ -122,19 +130,33 @@ class _MyHomePageState extends State<MyHomePage> {
     if (_formKey.currentState!.validate()) {
       String email = _emailController.text.trim();
       String password = _passwordController.text;
-      var result = await Supabase.instance.client.auth
-          .signInWithPassword(email: email, password: password);
 
-      setState(() {
-        _email = result.user?.email ?? '';
-      });
+      await context.read<AuthProvider>().signIn(email, password);
+
+      if (!mounted) return;
+
+      final isLoggedIn = context.read<AuthProvider>().isLoggedIn;
+
+      if (isLoggedIn) {
+        // TODO: Navigate to home page
+        print("Logged In User: ${context.read<AuthProvider>().currentUser}");
+      } else {
+        // TODO: Show an error
+      }
     }
   }
 
   void _logout() async {
-    await Supabase.instance.client.auth.signOut();
-    setState(() {
-      _email = '';
-    });
+    await context.read<AuthProvider>().signOut();
+
+    if (!mounted) return;
+
+    final isLoggedOut = !context.read<AuthProvider>().isLoggedIn;
+
+    if (isLoggedOut) {
+      // TODO: Navigate to sign in page
+    } else {
+      // TODO: Show an error
+    }
   }
 }
