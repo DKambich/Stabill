@@ -9,10 +9,10 @@ class AppUser {
     required this.email,
   });
 
-  factory AppUser.fromSupabaseUser(User? user) {
+  factory AppUser.fromSupabaseUser(User user) {
     return AppUser(
-      id: user?.id ?? '',
-      email: user?.email ?? '',
+      id: user.id,
+      email: user.email ?? '',
     );
   }
 }

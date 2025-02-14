@@ -131,7 +131,13 @@ class _MyHomePageState extends State<MyHomePage> {
       String email = _emailController.text.trim();
       String password = _passwordController.text;
 
-      await context.read<AuthProvider>().signIn(email, password);
+      try {
+        await context.read<AuthProvider>().signIn(email, password);
+      } catch (error) {
+        // Show an error
+        print("Login Failed");
+        return;
+      }
 
       if (!mounted) return;
 

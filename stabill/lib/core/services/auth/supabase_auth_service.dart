@@ -10,8 +10,9 @@ class SupabaseAuthService implements AbstractAuthService {
       _supabase.auth.onAuthStateChange.map((event) => event);
 
   @override
-  AppUser? get currentUser =>
-      AppUser.fromSupabaseUser(_supabase.auth.currentUser);
+  AppUser? get currentUser => _supabase.auth.currentUser != null
+      ? AppUser.fromSupabaseUser(_supabase.auth.currentUser!)
+      : null;
 
   @override
   Future<void> resetPassword(String email) async {
