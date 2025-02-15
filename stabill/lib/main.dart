@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/config/router.dart';
 import 'package:stabill/providers/auth_provider.dart';
-import 'package:stabill/ui/pages/auth/sign_in_page.dart';
 import 'package:stabill/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -26,7 +26,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
+        routerConfig: goRouter,
         title: 'Flutter Demo',
         theme: ThemeData(
           // This is the theme of your application.
@@ -47,7 +48,6 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const SignInPage(),
       ),
     );
   }
