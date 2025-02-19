@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/data/models/app_user.dart';
 import 'package:stabill/providers/auth_provider.dart';
@@ -40,23 +43,21 @@ class _SignInPageState extends State<SignInPage> {
               controller: _emailController,
               decoration: InputDecoration(labelText: 'Email'),
               keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
             ),
             SizedBox(height: 16),
             TextFormField(
               controller: _passwordController,
               decoration: InputDecoration(labelText: 'Password'),
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _login(),
               obscureText: true,
             ),
             SizedBox(height: 24),
-            loggedIn
-                ? ElevatedButton(
-                    onPressed: _logout,
-                    child: Text('Logout'),
-                  )
-                : ElevatedButton(
-                    onPressed: _login,
-                    child: Text('Login'),
-                  ),
+            ElevatedButton(
+              onPressed: _login,
+              child: Text('Login'),
+            ),
             SizedBox(height: 24),
             loggedIn
                 ? Text("Logged in with email as ${loggedInUser.email}")
@@ -65,6 +66,15 @@ class _SignInPageState extends State<SignInPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is removed from the widget tree.
+    // This also removes the _printLatestValue listener.
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   void _login() async {
@@ -76,7 +86,7 @@ class _SignInPageState extends State<SignInPage> {
         await context.read<AuthProvider>().signIn(email, password);
       } catch (error) {
         // Show an error
-        print("Login Failed");
+        log("Login Failed");
         return;
       }
 
@@ -85,25 +95,11 @@ class _SignInPageState extends State<SignInPage> {
       final isLoggedIn = context.read<AuthProvider>().isLoggedIn;
 
       if (isLoggedIn) {
-        // TODO: Navigate to home page
-        print("Logged In User: ${context.read<AuthProvider>().currentUser}");
+        log("Logged In User: ${context.read<AuthProvider>().currentUser}");
+        context.go('/');
       } else {
         // TODO: Show an error
       }
-    }
-  }
-
-  void _logout() async {
-    await context.read<AuthProvider>().signOut();
-
-    if (!mounted) return;
-
-    final isLoggedOut = !context.read<AuthProvider>().isLoggedIn;
-
-    if (isLoggedOut) {
-      // TODO: Navigate to sign in page
-    } else {
-      // TODO: Show an error
     }
   }
 }
