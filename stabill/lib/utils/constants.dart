@@ -1,3 +1,8 @@
+class Environment {
+  static const bool useAuthMock =
+      bool.fromEnvironment('USE_AUTH_MOCK', defaultValue: false);
+}
+
 class SupabaseConfig {
   static const String supabaseUrl = 'https://vyuqaamvpzcuyawldpcz.supabase.co';
   static const String anonKey =
