@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/config/router.dart';
+import 'package:stabill/core/services/navigation/navigation_service.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,21 +14,28 @@ void main() async {
     anonKey: SupabaseConfig.anonKey,
   );
 
-  runApp(const MyApp());
+  runApp(const Stabill());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Stabill extends StatefulWidget {
+  const Stabill({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<Stabill> createState() => _StabillState();
+}
+
+class _StabillState extends State<Stabill> {
+  late final NavigationService _navigationService = NavigationService(router);
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        Provider<NavigationService>.value(value: _navigationService),
       ],
       child: MaterialApp.router(
-        routerConfig: goRouter,
+        routerConfig: _navigationService.router,
         title: 'Flutter Demo',
         theme: ThemeData(
           // This is the theme of your application.
@@ -50,5 +58,13 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void initialize() {}
+
+  @override
+  void initState() {
+    super.initState();
+    initialize();
   }
 }

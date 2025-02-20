@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stabill/config/router.dart';
 
@@ -5,6 +6,8 @@ class NavigationService {
   final GoRouter _router;
 
   NavigationService(this._router);
+
+  RouterConfig<RouteMatchList> get router => _router;
 
   Future<void> navigateToAccount(String accountId) async =>
       _router.go(Routes.accountRoute(accountId));
