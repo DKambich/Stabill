@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/core/services/navigation/navigation_service.dart';
 import 'package:stabill/providers/auth_provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     final isLoggedOut = !context.read<AuthProvider>().isLoggedIn;
 
     if (isLoggedOut) {
-      context.go('/sign-in');
+      context.read<NavigationService>().navigateToSignIn();
     } else {
       // TODO: Show an error
     }

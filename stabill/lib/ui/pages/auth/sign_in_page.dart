@@ -1,8 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/core/services/navigation/navigation_service.dart';
 import 'package:stabill/data/models/app_user.dart';
 import 'package:stabill/providers/auth_provider.dart';
 
@@ -58,10 +58,6 @@ class _SignInPageState extends State<SignInPage> {
               onPressed: _login,
               child: Text('Login'),
             ),
-            SizedBox(height: 24),
-            loggedIn
-                ? Text("Logged in with email as ${loggedInUser.email}")
-                : Text("Please Login")
           ],
         ),
       ),
@@ -96,7 +92,7 @@ class _SignInPageState extends State<SignInPage> {
 
       if (isLoggedIn) {
         log("Logged In User: ${context.read<AuthProvider>().currentUser}");
-        context.go('/');
+        context.read<NavigationService>().navigateToHome();
       } else {
         // TODO: Show an error
       }
