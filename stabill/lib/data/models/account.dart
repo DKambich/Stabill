@@ -1,9 +1,21 @@
+/// Represents a user's financial account.
 class Account {
+  /// Unique identifier for the account.
   final String id;
+
+  /// The name of the account.
   final String name;
+
+  /// The current balance, including both cleared and pending transactions (stored in cents).
   final int currentBalance;
+
+  /// The available balance, excluding pending transactions (stored in cents).
   final int availableBalance;
+
+  /// The timestamp when the account was created.
   final DateTime createdAt;
+
+  /// Indicates whether the account is archived (inactive).
   final bool archived;
 
   Account({
@@ -15,6 +27,7 @@ class Account {
     required this.archived,
   });
 
+  /// Creates an [Account] from a JSON object.
   factory Account.fromJson(Map<String, dynamic> json) {
     return Account(
       id: json['id'] as String,
@@ -26,6 +39,7 @@ class Account {
     );
   }
 
+  /// Converts the [Account] instance to a JSON object.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -37,12 +51,13 @@ class Account {
     };
   }
 
+  /// Returns a string representation of the [Account] instance.
   @override
   String toString() {
     return 'Account('
         'id: $id, '
         'name: $name, '
-        'currentBalance: ${currentBalance / 100}, ' // Assuming balance is stored in cents
+        'currentBalance: ${currentBalance / 100}, '
         'availableBalance: ${availableBalance / 100}, '
         'createdAt: ${createdAt.toIso8601String()}, '
         'archived: $archived'
