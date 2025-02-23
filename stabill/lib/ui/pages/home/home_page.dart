@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/core/services/account/account_service.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
-import 'package:stabill/data/repository/database_repository.dart';
 import 'package:stabill/providers/auth_provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -46,9 +46,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _createAccount() async {
-    var account =
-        await DatabaseRepository.instance.createAccount("Account Name", 12345);
-    log(account.toString());
+    var result = await context
+        .read<AccountService>()
+        .createAccount("Account Name", 12345);
+    if (result.isSuccess) {
+      var account = result.data!;
+      log(account.toString());
+    }
   }
 
   void _logout() async {

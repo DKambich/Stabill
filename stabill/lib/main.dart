@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/config/router.dart';
+import 'package:stabill/core/services/account/account_service.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
+import 'package:stabill/data/repository/database_repository.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -35,6 +37,9 @@ class _StabillState extends State<Stabill> {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         Provider<NavigationService>.value(value: _navigationService),
+        Provider<AccountService>(
+          create: (_) => AccountService(DatabaseRepository.instance),
+        ),
       ],
       child: MaterialApp.router(
         routerConfig: _navigationService.router,
