@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
-import 'package:stabill/data/models/app_user.dart';
 import 'package:stabill/providers/auth_provider.dart';
 
 class SignInPage extends StatefulWidget {
@@ -22,9 +21,6 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    AppUser? loggedInUser = context.watch<AuthProvider>().currentUser;
-    bool loggedIn = loggedInUser != null;
-
     return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
