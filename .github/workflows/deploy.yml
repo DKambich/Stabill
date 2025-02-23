@@ -28,6 +28,10 @@ jobs:
         working-directory: ${{ env.FLUTTER_APP_DIR }}
         run: flutter build web --base-href /Stabill/ # Specify the repo name 'Stabill' as the base href for the app, since using GitHub Pages
 
+      - name: Fix Routing for GitHub Pages
+        working-directory: ${{ env.FLUTTER_APP_DIR }}/build/web
+        run: cp index.html 404.html  # Ensures deep links work
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
