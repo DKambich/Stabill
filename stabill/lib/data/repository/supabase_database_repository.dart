@@ -44,7 +44,7 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<Account> getAccount() {
+  Future<Account> getAccount(String accountId) {
     // TODO: implement getAccount
     throw UnimplementedError();
   }
