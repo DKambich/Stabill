@@ -22,7 +22,7 @@ class Account {
       currentBalance: json['current_balance'] as int,
       availableBalance: json['available_balance'] as int,
       createdAt: DateTime.parse(json['created_at'] as String),
-      archived: json['archived'] as bool,
+      archived: json['is_archived'] as bool,
     );
   }
 
@@ -35,5 +35,17 @@ class Account {
       'created_at': createdAt.toIso8601String(),
       'archived': archived,
     };
+  }
+
+  @override
+  String toString() {
+    return 'Account('
+        'id: $id, '
+        'name: $name, '
+        'currentBalance: ${currentBalance / 100}, ' // Assuming balance is stored in cents
+        'availableBalance: ${availableBalance / 100}, '
+        'createdAt: ${createdAt.toIso8601String()}, '
+        'archived: $archived'
+        ')';
   }
 }

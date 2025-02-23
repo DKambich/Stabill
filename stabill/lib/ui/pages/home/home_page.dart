@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
+import 'package:stabill/data/repository/database_repository.dart';
 import 'package:stabill/providers/auth_provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,11 +29,26 @@ class _HomePageState extends State<HomePage> {
           title: Text("Home Page"),
         ),
         body: Center(
-          child: ElevatedButton(
-            onPressed: _logout,
-            child: Text('Logout'),
+          child: Column(
+            spacing: 24,
+            children: [
+              ElevatedButton(
+                onPressed: _logout,
+                child: Text('Logout'),
+              ),
+              ElevatedButton(
+                onPressed: _createAccount,
+                child: Text('Create Account'),
+              )
+            ],
           ),
         ));
+  }
+
+  void _createAccount() async {
+    var account =
+        await DatabaseRepository.instance.createAccount("Account Name", 12345);
+    log(account.toString());
   }
 
   void _logout() async {
