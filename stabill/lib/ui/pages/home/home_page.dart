@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/core/classes/result.dart';
 import 'package:stabill/core/services/account/account_service.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
 import 'package:stabill/providers/auth_provider.dart';
@@ -46,12 +47,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _createAccount() async {
-    var result = await context
+    var Result(:data) = await context
         .read<AccountService>()
         .createAccount("Account Name", 12345);
-    if (result.isSuccess) {
-      var account = result.data!;
-      log(account.toString());
+
+    if (data != null) {
+      log(data.toString());
     }
   }
 
