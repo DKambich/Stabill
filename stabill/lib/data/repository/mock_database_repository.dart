@@ -38,7 +38,7 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<List<Account>> getAccounts() async {
-    return [..._accounts];
+  Stream<List<Account>> getAccountsStream() {
+    return Stream.value([..._accounts]);
   }
 }

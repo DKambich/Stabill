@@ -44,9 +44,17 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<List<Account>> getAccounts() {
-    // TODO: implement getAccounts
-    throw UnimplementedError();
+  Stream<List<Account>> getAccountsStream() {
+    return _supabase
+        .from("accounts")
+        .stream(primaryKey: ['id'])
+        .eq('user_id', _getUserId())
+        .asBroadcastStream()
+        .map(
+          (accountJsonList) => accountJsonList
+              .map((accountJson) => Account.fromJson(accountJson))
+              .toList(),
+        );
   }
 
   String _getUserId() {
