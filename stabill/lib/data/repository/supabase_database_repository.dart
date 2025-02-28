@@ -45,15 +45,13 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
 
   @override
   Stream<List<Account>> getAccountsStream() {
+    // TODO: On web, this is giving DartError: TypeError: Instance of 'JSArray<dynamic>': type 'List<dynamic>' is not a subtype of type 'List<Map<String, dynamic>>'
     return _supabase
         .from("accounts")
         .stream(primaryKey: ['id'])
         .eq('user_id', _getUserId())
-        .asBroadcastStream()
         .map(
-          (accountJsonList) => accountJsonList
-              .map((accountJson) => Account.fromJson(accountJson))
-              .toList(),
+          (accountRecords) => accountRecords.map(Account.fromJson).toList(),
         );
   }
 
