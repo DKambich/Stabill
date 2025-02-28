@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stabill/core/classes/result.dart';
 import 'package:stabill/data/models/account.dart';
+import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/repository/abstract_database_repository.dart';
 
 /// A service responsible for managing user accounts.
 class AccountService {
   final AbstractDatabaseRepository _databaseRepository;
+  late final Stream<List<Account>> _sharedAccountsStream;
 
-  AccountService(this._databaseRepository);
+  AccountService(this._databaseRepository) {
+    _sharedAccountsStream =
+        _databaseRepository.getAccountsStream().shareReplay(maxSize: 1);
+  }
 
   /// Creates a new account with the given [accountName] and [startingBalance].
   ///
@@ -59,13 +65,28 @@ class AccountService {
   ///
   /// Returns a [Result] containing a list of [Account] objects on success,
   /// or an error if the operation fails.
-  Future<Result<List<Account>>> getAccounts() async {
-    try {
-      var account = await _databaseRepository.getAccounts();
-      return Result.success(account);
-    } catch (error, stackTrace) {
-      debugPrint("getAccounts() failed: $error\n$stackTrace");
-      return Result.failure(error);
-    }
+  Stream<List<Account>> getAccounts() => _sharedAccountsStream;
+
+  Stream<Balance> getTotalBalance() {
+    return _sharedAccountsStream
+        .map(
+          (accounts) => Balance(
+            current: accounts.fold(
+              0,
+              (currentBalance, account) =>
+                  currentBalance + account.balance.current,
+            ),
+            available: accounts.fold(
+              0,
+              (availableBalance, account) =>
+                  availableBalance + account.balance.available,
+            ),
+          ),
+        )
+        .distinct(
+          (previous, next) =>
+              previous.current == next.current &&
+              previous.available == next.available,
+        );
   }
 }
