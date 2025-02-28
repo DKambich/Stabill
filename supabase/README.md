@@ -20,7 +20,7 @@ Stores user-created accounts with their respective balances.
 - `created_at` (timestamp with time zone) - The time and date in UTC that the account was created at
 - `current_balance` (integer) - The current balance (includes cleared and pending transactions) of the account in cents.
 - `available_balance` (integer) - The available balance (only includes cleared transactions) of the account in cents.
-- `archived` (boolean) - Whether the account is archived
+- `is_archived` (boolean) - Whether the account is archived
 
 #### RLS Policies
 
