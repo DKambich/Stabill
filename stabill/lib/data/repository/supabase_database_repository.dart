@@ -4,6 +4,7 @@ import 'package:stabill/core/services/auth/abstract_auth_service.dart';
 import 'package:stabill/core/services/auth/auth_service.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/stored_procedures/create_account_procedure.dart';
+import 'package:stabill/data/tables/accounts_table.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'abstract_database_repository.dart';
@@ -47,9 +48,9 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   Stream<List<Account>> getAccountsStream() {
     // TODO: On web, this is giving DartError: TypeError: Instance of 'JSArray<dynamic>': type 'List<dynamic>' is not a subtype of type 'List<Map<String, dynamic>>'
     return _supabase
-        .from("accounts")
-        .stream(primaryKey: ['id'])
-        .eq('user_id', _getUserId())
+        .from(AccountsTable.tableName)
+        .stream(primaryKey: [AccountsTable.id])
+        .eq(AccountsTable.userId, _getUserId())
         .map(
           (accountRecords) => accountRecords.map(Account.fromJson).toList(),
         );
