@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/providers/auth_provider.dart';
+import 'package:stabill/ui/pages/accounts/accounts_page.dart';
 import 'package:stabill/ui/pages/auth/sign_in_page.dart';
 import 'package:stabill/ui/pages/home/home_page.dart';
 
@@ -21,6 +23,10 @@ final router = GoRouter(
     GoRoute(
       path: Routes.signIn,
       builder: (context, state) => SignInPage(),
+    ),
+    GoRoute(
+      path: Routes.accounts,
+      builder: (context, state) => AccountsPage(),
     ),
   ],
 );
@@ -50,4 +56,8 @@ class Routes {
 
   static String transactionRoute(String accountId, String transactionId) =>
       '${accountRoute(accountId)}${RoutePatterns.transaction.replaceAll(RoutePatterns.transactionToken, transactionId)}';
+}
+
+extension GoRouteExtension on GoRouter {
+  navigate<T>(String route) => kIsWeb ? go(route) : push(route);
 }

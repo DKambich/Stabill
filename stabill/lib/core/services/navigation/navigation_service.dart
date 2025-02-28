@@ -10,13 +10,16 @@ class NavigationService {
   RouterConfig<RouteMatchList> get router => _router;
 
   Future<void> navigateToAccount(String accountId) async =>
-      _router.go(Routes.accountRoute(accountId));
+      _router.navigate(Routes.accountRoute(accountId));
 
-  Future<void> navigateToHome() async => _router.go(Routes.home);
+  // TODO: Decide whether to use push or go
+  Future<void> navigateToAccounts() async => _router.navigate(Routes.accounts);
 
-  Future<void> navigateToSignIn() async => _router.go(Routes.signIn);
+  Future<void> navigateToHome() async => _router.navigate(Routes.home);
+
+  Future<void> navigateToSignIn() async => _router.navigate(Routes.signIn);
 
   Future<void> navigateToTransaction(
           String accountId, String transactionId) async =>
-      _router.go(Routes.transactionRoute(accountId, transactionId));
+      _router.navigate(Routes.transactionRoute(accountId, transactionId));
 }

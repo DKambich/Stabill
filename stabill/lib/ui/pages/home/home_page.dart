@@ -50,6 +50,10 @@ class _HomePageState extends State<HomePage> {
                 onPressed: _listenToTotalBalance,
                 child: Text('Listen to Balance'),
               ),
+              ElevatedButton(
+                onPressed: _goToAccounts,
+                child: Text('Go To Accounts'),
+              ),
               StreamBuilder(
                 stream: totalBalanceStream,
                 builder: (context, snapshot) {
@@ -91,6 +95,10 @@ class _HomePageState extends State<HomePage> {
     if (data != null) {
       log(data.toString());
     }
+  }
+
+  _goToAccounts() {
+    context.read<NavigationService>().navigateToAccounts();
   }
 
   void _listenToTotalBalance() {
