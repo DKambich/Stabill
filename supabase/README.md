@@ -29,6 +29,12 @@ Stores user-created accounts with their respective balances.
 - UPDATE: Enable users to update accounts based on the incoming authenticated user id matching the user_id on the updated account
 - DELETE: Enable users to delete accounts based on the incoming authenticated user id matching the user_id on the deleted account
 
+
+#### Notes
+
+- This table is realtime for updates and deletes so `alter table
+  accounts replica identity full` was run to allow that
+
 ## Stored Procedures
 
 ### **create_account**
@@ -49,7 +55,6 @@ The record of the created account
 
 - Raises an exception if the account name is null or empty
 - Raises an exception if the starting balance is less than 0
-
 
 # To Be Implemented
 
