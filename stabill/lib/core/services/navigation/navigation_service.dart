@@ -9,10 +9,17 @@ class NavigationService {
 
   RouterConfig<RouteMatchList> get router => _router;
 
+  Future<void> navigateBack({String fallbackRoute = Routes.home}) async {
+    if (_router.canPop()) {
+      _router.pop();
+    } else {
+      _router.go(fallbackRoute);
+    }
+  }
+
   Future<void> navigateToAccount(String accountId) async =>
       _router.navigate(Routes.accountRoute(accountId));
 
-  // TODO: Decide whether to use push or go
   Future<void> navigateToAccounts() async => _router.navigate(Routes.accounts);
 
   Future<void> navigateToHome() async => _router.navigate(Routes.home);
