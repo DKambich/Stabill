@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +44,15 @@ class _StabillState extends State<Stabill> {
         ),
       ],
       child: MaterialApp.router(
+        // TODO: Decide if this should be scoped or not
+        scrollBehavior: MaterialScrollBehavior().copyWith(
+          dragDevices: {
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.touch,
+            PointerDeviceKind.stylus,
+            PointerDeviceKind.unknown
+          },
+        ),
         routerConfig: _navigationService.router,
         title: 'Flutter Demo',
         theme: ThemeData(
@@ -60,7 +71,10 @@ class _StabillState extends State<Stabill> {
           //
           // This works for code too, not just values: Most code changes can be
           // tested with just a hot reload.
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.green,
+            brightness: Brightness.light,
+          ),
           useMaterial3: true,
         ),
       ),
