@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -144,7 +146,7 @@ class _AccountsPageState extends State<AccountsPage> {
       ),
       floatingActionButton: showActions
           ? FloatingActionButton(
-              onPressed: () {},
+              onPressed: _addAccount,
               elevation: 1,
               child: Icon(Icons.add),
             )
@@ -195,11 +197,17 @@ class _AccountsPageState extends State<AccountsPage> {
     _controller.addListener(_onScroll);
   }
 
+  void _addAccount() {
+    context.read<AccountService>().createAccount(
+          "Account #${Random().nextInt(1000)}",
+          Random().nextInt(1000000),
+        );
+  }
+
   void _onScroll() {
     var showActions = switch (_controller.position.userScrollDirection) {
       == ScrollDirection.forward => true,
       == ScrollDirection.reverse => false,
-      == ScrollDirection.idle => true
       _ => null
     };
 
