@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/config/router.dart';
 import 'package:stabill/core/services/account/account_service.dart';
@@ -20,12 +21,16 @@ class _AccountsPageState extends State<AccountsPage> {
   late Stream<List<Account>> accountStream;
   late AutoSizeGroup textGroup = AutoSizeGroup();
 
+  final ScrollController _controller = ScrollController();
+
+  bool showActions = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
+        controller: _controller,
         slivers: [
-          // SliverAppBar replaces the NestedScrollView header
           SliverAppBar(
             title: const Text('Accounts'),
             leading: AdaptiveBackButton(
@@ -137,12 +142,47 @@ class _AccountsPageState extends State<AccountsPage> {
               }),
         ],
       ),
+      floatingActionButton: showActions
+          ? FloatingActionButton(
+              onPressed: () {},
+              elevation: 1,
+              child: Icon(Icons.add),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
+      bottomNavigationBar: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: showActions
+            ? kBottomNavigationBarHeight +
+                kFloatingActionButtonMargin // TODO: Decide if this is the correct height
+            : 0,
+        child: BottomAppBar(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          elevation: 45,
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.schedule),
+                tooltip: "Schedule Transactions",
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.swap_horiz),
+                tooltip: "Transfer Funds",
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   @override
   void dispose() {
     super.dispose();
+    _controller.removeListener(_onScroll);
+    _controller.dispose();
   }
 
   @override
@@ -151,5 +191,22 @@ class _AccountsPageState extends State<AccountsPage> {
     var accountService = context.read<AccountService>();
     balanceStream = accountService.getTotalBalance();
     accountStream = accountService.getAccounts();
+
+    _controller.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    var showActions = switch (_controller.position.userScrollDirection) {
+      == ScrollDirection.forward => true,
+      == ScrollDirection.reverse => false,
+      == ScrollDirection.idle => true
+      _ => null
+    };
+
+    if (showActions != null) {
+      setState(() {
+        this.showActions = showActions;
+      });
+    }
   }
 }

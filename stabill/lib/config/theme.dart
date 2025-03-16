@@ -10,4 +10,8 @@ var themeLight = ThemeData.from(colorScheme: colorSchemeLight).copyWith(
     backgroundColor: colorSchemeLight.secondaryContainer,
     shadowColor: colorSchemeLight.shadow,
   ),
+  bottomAppBarTheme: BottomAppBarTheme(
+    color: colorSchemeLight.tertiaryContainer,
+    shadowColor: colorSchemeLight.shadow,
+  ),
 );
