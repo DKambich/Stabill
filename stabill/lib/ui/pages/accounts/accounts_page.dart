@@ -27,9 +27,6 @@ class _AccountsPageState extends State<AccountsPage> {
         slivers: [
           // SliverAppBar replaces the NestedScrollView header
           SliverAppBar(
-            scrolledUnderElevation: 3,
-            shadowColor: Theme.of(context).colorScheme.shadow,
-            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
             title: const Text('Accounts'),
             leading: AdaptiveBackButton(
               fallbackRoute: Routes.home,
@@ -49,6 +46,10 @@ class _AccountsPageState extends State<AccountsPage> {
                 child: StreamBuilder<Balance>(
                   stream: balanceStream,
                   builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Text("Loading");
+                    }
+
                     if (snapshot.hasError) {
                       return Column(
                         children: [
