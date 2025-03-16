@@ -4,6 +4,7 @@ import 'package:stabill/core/classes/result.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/repository/abstract_database_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// A service responsible for managing user accounts.
 class AccountService {
@@ -11,8 +12,9 @@ class AccountService {
   late final Stream<List<Account>> _sharedAccountsStream;
 
   AccountService(this._databaseRepository) {
-    _sharedAccountsStream =
-        _databaseRepository.getAccountsStream().shareReplay(maxSize: 1);
+    _sharedAccountsStream = _getRetryStream(
+      _databaseRepository.getAccountsStream(),
+    );
   }
 
   /// Creates a new account with the given [accountName] and [startingBalance].
@@ -88,5 +90,24 @@ class AccountService {
               previous.current == next.current &&
               previous.available == next.available,
         );
+  }
+
+  Stream<T> _getRetryStream<T>(
+    Stream<T> stream, {
+    Duration retryDelay = const Duration(seconds: 2),
+  }) {
+    return Rx.retryWhen(
+      () => stream,
+      (error, stackTrace) {
+        if (error is RealtimeSubscribeException) {
+          var status = error.status;
+          if (status == RealtimeSubscribeStatus.channelError ||
+              status == RealtimeSubscribeStatus.timedOut) {
+            return Stream.value(null).delay(retryDelay);
+          }
+        }
+        return Stream.error(error, stackTrace);
+      },
+    ).shareReplay(maxSize: 1);
   }
 }
