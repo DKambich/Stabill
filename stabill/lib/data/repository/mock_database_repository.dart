@@ -16,7 +16,7 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
       name: accountName,
       balance: Balance(current: startingBalance, available: startingBalance),
       createdAt: DateTime.now(),
-      archived: false,
+      isArchived: false,
     );
 
     // TODO: Add a related transaction to the list of transactions
