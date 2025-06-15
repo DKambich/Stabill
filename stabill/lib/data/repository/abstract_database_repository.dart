@@ -4,5 +4,5 @@ abstract class AbstractDatabaseRepository {
   Future<Account> createAccount(String accountName, int startingBalance);
   Future<void> deleteAccount(String accountId);
   Future<Account> getAccount(String accountId);
-  Future<List<Account>> getAccounts();
+  Stream<List<Account>> getAccountsStream();
 }

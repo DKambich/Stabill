@@ -1,3 +1,5 @@
+import 'package:stabill/data/models/balance.dart';
+
 /// Represents a user's financial account.
 class Account {
   /// Unique identifier for the account.
@@ -7,10 +9,7 @@ class Account {
   final String name;
 
   /// The current balance, including both cleared and pending transactions (stored in cents).
-  final int currentBalance;
-
-  /// The available balance, excluding pending transactions (stored in cents).
-  final int availableBalance;
+  final Balance balance;
 
   /// The timestamp when the account was created.
   final DateTime createdAt;
@@ -21,8 +20,7 @@ class Account {
   Account({
     required this.id,
     required this.name,
-    required this.currentBalance,
-    required this.availableBalance,
+    required this.balance,
     required this.createdAt,
     required this.archived,
   });
@@ -32,8 +30,10 @@ class Account {
     return Account(
       id: json['id'] as String,
       name: json['name'] as String,
-      currentBalance: json['current_balance'] as int,
-      availableBalance: json['available_balance'] as int,
+      balance: Balance(
+        current: (json['current_balance'] as num).toInt(),
+        available: (json['available_balance'] as num).toInt(),
+      ),
       createdAt: DateTime.parse(json['created_at'] as String),
       archived: json['is_archived'] as bool,
     );
@@ -44,8 +44,8 @@ class Account {
     return {
       'id': id,
       'name': name,
-      'current_balance': currentBalance,
-      'available_balance': availableBalance,
+      'current_balance': balance.current,
+      'available_balance': balance.available,
       'created_at': createdAt.toIso8601String(),
       'archived': archived,
     };
@@ -54,13 +54,6 @@ class Account {
   /// Returns a string representation of the [Account] instance.
   @override
   String toString() {
-    return 'Account('
-        'id: $id, '
-        'name: $name, '
-        'currentBalance: ${currentBalance / 100}, '
-        'availableBalance: ${availableBalance / 100}, '
-        'createdAt: ${createdAt.toIso8601String()}, '
-        'archived: $archived'
-        ')';
+    return 'Account(id: $id, name: $name, balance: ${balance.toString()}, createdAt: ${createdAt.toIso8601String()}, archived: $archived)';
   }
 }

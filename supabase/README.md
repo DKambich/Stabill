@@ -1,6 +1,6 @@
 # Database Implementation Overview
 
-This document provides a summary of the database schema, stored procedures, triggers, and edge functions (that will be) implemented for Stabill.
+This document provides a summary of the database schema, RLS (row-level security) policies, stored procedures, triggers, and edge functions haven been (and will be) implemented for Stabill.
 
 ## Tables
 
@@ -12,13 +12,56 @@ Stores user authentication and identity information using Supabase's built-in au
 
 Stores user-created accounts with their respective balances.
 
-- `id` (UUID, Primary Key)
-- `user_id` (UUID, Foreign Key -> Users)
-- `name` (TEXT)
-- `created_at` (TIMESTAMP)
-- `current_balance` (BIGINT) - Stores the sum of cleared transactions.
-- `available_balance` (BIGINT) - Stores the sum of all transactions, including pending.
-- `archived` (BOOLEAN)
+#### Columns
+
+- `id` (uuid, Primary Key)
+- `user_id` (uuid, Foreign Key -> Users) - The linked user that owns the account
+- `name` (text) - The name of the account
+- `created_at` (timestamp with time zone) - The time and date in UTC that the account was created at
+- `current_balance` (integer) - The current balance (includes cleared and pending transactions) of the account in cents.
+- `available_balance` (integer) - The available balance (only includes cleared transactions) of the account in cents.
+- `is_archived` (boolean) - Whether the account is archived
+
+#### RLS Policies
+
+- SELECT: Enable users to select accounts based on the incoming authenticated user id matching the user_id on the selected account
+- INSERT: Enable users to insert accounts based on the incoming authenticated user id matching the user_id on the inserted account
+- UPDATE: Enable users to update accounts based on the incoming authenticated user id matching the user_id on the updated account
+- DELETE: Enable users to delete accounts based on the incoming authenticated user id matching the user_id on the deleted account
+
+
+#### Notes
+
+- This table is realtime for updates and deletes so `alter table
+  accounts replica identity full` was run to allow that
+
+## Stored Procedures
+
+### **create_account**
+
+Creates an account for the user based on the inputted account name and starting balance. If starting balance is greater than zero, it creates a cleared transaction to apply the starting balance to both the `current_balance` and `available_balance` of the created account.
+
+#### Parameters
+
+- `p_user_id` (uuid, Foreign Key -> Users) - The user id of the user that owns the account
+- `p_account_name` (text) - The name of the account
+- `p_starting_balance` (integer) - The starting balance of the account
+
+#### Outputs
+
+The record of the created account
+
+#### Exceptions
+
+- Raises an exception if the account name is null or empty
+- Raises an exception if the starting balance is less than 0
+
+# To Be Implemented
+
+## Tables
+
+### **Accounts**
+
 - `order_index` (INTEGER) - Custom ordering for UI.
 
 ### **Transactions**
@@ -150,6 +193,3 @@ CREATE INDEX idx_scheduled_transactions_date ON scheduled_transactions (next_app
 - **Balances**: Atomic updates to account balances with triggers.
 - **Realtime Updates**: Transactions and account balances update dynamically.
 - **Bulk Import/Export**: Supports CSV-based transaction management.
-
-This document provides an overview of the Supabase schema and logic. Let me know if any modifications are needed!
-
