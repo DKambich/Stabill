@@ -6,20 +6,20 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/config/router.dart';
 import 'package:stabill/core/services/account/account_service.dart';
-import 'package:stabill/core/services/navigation/navigation_service.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/ui/widgets/balance_text.dart';
 import 'package:stabill/ui/widgets/fallback_back_button.dart';
 
-class AccountsPage extends StatefulWidget {
-  const AccountsPage({super.key});
+class AccountPage extends StatefulWidget {
+  final String accountId;
+  const AccountPage({super.key, required, required this.accountId});
 
   @override
-  State<AccountsPage> createState() => _AccountsPageState();
+  State<AccountPage> createState() => _AccountPageState();
 }
 
-class _AccountsPageState extends State<AccountsPage> {
+class _AccountPageState extends State<AccountPage> {
   late Stream<Balance> balanceStream;
   late Stream<List<Account>> accountStream;
   late AutoSizeGroup textGroup = AutoSizeGroup();
@@ -35,9 +35,9 @@ class _AccountsPageState extends State<AccountsPage> {
         controller: _controller,
         slivers: [
           SliverAppBar(
-            title: const Text('Accounts'),
+            title: const Text('Account'),
             leading: AdaptiveBackButton(
-              fallbackRoute: Routes.home,
+              fallbackRoute: Routes.accounts,
             ),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(
@@ -130,15 +130,12 @@ class _AccountsPageState extends State<AccountsPage> {
                     (context, index) {
                       var account = accounts[index];
 
-                      return GestureDetector(
-                        onTap: () => _goToAccount(account.id),
-                        child: Card(
-                          margin: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: ListTile(
-                            leading: CircleAvatar(child: Text('${index + 1}')),
-                            title: Text(account.name),
-                            subtitle: Text(account.balance.toString()),
-                          ),
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: ListTile(
+                          leading: CircleAvatar(child: Text('${index + 1}')),
+                          title: Text(account.name),
+                          subtitle: Text(account.balance.toString()),
                         ),
                       );
                     },
@@ -206,10 +203,6 @@ class _AccountsPageState extends State<AccountsPage> {
           "Account #${Random().nextInt(1000)}",
           Random().nextInt(1000000),
         );
-  }
-
-  void _goToAccount(String accountId) {
-    context.read<NavigationService>().navigateToAccount(accountId);
   }
 
   void _onScroll() {

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/providers/auth_provider.dart';
+import 'package:stabill/ui/pages/account/account_page.dart';
 import 'package:stabill/ui/pages/accounts/accounts_page.dart';
 import 'package:stabill/ui/pages/auth/sign_in_page.dart';
 import 'package:stabill/ui/pages/home/home_page.dart';
@@ -28,6 +29,12 @@ final router = GoRouter(
       path: Routes.accounts,
       builder: (context, state) => AccountsPage(),
     ),
+    GoRoute(
+      path: RoutePatterns.account,
+      builder: (context, state) => AccountPage(
+        accountId: state.pathParameters[RoutePatterns.accountToken] ?? '',
+      ),
+    )
   ],
 );
 
