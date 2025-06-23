@@ -26,8 +26,10 @@ class AccountService {
     int startingBalance,
   ) async {
     try {
-      var account =
-          await _databaseRepository.createAccount(accountName, startingBalance);
+      var account = await _databaseRepository.createAccount(
+        accountName: accountName,
+        startingBalance: startingBalance,
+      );
       return Result.success(account);
     } catch (error, stackTrace) {
       debugPrint("createAccount() failed: $error\n$stackTrace");

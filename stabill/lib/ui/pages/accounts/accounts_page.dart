@@ -96,7 +96,7 @@ class _AccountsPageState extends State<AccountsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   BalanceText(
-                                    balance: -balance.currentInDollars,
+                                    balance: balance.currentInDollars,
                                     maxFontSize: 18,
                                     group: textGroup,
                                   ),
