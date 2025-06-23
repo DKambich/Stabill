@@ -19,7 +19,7 @@ abstract class AbstractDatabaseRepository {
   });
   Future<void> deleteAccount(String accountId);
   Future<Account> getAccount(String accountId);
-
+  Stream<Account> getAccountAsStream(String accountId);
   Stream<List<Account>> getAccountsStream();
 
   Future<Transaction> getTransaction(String transactionId);

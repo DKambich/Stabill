@@ -69,6 +69,12 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Stream<Account> getAccountAsStream(String accountId) {
+    // TODO: implement getAccountAsStream
+    throw UnimplementedError();
+  }
+
+  @override
   Stream<List<Account>> getAccountsStream() {
     return Stream.value([..._accounts]);
   }

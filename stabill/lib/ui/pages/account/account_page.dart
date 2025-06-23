@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stabill/config/router.dart';
 import 'package:stabill/core/classes/result.dart';
 import 'package:stabill/core/services/account/account_service.dart';
@@ -22,12 +23,14 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   late Future<Result<List<Transaction>>> transactions;
 
-  late Stream<Balance> balanceStream;
+  late Stream<Balance> accountBalanceStream;
   late AutoSizeGroup textGroup = AutoSizeGroup();
 
   final ScrollController _controller = ScrollController();
 
   bool showActions = true;
+
+  String accountName = "";
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +39,7 @@ class _AccountPageState extends State<AccountPage> {
         controller: _controller,
         slivers: [
           SliverAppBar(
-            title: const Text('Account'),
+            title: Text(accountName),
             leading: AdaptiveBackButton(
               fallbackRoute: Routes.accounts,
             ),
@@ -53,7 +56,7 @@ class _AccountPageState extends State<AccountPage> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: StreamBuilder<Balance>(
-                  stream: balanceStream,
+                  stream: accountBalanceStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Text("Loading");
@@ -155,7 +158,9 @@ class _AccountPageState extends State<AccountPage> {
                         child: ListTile(
                           leading: CircleAvatar(child: Text('${index + 1}')),
                           title: Text(transaction.name),
-                          subtitle: Text(transaction.amount.toString()),
+                          subtitle: BalanceText(
+                            balance: transaction.amount / 100,
+                          ),
                         ),
                       );
                     },
@@ -212,10 +217,15 @@ class _AccountPageState extends State<AccountPage> {
   void initState() {
     super.initState();
     var accountService = context.read<AccountService>();
-    var transactionService = context.read<TransactionService>();
+    accountBalanceStream =
+        accountService.getAccountAsStream(widget.accountId).doOnData((account) {
+      setState(() {
+        accountName = account.name;
+      });
+    }).map((account) => account.balance);
 
+    var transactionService = context.read<TransactionService>();
     transactions = transactionService.getTransactions(widget.accountId);
-    balanceStream = accountService.getTotalBalance();
 
     _controller.addListener(_onScroll);
   }

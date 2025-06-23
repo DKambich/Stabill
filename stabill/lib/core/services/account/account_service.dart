@@ -65,6 +65,10 @@ class AccountService {
     }
   }
 
+  Stream<Account> getAccountAsStream(String accountId) {
+    return _getRetryStream(_databaseRepository.getAccountAsStream(accountId));
+  }
+
   /// Retrieves a list of all user accounts.
   ///
   /// Returns a [Result] containing a list of [Account] objects on success,
