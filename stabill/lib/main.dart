@@ -7,6 +7,7 @@ import 'package:stabill/config/router.dart';
 import 'package:stabill/config/theme.dart';
 import 'package:stabill/core/services/account/account_service.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
+import 'package:stabill/core/services/transaction/transaction_service.dart';
 import 'package:stabill/data/repository/database_repository.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/utils/constants.dart';
@@ -42,6 +43,9 @@ class _StabillState extends State<Stabill> {
         Provider<NavigationService>.value(value: _navigationService),
         Provider<AccountService>(
           create: (_) => AccountService(DatabaseRepository.instance),
+        ),
+        Provider<TransactionService>(
+          create: (_) => TransactionService(DatabaseRepository.instance),
         ),
       ],
       child: MaterialApp.router(

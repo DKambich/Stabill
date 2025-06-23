@@ -32,7 +32,7 @@ final router = GoRouter(
     GoRoute(
       path: RoutePatterns.account,
       builder: (context, state) => AccountPage(
-        accountId: state.pathParameters[RoutePatterns.accountToken] ?? '',
+        accountId: state.pathParameters[RoutePathParameter.account] ?? '',
       ),
     )
   ],

@@ -1,13 +1,13 @@
-import 'dart:math';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:stabill/config/router.dart';
+import 'package:stabill/core/classes/result.dart';
 import 'package:stabill/core/services/account/account_service.dart';
-import 'package:stabill/data/models/account.dart';
+import 'package:stabill/core/services/transaction/transaction_service.dart';
 import 'package:stabill/data/models/balance.dart';
+import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/ui/widgets/balance_text.dart';
 import 'package:stabill/ui/widgets/fallback_back_button.dart';
 
@@ -20,8 +20,9 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
+  late Future<Result<List<Transaction>>> transactions;
+
   late Stream<Balance> balanceStream;
-  late Stream<List<Account>> accountStream;
   late AutoSizeGroup textGroup = AutoSizeGroup();
 
   final ScrollController _controller = ScrollController();
@@ -115,31 +116,50 @@ class _AccountPageState extends State<AccountPage> {
             ),
           ),
           // SliverList for the body
-          StreamBuilder<List<Account>>(
-              stream: accountStream,
+          FutureBuilder<Result<List<Transaction>>>(
+              future: transactions,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return Center(
-                    child: Text(snapshot.error.toString()),
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(snapshot.error.toString()),
+                    ),
                   );
                 }
 
-                var accounts = snapshot.data ?? [];
+                if (snapshot.data?.error != null) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(snapshot.data!.error.toString()),
+                    ),
+                  );
+                }
+
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                var transactions = snapshot.data!.data ?? [];
+
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      var account = accounts[index];
+                      var transaction = transactions[index];
 
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 4.0),
                         child: ListTile(
                           leading: CircleAvatar(child: Text('${index + 1}')),
-                          title: Text(account.name),
-                          subtitle: Text(account.balance.toString()),
+                          title: Text(transaction.name),
+                          subtitle: Text(transaction.amount.toString()),
                         ),
                       );
                     },
-                    childCount: accounts.length,
+                    childCount: transactions.length,
                   ),
                 );
               }),
@@ -147,7 +167,7 @@ class _AccountPageState extends State<AccountPage> {
       ),
       floatingActionButton: showActions
           ? FloatingActionButton(
-              onPressed: _addAccount,
+              onPressed: () => {},
               elevation: 1,
               child: Icon(Icons.add),
             )
@@ -192,17 +212,12 @@ class _AccountPageState extends State<AccountPage> {
   void initState() {
     super.initState();
     var accountService = context.read<AccountService>();
+    var transactionService = context.read<TransactionService>();
+
+    transactions = transactionService.getTransactions(widget.accountId);
     balanceStream = accountService.getTotalBalance();
-    accountStream = accountService.getAccounts();
 
     _controller.addListener(_onScroll);
-  }
-
-  void _addAccount() {
-    context.read<AccountService>().createAccount(
-          "Account #${Random().nextInt(1000)}",
-          Random().nextInt(1000000),
-        );
   }
 
   void _onScroll() {
