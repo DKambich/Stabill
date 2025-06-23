@@ -86,6 +86,15 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Function getTransactionChanges(String accountId,
+      {Function(Transaction p1)? onInsert,
+      Function(Transaction p1, Transaction p2)? onUpdate,
+      Function(Transaction p1)? onDelete}) {
+    // TODO: implement getTransactionChanges
+    throw UnimplementedError();
+  }
+
+  @override
   Future<List<Transaction>> getTransactions(String accountId) {
     // TODO: implement getTransactions
     throw UnimplementedError();

@@ -227,6 +227,14 @@ class _AccountPageState extends State<AccountPage> {
     var transactionService = context.read<TransactionService>();
     transactions = transactionService.getTransactions(widget.accountId);
 
+    // TODO: Figure out the best way to wrap the subscription and unsubscription
+    var unsubscribe = transactionService.getTransactionChanges(
+      widget.accountId,
+      onInsert: (_) => {},
+      onUpdate: (_, __) => {},
+      onDelete: (_) => {},
+    );
+
     _controller.addListener(_onScroll);
   }
 

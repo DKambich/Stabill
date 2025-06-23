@@ -9,6 +9,20 @@ class TransactionService {
 
   TransactionService(this._databaseRepository);
 
+  Function getTransactionChanges(
+    String accountId, {
+    Function(Transaction)? onInsert,
+    Function(Transaction, Transaction)? onUpdate,
+    Function(Transaction)? onDelete,
+  }) {
+    return _databaseRepository.getTransactionChanges(
+      accountId,
+      onInsert: onInsert,
+      onUpdate: onUpdate,
+      onDelete: onDelete,
+    );
+  }
+
   Future<Result<List<Transaction>>> getTransactions(String accountId) async {
     try {
       var transactions = await _databaseRepository.getTransactions(accountId);

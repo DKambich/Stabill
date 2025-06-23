@@ -23,5 +23,13 @@ abstract class AbstractDatabaseRepository {
   Stream<List<Account>> getAccountsStream();
 
   Future<Transaction> getTransaction(String transactionId);
+
+  // TODO: Change this, maybe return the unsubscribe function to be called?
+  Function getTransactionChanges(
+    String accountId, {
+    Function(Transaction)? onInsert,
+    Function(Transaction, Transaction)? onUpdate,
+    Function(Transaction)? onDelete,
+  });
   Future<List<Transaction>> getTransactions(String accountId);
 }

@@ -119,6 +119,62 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Function getTransactionChanges(
+    String accountId, {
+    Function(Transaction)? onInsert,
+    Function(Transaction, Transaction)? onUpdate,
+    Function(Transaction)? onDelete,
+  }) {
+    var transactionChannel = _supabase.channel("transaction-table-changes");
+
+    if (onInsert != null) {
+      transactionChannel.onPostgresChanges(
+        event: PostgresChangeEvent.insert,
+        schema: 'public',
+        table: TransactionsTable.tableName,
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: TransactionsTable.accountId,
+          value: accountId,
+        ),
+        callback: (change) => onInsert(Transaction.fromJson(change.newRecord)),
+      );
+    }
+
+    if (onUpdate != null) {
+      transactionChannel.onPostgresChanges(
+        event: PostgresChangeEvent.update,
+        schema: 'public',
+        table: TransactionsTable.tableName,
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: TransactionsTable.accountId,
+          value: accountId,
+        ),
+        callback: (change) => onUpdate(
+          Transaction.fromJson(change.oldRecord),
+          Transaction.fromJson(change.newRecord),
+        ),
+      );
+    }
+    if (onDelete != null) {
+      transactionChannel.onPostgresChanges(
+        event: PostgresChangeEvent.delete,
+        schema: 'public',
+        table: TransactionsTable.tableName,
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: TransactionsTable.accountId,
+          value: accountId,
+        ),
+        callback: (change) => onDelete(Transaction.fromJson(change.oldRecord)),
+      );
+    }
+
+    return transactionChannel.subscribe().unsubscribe;
+  }
+
+  @override
   Future<List<Transaction>> getTransactions(String accountId) async {
     // TODO: Implement pagination
     var transactions = await _supabase
