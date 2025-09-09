@@ -1,24 +1,14 @@
-class Failure<T> extends Result<T> {
-  @override
-  final Object error;
-  const Failure(this.error);
-}
+class Result<T> {
+  final T? data;
+  final Object? error;
 
-sealed class Result<T> {
-  const Result();
+  const Result({this.data, this.error})
+      : assert((data == null) != (error == null),
+            'Either data or error must be provided, but not both.');
 
-  factory Result.failure(Object error) = Failure<T>;
-  factory Result.success(T data) = Success<T>;
+  factory Result.failure(Object error) => Result(error: error);
+  factory Result.success(T data) => Result(data: data);
 
-  T? get data => this is Success<T> ? (this as Success<T>).data : null;
-  Object? get error => this is Failure<T> ? (this as Failure<T>).error : null;
-
-  bool get isFailure => this is Failure<T>;
-  bool get isSuccess => this is Success<T>;
-}
-
-class Success<T> extends Result<T> {
-  @override
-  final T data;
-  const Success(this.data);
+  bool get isFailure => error != null;
+  bool get isSuccess => data != null;
 }

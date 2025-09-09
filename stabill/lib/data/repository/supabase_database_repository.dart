@@ -1,7 +1,10 @@
 // lib/repositories/supabase_database_service.dart
+
 import 'package:stabill/core/services/auth/abstract_auth_service.dart';
 import 'package:stabill/core/services/auth/auth_service.dart';
 import 'package:stabill/data/models/account.dart';
+import 'package:stabill/data/stored_procedures/create_account_procedure.dart';
+import 'package:stabill/data/tables/accounts_table.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'abstract_database_repository.dart';
@@ -12,26 +15,18 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
 
   @override
   Future<Account> createAccount(String accountName, int startingBalance) async {
-    final user = _authService.currentUser;
-    if (user == null || user.id.isEmpty) {
-      throw Exception('User is not authenticated');
-    }
-
+    var userId = _getUserId();
     try {
-      // TODO: This should create a transaction instead of setting current and available balance
-      final response = await _supabase
-          .from('accounts')
-          .insert({
-            'user_id': user.id,
-            'name': accountName,
-            'current_balance': startingBalance,
-            'available_balance': startingBalance,
-            'is_archived': false,
-          })
-          .select()
-          .single();
+      final createdAccount = await _supabase.rpc<Map<String, dynamic>>(
+        CreateAccountProcedure.procedureName,
+        params: CreateAccountProcedure.createParams(
+          userId,
+          accountName,
+          startingBalance,
+        ),
+      );
 
-      return Account.fromJson(response);
+      return Account.fromJson(createdAccount);
     } on PostgrestException {
       rethrow;
     }
@@ -50,8 +45,22 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<List<Account>> getAccounts() {
-    // TODO: implement getAccounts
-    throw UnimplementedError();
+  Stream<List<Account>> getAccountsStream() {
+    // TODO: On web, this is giving DartError: TypeError: Instance of 'JSArray<dynamic>': type 'List<dynamic>' is not a subtype of type 'List<Map<String, dynamic>>'
+    return _supabase
+        .from(AccountsTable.tableName)
+        .stream(primaryKey: [AccountsTable.id])
+        .eq(AccountsTable.userId, _getUserId())
+        .map(
+          (accountRecords) => accountRecords.map(Account.fromJson).toList(),
+        );
+  }
+
+  String _getUserId() {
+    final user = _authService.currentUser;
+    if (user == null || user.id.isEmpty) {
+      throw Exception('User is not authenticated');
+    }
+    return user.id;
   }
 }

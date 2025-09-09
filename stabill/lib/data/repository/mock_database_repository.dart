@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:stabill/data/models/account.dart';
+import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/repository/abstract_database_repository.dart';
 
 class MockDatabaseRepository implements AbstractDatabaseRepository {
@@ -13,8 +14,7 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
           .millisecondsSinceEpoch
           .toString(), // Utilize a date-based uid, good enough for a mock, potentially use the uuid package if a better id is needed
       name: accountName,
-      currentBalance: startingBalance,
-      availableBalance: startingBalance,
+      balance: Balance(current: startingBalance, available: startingBalance),
       createdAt: DateTime.now(),
       archived: false,
     );
@@ -38,7 +38,7 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<List<Account>> getAccounts() async {
-    return [..._accounts];
+  Stream<List<Account>> getAccountsStream() {
+    return Stream.value([..._accounts]);
   }
 }
