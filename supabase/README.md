@@ -37,6 +37,14 @@ Stores user-created accounts with their respective balances.
 
 ## Stored Procedures
 
+### **ping**
+
+Returns a static response to keep the Supabase project alive.
+
+#### Outputs
+
+'pong'
+
 ### **create_account**
 
 Creates an account for the user based on the inputted account name and starting balance. If starting balance is greater than zero, it creates a cleared transaction to apply the starting balance to both the `current_balance` and `available_balance` of the created account.
