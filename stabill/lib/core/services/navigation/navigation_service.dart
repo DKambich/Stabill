@@ -18,9 +18,12 @@ class NavigationService {
   }
 
   Future<void> navigateToAccount(String accountId) async =>
-      _router.navigate(Routes.accountRoute(accountId));
+      _router.navigate(Routes.account(accountId));
 
   Future<void> navigateToAccounts() async => _router.navigate(Routes.accounts);
+
+  Future<void> navigateToAddTransaction(String accountId) async =>
+      _router.navigate(Routes.addTransaction(accountId));
 
   Future<void> navigateToHome() async => _router.navigate(Routes.home);
 
@@ -28,5 +31,5 @@ class NavigationService {
 
   Future<void> navigateToTransaction(
           String accountId, String transactionId) async =>
-      _router.navigate(Routes.transactionRoute(accountId, transactionId));
+      _router.navigate(Routes.transaction(accountId, transactionId));
 }

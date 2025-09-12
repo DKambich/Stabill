@@ -6,6 +6,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stabill/config/router.dart';
 import 'package:stabill/core/classes/result.dart';
 import 'package:stabill/core/services/account/account_service.dart';
+import 'package:stabill/core/services/navigation/navigation_service.dart';
 import 'package:stabill/core/services/transaction/transaction_service.dart';
 import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/models/transaction.dart';
@@ -153,15 +154,21 @@ class _AccountPageState extends State<AccountPage> {
                     (context, index) {
                       var transaction = transactions[index];
 
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: ListTile(
-                          leading: CircleAvatar(child: Text('${index + 1}')),
-                          title: Text(transaction.name),
-                          subtitle: BalanceText(
-                            balance: transaction.amount / 100,
+                      return GestureDetector(
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: ListTile(
+                            leading: CircleAvatar(child: Text('${index + 1}')),
+                            title: Text(transaction.name),
+                            subtitle: BalanceText(
+                              balance: transaction.amount / 100,
+                            ),
                           ),
                         ),
+                        onTap: () => context
+                            .read<NavigationService>()
+                            .navigateToTransaction(
+                                widget.accountId, transaction.id),
                       );
                     },
                     childCount: transactions.length,
@@ -172,7 +179,11 @@ class _AccountPageState extends State<AccountPage> {
       ),
       floatingActionButton: showActions
           ? FloatingActionButton(
-              onPressed: () => {},
+              onPressed: () => {
+                context
+                    .read<NavigationService>()
+                    .navigateToAddTransaction(widget.accountId)
+              },
               elevation: 1,
               child: Icon(Icons.add),
             )
