@@ -1,32 +1,37 @@
-import 'dart:math';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stabill/config/router.dart';
+import 'package:stabill/core/classes/result.dart';
 import 'package:stabill/core/services/account/account_service.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
-import 'package:stabill/data/models/account.dart';
+import 'package:stabill/core/services/transaction/transaction_service.dart';
 import 'package:stabill/data/models/balance.dart';
+import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/ui/widgets/balance_text.dart';
 import 'package:stabill/ui/widgets/fallback_back_button.dart';
 
-class AccountsPage extends StatefulWidget {
-  const AccountsPage({super.key});
+class AccountPage extends StatefulWidget {
+  final String accountId;
+  const AccountPage({super.key, required, required this.accountId});
 
   @override
-  State<AccountsPage> createState() => _AccountsPageState();
+  State<AccountPage> createState() => _AccountPageState();
 }
 
-class _AccountsPageState extends State<AccountsPage> {
-  late Stream<Balance> balanceStream;
-  late Stream<List<Account>> accountStream;
+class _AccountPageState extends State<AccountPage> {
+  late Future<Result<List<Transaction>>> transactions;
+
+  late Stream<Balance> accountBalanceStream;
   late AutoSizeGroup textGroup = AutoSizeGroup();
 
   final ScrollController _controller = ScrollController();
 
   bool showActions = true;
+
+  String accountName = "";
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +40,9 @@ class _AccountsPageState extends State<AccountsPage> {
         controller: _controller,
         slivers: [
           SliverAppBar(
-            title: const Text('Accounts'),
+            title: Text(accountName),
             leading: AdaptiveBackButton(
-              fallbackRoute: Routes.home,
+              fallbackRoute: Routes.accounts,
             ),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(
@@ -52,7 +57,7 @@ class _AccountsPageState extends State<AccountsPage> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: StreamBuilder<Balance>(
-                  stream: balanceStream,
+                  stream: accountBalanceStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Text("Loading");
@@ -115,34 +120,58 @@ class _AccountsPageState extends State<AccountsPage> {
             ),
           ),
           // SliverList for the body
-          StreamBuilder<List<Account>>(
-              stream: accountStream,
+          FutureBuilder<Result<List<Transaction>>>(
+              future: transactions,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return Center(
-                    child: Text(snapshot.error.toString()),
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(snapshot.error.toString()),
+                    ),
                   );
                 }
 
-                var accounts = snapshot.data ?? [];
+                if (snapshot.data?.error != null) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(snapshot.data!.error.toString()),
+                    ),
+                  );
+                }
+
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                var transactions = snapshot.data!.data ?? [];
+
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      var account = accounts[index];
+                      var transaction = transactions[index];
 
                       return GestureDetector(
-                        onTap: () => _goToAccount(account.id ?? ''),
                         child: Card(
                           margin: const EdgeInsets.symmetric(vertical: 4.0),
                           child: ListTile(
                             leading: CircleAvatar(child: Text('${index + 1}')),
-                            title: Text(account.name),
-                            subtitle: Text(account.balance.toString()),
+                            title: Text(transaction.name),
+                            subtitle: BalanceText(
+                              balance: transaction.amount / 100,
+                            ),
                           ),
                         ),
+                        onTap: () => context
+                            .read<NavigationService>()
+                            .navigateToTransaction(
+                                widget.accountId, transaction.id ?? ""),
                       );
                     },
-                    childCount: accounts.length,
+                    childCount: transactions.length,
                   ),
                 );
               }),
@@ -150,7 +179,11 @@ class _AccountsPageState extends State<AccountsPage> {
       ),
       floatingActionButton: showActions
           ? FloatingActionButton(
-              onPressed: _addAccount,
+              onPressed: () => {
+                context
+                    .read<NavigationService>()
+                    .navigateToAddTransaction(widget.accountId)
+              },
               elevation: 1,
               child: Icon(Icons.add),
             )
@@ -195,21 +228,25 @@ class _AccountsPageState extends State<AccountsPage> {
   void initState() {
     super.initState();
     var accountService = context.read<AccountService>();
-    balanceStream = accountService.getTotalBalance();
-    accountStream = accountService.getAccounts();
+    accountBalanceStream =
+        accountService.getAccountAsStream(widget.accountId).doOnData((account) {
+      setState(() {
+        accountName = account.name;
+      });
+    }).map((account) => account.balance ?? Balance(current: 0, available: 0));
+
+    var transactionService = context.read<TransactionService>();
+    transactions = transactionService.getTransactions(widget.accountId);
+
+    // TODO: Figure out the best way to wrap the subscription and unsubscription
+    var unsubscribe = transactionService.getTransactionChanges(
+      widget.accountId,
+      onInsert: (_) => {},
+      onUpdate: (_, __) => {},
+      onDelete: (_) => {},
+    );
 
     _controller.addListener(_onScroll);
-  }
-
-  void _addAccount() {
-    context.read<AccountService>().createAccount(
-          "Account #${Random().nextInt(1000)}",
-          Random().nextInt(1000000),
-        );
-  }
-
-  void _goToAccount(String accountId) {
-    context.read<NavigationService>().navigateToAccount(accountId);
   }
 
   void _onScroll() {
