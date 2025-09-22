@@ -224,7 +224,31 @@ class _TransactionPageState extends State<TransactionPage> {
   @override
   void initState() {
     super.initState();
-    _amountController.text = _amount.toString();
+    if (!isNewTransaction) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final transactionService = context.read<TransactionService>();
+        final result =
+            await transactionService.getTransaction(widget.transactionId!);
+        if (result.isSuccess && result.data != null) {
+          var transaction = result.data;
+          setState(() {
+            _name = transaction?.name ?? "";
+            _amount = transaction?.amount ?? 0;
+            _dateTime = transaction?.transactionDate ?? DateTime.now();
+            _transactionType =
+                transaction?.transactionType ?? TransactionType.deposit;
+            _transactionCategory =
+                transaction?.category ?? TransactionCategory.none;
+            _checkNumber = transaction?.checkNumber;
+            _memo = transaction?.memo;
+            _isCleared = transaction?.isCleared ?? false;
+            _amountController.text = transaction?.amount.toString() ?? '0';
+          });
+        }
+      });
+    } else {
+      _amountController.text = _amount.toString();
+    }
   }
 
   Future<void> _deleteTransaction() async {

@@ -29,6 +29,16 @@ class TransactionService {
     }
   }
 
+  Future<Result<Transaction>> getTransaction(String transactionId) async {
+    try {
+      var transaction = await _databaseRepository.getTransaction(transactionId);
+      return Result.success(transaction);
+    } catch (error, stackTrace) {
+      debugPrint("getTransactionById() failed: $error\n$stackTrace");
+      return Result.failure(error);
+    }
+  }
+
   Function getTransactionChanges(
     String accountId, {
     Function(Transaction)? onInsert,
