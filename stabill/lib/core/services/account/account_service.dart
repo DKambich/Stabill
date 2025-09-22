@@ -26,8 +26,16 @@ class AccountService {
     int startingBalance,
   ) async {
     try {
-      var account =
-          await _databaseRepository.createAccount(accountName, startingBalance);
+      var account = await _databaseRepository.createAccount(
+        Account(
+          name: accountName,
+          balance: Balance(
+            current: startingBalance,
+            available: startingBalance,
+          ),
+          isArchived: false,
+        ),
+      );
       return Result.success(account);
     } catch (error, stackTrace) {
       debugPrint("createAccount() failed: $error\n$stackTrace");
@@ -63,6 +71,10 @@ class AccountService {
     }
   }
 
+  Stream<Account> getAccountAsStream(String accountId) {
+    return _getRetryStream(_databaseRepository.getAccountAsStream(accountId));
+  }
+
   /// Retrieves a list of all user accounts.
   ///
   /// Returns a [Result] containing a list of [Account] objects on success,
@@ -76,12 +88,12 @@ class AccountService {
             current: accounts.fold(
               0,
               (currentBalance, account) =>
-                  currentBalance + account.balance.current,
+                  currentBalance + (account.balance?.current ?? 0),
             ),
             available: accounts.fold(
               0,
               (availableBalance, account) =>
-                  availableBalance + account.balance.available,
+                  availableBalance + (account.balance?.available ?? 0),
             ),
           ),
         )
