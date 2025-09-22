@@ -2,27 +2,28 @@ import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/tables/accounts_table.dart';
 
 /// Represents a user's financial account.
+
 class Account {
   /// Unique identifier for the account.
-  final String id;
+  final String? id;
 
   /// The name of the account.
   final String name;
 
   /// The current balance, including both cleared and pending transactions (stored in cents).
-  final Balance balance;
+  final Balance? balance;
 
   /// The timestamp when the account was created.
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// Indicates whether the account is archived (inactive).
   final bool isArchived;
 
   Account({
-    required this.id,
+    this.id,
     required this.name,
-    required this.balance,
-    required this.createdAt,
+    this.balance,
+    this.createdAt,
     required this.isArchived,
   });
 
@@ -45,9 +46,9 @@ class Account {
     return {
       AccountsTable.id: id,
       AccountsTable.name: name,
-      AccountsTable.currentBalance: balance.current,
-      AccountsTable.availableBalance: balance.available,
-      AccountsTable.createdAt: createdAt.toIso8601String(),
+      AccountsTable.currentBalance: balance?.current,
+      AccountsTable.availableBalance: balance?.available,
+      AccountsTable.createdAt: createdAt?.toIso8601String(),
       AccountsTable.isArchived: isArchived,
     };
   }
@@ -55,6 +56,6 @@ class Account {
   /// Returns a string representation of the [Account] instance.
   @override
   String toString() {
-    return 'Account(id: $id, name: $name, balance: ${balance.toString()}, createdAt: ${createdAt.toIso8601String()}, archived: $isArchived)';
+    return 'Account(id: $id, name: $name, balance: ${balance?.toString()}, createdAt: ${createdAt?.toIso8601String()}, archived: $isArchived)';
   }
 }

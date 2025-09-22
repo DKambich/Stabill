@@ -86,6 +86,8 @@ TODO: Add Project Description
 - [ ] Implement Row Level Security (RLS) for user-linked data in Supabase
 - [ ] Secure scheduled transaction execution using Supabase Edge Functions or PostgreSQL functions
 
+Investigate: https://supabase.com/dashboard/project/vyuqaamvpzcuyawldpcz/settings/api-keys/new
+
 
 ## Running Supabase locally
 

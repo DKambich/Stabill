@@ -131,7 +131,7 @@ class _AccountsPageState extends State<AccountsPage> {
                       var account = accounts[index];
 
                       return GestureDetector(
-                        onTap: () => _goToAccount(account.id),
+                        onTap: () => _goToAccount(account.id ?? ''),
                         child: Card(
                           margin: const EdgeInsets.symmetric(vertical: 4.0),
                           child: ListTile(

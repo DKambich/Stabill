@@ -1,13 +1,15 @@
-import 'package:stabill/data/models/transaction_type.dart';
+import 'package:stabill/data/enums/transaction_category.dart';
+import 'package:stabill/data/enums/transaction_type.dart';
 import 'package:stabill/data/tables/transactions_table.dart';
 
 /// Represents a single financial transaction within an account.
+
 class Transaction {
   /// Unique identifier for the transaction.
-  final String id;
+  final String? id;
 
   /// The timestamp when the transaction was created.
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// The description or name of the transaction.
   final String name;
@@ -18,8 +20,11 @@ class Transaction {
   /// The date when the transaction occurred.
   final DateTime transactionDate;
 
-  /// The type of transaction
+  /// The type of transaction.
   final TransactionType transactionType;
+
+  /// The high-level category for the transaction.
+  final TransactionCategory category;
 
   /// The check number associated with the transaction (if applicable).
   final int? checkNumber;
@@ -34,14 +39,15 @@ class Transaction {
   final bool isArchived;
 
   Transaction({
-    required this.id,
+    this.id,
     required this.name,
-    required this.createdAt,
+    this.createdAt,
     required this.amount,
     required this.transactionDate,
     required this.transactionType,
-    required this.checkNumber,
-    required this.memo,
+    required this.category,
+    this.checkNumber,
+    this.memo,
     required this.isCleared,
     required this.isArchived,
   });
@@ -58,6 +64,9 @@ class Transaction {
       transactionType: TransactionType.fromJson(
         json[TransactionsTable.transactionType] as String,
       ),
+      category: TransactionCategory.fromJson(
+        json[TransactionsTable.transactionCategory] as String,
+      ),
       checkNumber: json[TransactionsTable.checkNumber] as int?,
       memo: json[TransactionsTable.memo] as String?,
       isCleared: json[TransactionsTable.isCleared] as bool,
@@ -70,10 +79,11 @@ class Transaction {
     return {
       TransactionsTable.id: id,
       TransactionsTable.name: name,
-      TransactionsTable.createdAt: createdAt.toIso8601String(),
+      TransactionsTable.createdAt: createdAt?.toIso8601String(),
       TransactionsTable.amount: amount,
       TransactionsTable.transactionDate: transactionDate.toIso8601String(),
       TransactionsTable.transactionType: transactionType.toJson(),
+      TransactionsTable.transactionCategory: category.toJson(),
       TransactionsTable.checkNumber: checkNumber,
       TransactionsTable.memo: memo,
       TransactionsTable.isCleared: isCleared,
@@ -84,6 +94,9 @@ class Transaction {
   /// Returns a string representation of the [Transaction] instance.
   @override
   String toString() {
-    return 'Transaction(id: $id, name: $name, amount: $amount, transactionType: $transactionType, transactionDate: ${transactionDate.toIso8601String()}, cleared: $isCleared, archived: $isArchived)';
+    return 'Transaction(id: $id, name: $name, amount: $amount, '
+        'transactionType: $transactionType, category: $category, '
+        'transactionDate: ${transactionDate.toIso8601String()}, '
+        'cleared: $isCleared, archived: $isArchived)';
   }
 }

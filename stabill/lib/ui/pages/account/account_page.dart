@@ -168,7 +168,7 @@ class _AccountPageState extends State<AccountPage> {
                         onTap: () => context
                             .read<NavigationService>()
                             .navigateToTransaction(
-                                widget.accountId, transaction.id),
+                                widget.accountId, transaction.id ?? ""),
                       );
                     },
                     childCount: transactions.length,
@@ -233,7 +233,7 @@ class _AccountPageState extends State<AccountPage> {
       setState(() {
         accountName = account.name;
       });
-    }).map((account) => account.balance);
+    }).map((account) => account.balance ?? Balance(current: 0, available: 0));
 
     var transactionService = context.read<TransactionService>();
     transactions = transactionService.getTransactions(widget.accountId);

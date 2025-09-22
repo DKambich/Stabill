@@ -27,8 +27,14 @@ class AccountService {
   ) async {
     try {
       var account = await _databaseRepository.createAccount(
-        accountName: accountName,
-        startingBalance: startingBalance,
+        Account(
+          name: accountName,
+          balance: Balance(
+            current: startingBalance,
+            available: startingBalance,
+          ),
+          isArchived: false,
+        ),
       );
       return Result.success(account);
     } catch (error, stackTrace) {
@@ -82,12 +88,12 @@ class AccountService {
             current: accounts.fold(
               0,
               (currentBalance, account) =>
-                  currentBalance + account.balance.current,
+                  currentBalance + (account.balance?.current ?? 0),
             ),
             available: accounts.fold(
               0,
               (availableBalance, account) =>
-                  availableBalance + account.balance.available,
+                  availableBalance + (account.balance?.available ?? 0),
             ),
           ),
         )

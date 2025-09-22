@@ -8,6 +8,7 @@ class TransactionsTable {
   static const String amount = 'amount';
   static const String transactionDate = 'transaction_date';
   static const String transactionType = 'transaction_type';
+  static const String transactionCategory = 'transaction_category';
   static const String checkNumber = 'check_number';
   static const String memo = 'memo';
   static const String isCleared = 'is_cleared';
@@ -21,6 +22,7 @@ class TransactionsTable {
         amount,
         transactionDate,
         transactionType,
+        transactionCategory,
         checkNumber,
         memo,
         isCleared,

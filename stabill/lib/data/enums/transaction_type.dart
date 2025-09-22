@@ -1,10 +1,22 @@
+import 'package:flutter/material.dart';
+
 /// Enum representing the type of a transaction.
 enum TransactionType {
   deposit,
   withdrawal,
   voided;
 
-  /// Returns a user-friendly label for display purposes.
+  IconData get icon {
+    switch (this) {
+      case TransactionType.deposit:
+        return Icons.arrow_downward;
+      case TransactionType.withdrawal:
+        return Icons.arrow_upward;
+      case TransactionType.voided:
+        return Icons.cancel;
+    }
+  }
+
   String get label {
     switch (this) {
       case TransactionType.deposit:
@@ -16,10 +28,21 @@ enum TransactionType {
     }
   }
 
-  /// Converts a [TransactionType] to its corresponding Supabase string value.
+  int get sortOrder {
+    switch (this) {
+      case TransactionType.deposit:
+        return 0;
+      case TransactionType.withdrawal:
+        return 1;
+      case TransactionType.voided:
+        return 2;
+    }
+  }
+
+  /// Supabase string
   String toJson() => name;
 
-  /// Creates a [TransactionType] from its Supabase string representation.
+  /// From Supabase string
   static TransactionType fromJson(String value) {
     return TransactionType.values.firstWhere(
       (e) => e.name == value,
