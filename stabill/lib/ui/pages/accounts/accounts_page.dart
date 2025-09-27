@@ -195,8 +195,8 @@ class _AccountsPageState extends State<AccountsPage> {
   void initState() {
     super.initState();
     var accountService = context.read<AccountService>();
-    balanceStream = accountService.getTotalBalance();
-    accountStream = accountService.getAccounts();
+    balanceStream = accountService.watchTotalBalance();
+    accountStream = accountService.watchAccounts();
 
     _controller.addListener(_onScroll);
   }

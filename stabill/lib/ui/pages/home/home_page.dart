@@ -95,7 +95,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    balanceStream = context.read<AccountService>().getTotalBalance();
+    balanceStream = context.read<AccountService>().watchTotalBalance();
     super.initState();
   }
 
