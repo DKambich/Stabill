@@ -1,7 +1,10 @@
 // lib/repositories/supabase_database_service.dart
 
+import 'dart:async';
+
 import 'package:stabill/core/services/auth/abstract_auth_service.dart';
 import 'package:stabill/core/services/auth/auth_service.dart';
+import 'package:stabill/data/misc/transaction_change.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/data/stored_procedures/create_account_procedure.dart';
@@ -200,6 +203,53 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
         .select()
         .single();
     return Transaction.fromJson(updated);
+  }
+
+  @override
+  Stream<TransactionChange> watchTransactions(String accountId) {
+    final controller = StreamController<TransactionChange>();
+
+    final channel = _supabase
+        .channel('transaction-table-changes')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: TransactionsTable.tableName,
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: TransactionsTable.accountId,
+            value: accountId,
+          ),
+          callback: (payload) {
+            final type = switch (payload.eventType) {
+              PostgresChangeEvent.insert => ChangeType.insert,
+              PostgresChangeEvent.update => ChangeType.update,
+              PostgresChangeEvent.delete => ChangeType.delete,
+              _ => null, // fallback for PostgresChangeEvent.all
+            };
+            if (type != null) {
+              controller.add(
+                TransactionChange(
+                  type: type,
+                  transaction: Transaction.fromJson(
+                    payload.newRecord.isNotEmpty
+                        ? payload.newRecord
+                        : payload.oldRecord,
+                  ),
+                ),
+              );
+            }
+          },
+        )
+        .subscribe();
+
+    // Cleanup: when no one is listening, unsubscribe from Supabase
+    controller.onCancel = () async {
+      await _supabase.removeChannel(channel);
+      await controller.close();
+    };
+
+    return controller.stream;
   }
 
   String _getUserId() {

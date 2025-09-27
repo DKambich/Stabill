@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stabill/core/classes/result.dart';
+import 'package:stabill/data/misc/transaction_change.dart';
+import 'package:stabill/data/misc/transaction_filter.dart';
+import 'package:stabill/data/misc/transaction_pager.dart';
 import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/data/repository/abstract_database_repository.dart';
 
@@ -7,6 +10,23 @@ import 'package:stabill/data/repository/abstract_database_repository.dart';
 class TransactionService {
   final AbstractDatabaseRepository _databaseRepository;
   TransactionService(this._databaseRepository);
+
+  TransactionPager createPager(String accountId, {TransactionFilter? filter}) {
+    return TransactionPager(
+      accountId: accountId,
+      getTransactions: ({
+        required accountId,
+        required pageSize,
+        required pageIndex,
+        filter,
+      }) =>
+          getTransactions(accountId,
+              pageSize: pageSize, pageIndex: pageIndex, filter: filter),
+      watchTransactions: watchTransactions,
+      filter: filter ?? const TransactionFilter(),
+    );
+  }
+
   Future<Result<Transaction>> createTransaction(
       Transaction transaction, String accountId) async {
     try {
@@ -53,7 +73,8 @@ class TransactionService {
     );
   }
 
-  Future<Result<List<Transaction>>> getTransactions(String accountId) async {
+  Future<Result<List<Transaction>>> getTransactions(String accountId,
+      {int pageSize = 20, int pageIndex = 0, TransactionFilter? filter}) async {
     try {
       var transactions = await _databaseRepository.getTransactions(accountId);
       return Result.success(transactions);
@@ -71,5 +92,9 @@ class TransactionService {
       debugPrint("updateTransaction() failed: $error\n$stackTrace");
       return Result.failure(error);
     }
+  }
+
+  Stream<TransactionChange> watchTransactions(String accountId) {
+    return _databaseRepository.watchTransactions(accountId);
   }
 }
