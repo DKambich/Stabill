@@ -1,3 +1,4 @@
+import 'package:stabill/data/misc/transaction_change.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/models/transaction.dart';
@@ -102,6 +103,12 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   @override
   Future<Transaction> updateTransaction(Transaction transaction) {
     // TODO: implement updateTransaction
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<TransactionChange> watchTransactions(String accountId) {
+    // TODO: implement watchTransactions
     throw UnimplementedError();
   }
 }

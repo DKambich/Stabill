@@ -87,6 +87,14 @@ Stores financial transactions linked to an account.
 - `memo` (TEXT, Nullable)
 - `archived` (BOOLEAN)
 
+#### RLS Policies
+
+- SELECT: Enable users to select transactions based on the related account belonging to the incoming authenticated user id
+- INSERT: Enable users to insert transactions based on the related account belonging to the incoming authenticated user id
+- UPDATE: Enable users to update transactions based on the related account belonging to the incoming authenticated user id
+- DELETE: Enable users to delete transactions based on the related account belonging to the incoming authenticated user id
+
+
 ### **Scheduled Transactions**
 
 Manages recurring transactions that automatically apply at set intervals.
