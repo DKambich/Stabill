@@ -229,7 +229,7 @@ class _AccountPageState extends State<AccountPage> {
     super.initState();
     var accountService = context.read<AccountService>();
     accountBalanceStream =
-        accountService.getAccountAsStream(widget.accountId).doOnData((account) {
+        accountService.watchAccount(widget.accountId).doOnData((account) {
       setState(() {
         accountName = account.name;
       });

@@ -4,23 +4,23 @@ import 'package:stabill/core/classes/result.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/repository/abstract_database_repository.dart';
+import 'package:stabill/utils/lazy_subject.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// A service responsible for managing user accounts.
 class AccountService {
   final AbstractDatabaseRepository _databaseRepository;
-  late final Stream<List<Account>> _sharedAccountsStream;
+
+  late final LazySubject<List<Account>> _accountsLazy;
+  final Map<String, LazySubject<Account>> _accountLazy = {};
 
   AccountService(this._databaseRepository) {
-    _sharedAccountsStream = _getRetryStream(
-      _databaseRepository.getAccountsStream(),
+    _accountsLazy = LazySubject(
+      () => _getRetryStream(_databaseRepository.getAccountsStream()),
     );
   }
 
   /// Creates a new account with the given [accountName] and [startingBalance].
-  ///
-  /// Returns a [Result] containing the created [Account] on success,
-  /// or an error if the operation fails.
   Future<Result<Account>> createAccount(
     String accountName,
     int startingBalance,
@@ -43,10 +43,6 @@ class AccountService {
     }
   }
 
-  /// Deletes an account identified by the given [accountId].
-  ///
-  /// Returns a [Result] with `null` on success,
-  /// or an error if the operation fails.
   Future<Result<void>> deleteAccount(String accountId) async {
     try {
       await _databaseRepository.deleteAccount(accountId);
@@ -57,10 +53,14 @@ class AccountService {
     }
   }
 
-  /// Retrieves an account by its [accountId].
-  ///
-  /// Returns a [Result] containing the requested [Account] on success,
-  /// or an error if the operation fails.
+  /// Clean up subjects when no longer needed.
+  Future<void> dispose() async {
+    await _accountsLazy.dispose();
+    for (var lazy in _accountLazy.values) {
+      await lazy.dispose();
+    }
+  }
+
   Future<Result<Account>> getAccount(String accountId) async {
     try {
       var account = await _databaseRepository.getAccount(accountId);
@@ -71,36 +71,39 @@ class AccountService {
     }
   }
 
-  Stream<Account> getAccountAsStream(String accountId) {
-    return _getRetryStream(_databaseRepository.getAccountAsStream(accountId));
+  /// Watch a single account reactively.
+  Stream<Account> watchAccount(String accountId) {
+    if (_accountLazy.containsKey(accountId)) {
+      return _accountLazy[accountId]!.stream;
+    }
+    final lazy = LazySubject(
+      () => _getRetryStream(_databaseRepository.getAccountAsStream(accountId)),
+    );
+    _accountLazy[accountId] = lazy;
+    return lazy.stream;
   }
 
-  /// Retrieves a list of all user accounts.
-  ///
-  /// Returns a [Result] containing a list of [Account] objects on success,
-  /// or an error if the operation fails.
-  Stream<List<Account>> getAccounts() => _sharedAccountsStream;
+  /// Watch all accounts reactively.
+  Stream<List<Account>> watchAccounts() => _accountsLazy.stream;
 
-  Stream<Balance> getTotalBalance() {
-    return _sharedAccountsStream
+  /// Watch the total balance across all accounts reactively.
+  Stream<Balance> watchTotalBalance() {
+    return _accountsLazy.stream
         .map(
           (accounts) => Balance(
             current: accounts.fold(
               0,
-              (currentBalance, account) =>
-                  currentBalance + (account.balance?.current ?? 0),
+              (curr, acc) => curr + (acc.balance?.current ?? 0),
             ),
             available: accounts.fold(
               0,
-              (availableBalance, account) =>
-                  availableBalance + (account.balance?.available ?? 0),
+              (avail, acc) => avail + (acc.balance?.available ?? 0),
             ),
           ),
         )
         .distinct(
-          (previous, next) =>
-              previous.current == next.current &&
-              previous.available == next.available,
+          (prev, next) =>
+              prev.current == next.current && prev.available == next.available,
         );
   }
 
@@ -120,6 +123,6 @@ class AccountService {
         }
         return Stream.error(error, stackTrace);
       },
-    ).shareReplay(maxSize: 1);
+    );
   }
 }

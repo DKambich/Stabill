@@ -22,6 +22,7 @@ class TransactionPage extends StatefulWidget {
 class _TransactionPageState extends State<TransactionPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   String _name = '';
 
   int _amount = 0;
@@ -69,7 +70,7 @@ class _TransactionPageState extends State<TransactionPage> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.label),
                 ),
-                initialValue: _name,
+                controller: _nameController,
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Enter a name' : null,
                 onSaved: (value) => _name = value ?? '',
@@ -218,6 +219,7 @@ class _TransactionPageState extends State<TransactionPage> {
   @override
   void dispose() {
     _amountController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -233,6 +235,7 @@ class _TransactionPageState extends State<TransactionPage> {
           var transaction = result.data;
           setState(() {
             _name = transaction?.name ?? "";
+            _nameController.text = transaction?.name ?? "";
             _amount = transaction?.amount ?? 0;
             _dateTime = transaction?.transactionDate ?? DateTime.now();
             _transactionType =
@@ -248,6 +251,7 @@ class _TransactionPageState extends State<TransactionPage> {
       });
     } else {
       _amountController.text = _amount.toString();
+      _nameController.text = _name;
     }
   }
 
