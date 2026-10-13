@@ -46,3 +46,5 @@ app.*.map.json
 
 # Android debug files
 /android/app/.cxx
+# Widget Preview related
+.widget_preview/
