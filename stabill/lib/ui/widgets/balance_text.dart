@@ -1,9 +1,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:stabill/utils/currency_format.dart';
 
 class BalanceText extends StatelessWidget {
-  static final NumberFormat _formatCurrency = NumberFormat.simpleCurrency();
   final double balance;
   final double minFontSize;
   final double maxFontSize;
@@ -32,7 +31,7 @@ class BalanceText extends StatelessWidget {
     };
 
     return AutoSizeText(
-      _formatCurrency.format(showNegative ? balance : balance.abs()),
+      CurrencyFormat.formatAmount(showNegative ? balance : balance.abs()),
       style: textStyle,
       minFontSize: minFontSize,
       maxFontSize: maxFontSize,
