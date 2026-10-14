@@ -14,7 +14,7 @@ class Transaction {
   /// The description or name of the transaction.
   final String name;
 
-  /// The transaction amount in cents (positive for deposits, negative for withdrawals).
+  /// The non-negative transaction amount in cents; transactionType determines direction.
   final int amount;
 
   /// The date when the transaction occurred.
