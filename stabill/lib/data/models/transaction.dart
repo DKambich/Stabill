@@ -74,6 +74,34 @@ class Transaction {
     );
   }
 
+  Transaction copyWith({
+    String? id,
+    DateTime? createdAt,
+    String? name,
+    int? amount,
+    DateTime? transactionDate,
+    TransactionType? transactionType,
+    TransactionCategory? category,
+    int? checkNumber,
+    String? memo,
+    bool? isCleared,
+    bool? isArchived,
+  }) {
+    return Transaction(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      name: name ?? this.name,
+      amount: amount ?? this.amount,
+      transactionDate: transactionDate ?? this.transactionDate,
+      transactionType: transactionType ?? this.transactionType,
+      category: category ?? this.category,
+      checkNumber: checkNumber ?? this.checkNumber,
+      memo: memo ?? this.memo,
+      isCleared: isCleared ?? this.isCleared,
+      isArchived: isArchived ?? this.isArchived,
+    );
+  }
+
   /// Converts the [Transaction] instance to a JSON object.
   Map<String, dynamic> toJson() {
     return {

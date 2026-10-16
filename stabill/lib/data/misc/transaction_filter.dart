@@ -1,6 +1,9 @@
 class TransactionFilter {
   final String? searchText;
-  final bool? showUnclearedFirst;
+  final bool includeArchived;
 
-  const TransactionFilter({this.searchText, this.showUnclearedFirst});
+  const TransactionFilter({
+    this.searchText,
+    this.includeArchived = false,
+  });
 }

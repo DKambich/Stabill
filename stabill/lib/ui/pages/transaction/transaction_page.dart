@@ -38,6 +38,7 @@ class _TransactionPageState extends State<TransactionPage> {
   int? _checkNumber;
   String? _memo;
   bool _isCleared = false;
+  bool _isArchived = false;
   bool _isEditing = false;
   bool _isLoading = false;
   bool _loadFailed = false;
@@ -75,6 +76,12 @@ class _TransactionPageState extends State<TransactionPage> {
           ),
           leading: BackButton(onPressed: _handleBack),
           actions: [
+            if (_isArchived)
+              IconButton(
+                icon: const Icon(Icons.visibility_outlined),
+                tooltip: 'Unhide transaction',
+                onPressed: _unhideTransaction,
+              ),
             if (!isNewTransaction && !_isEditing)
               IconButton(
                 icon: const Icon(Icons.edit),
@@ -312,6 +319,7 @@ class _TransactionPageState extends State<TransactionPage> {
     _checkNumber = transaction.checkNumber;
     _memo = transaction.memo;
     _isCleared = transaction.isCleared;
+    _isArchived = transaction.isArchived;
   }
 
   Widget _buildCategoryField() {
@@ -570,7 +578,7 @@ class _TransactionPageState extends State<TransactionPage> {
         checkNumber: _checkNumber,
         memo: _memo,
         isCleared: _isCleared,
-        isArchived: false,
+        isArchived: _isArchived,
       );
       final transactionService = context.read<TransactionService>();
       final result = isNewTransaction
@@ -607,6 +615,33 @@ class _TransactionPageState extends State<TransactionPage> {
     } else if (_transactionCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please select a category')),
+      );
+    }
+  }
+
+  Future<void> _unhideTransaction() async {
+    final transaction = _originalTransaction;
+    if (transaction == null || !_isArchived) return;
+
+    final unhiddenTransaction = transaction.copyWith(isArchived: false);
+    final result = await context
+        .read<TransactionService>()
+        .updateTransaction(unhiddenTransaction);
+    if (!mounted) return;
+
+    if (result.isSuccess) {
+      setState(() {
+        _originalTransaction = unhiddenTransaction;
+        _isArchived = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Transaction unhidden')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to unhide transaction: ${result.error}'),
+        ),
       );
     }
   }
