@@ -10,12 +10,12 @@ import 'package:stabill/config/router.dart';
 import 'package:stabill/core/services/account/account_service.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
 import 'package:stabill/core/services/transaction/transaction_service.dart';
-import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/enums/transaction_type.dart';
 import 'package:stabill/data/misc/transaction_change.dart';
 import 'package:stabill/data/misc/transaction_filter.dart';
 import 'package:stabill/data/misc/transaction_pager.dart';
 import 'package:stabill/data/misc/transaction_query.dart';
+import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/ui/widgets/balance_text.dart';
@@ -606,107 +606,6 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
-  Future<void> _showMoveTransactionDialog(Transaction transaction) async {
-    final accountService = context.read<AccountService>();
-    final destination = await showDialog<Account>(
-      context: context,
-      builder: (dialogContext) {
-        Account? selectedAccount;
-        final accountsStream = accountService.watchAccounts();
-
-        return StatefulBuilder(
-          builder: (context, setDialogState) => AlertDialog(
-            title: Text('Move "${transaction.name}" to'),
-            content: SizedBox(
-              width: 360,
-              child: StreamBuilder<List<Account>>(
-                stream: accountsStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Text('Unable to load accounts: ${snapshot.error}');
-                  }
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final accounts = snapshot.data!;
-                  final destinations = accounts
-                      .where((account) => account.id != widget.accountId)
-                      .toList();
-                  if (destinations.isEmpty) {
-                    return const Text('No other accounts available.');
-                  }
-
-                  final nameCounts = <String, int>{};
-                  for (final account in accounts) {
-                    nameCounts.update(
-                      account.name,
-                      (count) => count + 1,
-                      ifAbsent: () => 1,
-                    );
-                  }
-
-                  return ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 360),
-                    child: RadioGroup<Account>(
-                      groupValue: selectedAccount,
-                      onChanged: (account) => setDialogState(
-                        () => selectedAccount = account,
-                      ),
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: destinations.length,
-                        separatorBuilder: (context, index) =>
-                            const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final account = destinations[index];
-                          final accountId = account.id ?? 'Unknown ID';
-                          final idSuffix = accountId.length > 8
-                              ? accountId.substring(accountId.length - 8)
-                              : accountId;
-
-                          return RadioListTile<Account>(
-                            value: account,
-                            title: Text(account.name),
-                            subtitle: nameCounts[account.name]! > 1
-                                ? Text('ID: $idSuffix')
-                                : null,
-                          );
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: selectedAccount == null
-                    ? null
-                    : () => Navigator.of(dialogContext).pop(selectedAccount),
-                child: const Text('Move'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-    if (destination == null || !mounted) return;
-
-    // TODO: Persist the move and refresh the transaction pager.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Moving transactions to ${destination.name} is not implemented yet',
-        ),
-      ),
-    );
-  }
-
   void _loadNextPage() {
     if (_transactionPager.isLoading || !_transactionPager.hasMore) return;
     unawaited(_transactionPager.loadNextPage());
@@ -828,6 +727,107 @@ class _AccountPageState extends State<AccountPage> {
         ),
       );
     }
+  }
+
+  Future<void> _showMoveTransactionDialog(Transaction transaction) async {
+    final accountService = context.read<AccountService>();
+    final destination = await showDialog<Account>(
+      context: context,
+      builder: (dialogContext) {
+        Account? selectedAccount;
+        final accountsStream = accountService.watchAccounts();
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: Text('Move "${transaction.name}" to'),
+            content: SizedBox(
+              width: 360,
+              child: StreamBuilder<List<Account>>(
+                stream: accountsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Unable to load accounts: ${snapshot.error}');
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final accounts = snapshot.data!;
+                  final destinations = accounts
+                      .where((account) => account.id != widget.accountId)
+                      .toList();
+                  if (destinations.isEmpty) {
+                    return const Text('No other accounts available.');
+                  }
+
+                  final nameCounts = <String, int>{};
+                  for (final account in accounts) {
+                    nameCounts.update(
+                      account.name,
+                      (count) => count + 1,
+                      ifAbsent: () => 1,
+                    );
+                  }
+
+                  return ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 360),
+                    child: RadioGroup<Account>(
+                      groupValue: selectedAccount,
+                      onChanged: (account) => setDialogState(
+                        () => selectedAccount = account,
+                      ),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: destinations.length,
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final account = destinations[index];
+                          final accountId = account.id ?? 'Unknown ID';
+                          final idSuffix = accountId.length > 8
+                              ? accountId.substring(accountId.length - 8)
+                              : accountId;
+
+                          return RadioListTile<Account>(
+                            value: account,
+                            title: Text(account.name),
+                            subtitle: nameCounts[account.name]! > 1
+                                ? Text('ID: $idSuffix')
+                                : null,
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: selectedAccount == null
+                    ? null
+                    : () => Navigator.of(dialogContext).pop(selectedAccount),
+                child: const Text('Move'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    if (destination == null || !mounted) return;
+
+    // TODO: Persist the move and refresh the transaction pager.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Moving transactions to ${destination.name} is not implemented yet',
+        ),
+      ),
+    );
   }
 
   Future<void> _showTransactionMenu(
