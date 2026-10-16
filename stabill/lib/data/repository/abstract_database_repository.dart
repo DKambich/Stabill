@@ -1,4 +1,5 @@
 import 'package:stabill/data/misc/transaction_change.dart';
+import 'package:stabill/data/misc/transaction_query.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/transaction.dart';
 
@@ -20,7 +21,10 @@ abstract class AbstractDatabaseRepository {
     Function(Transaction, Transaction)? onUpdate,
     Function(Transaction)? onDelete,
   });
-  Future<List<Transaction>> getTransactions(String accountId);
+  Future<List<Transaction>> getTransactions(
+    String accountId, {
+    TransactionQuery query = const TransactionQuery(),
+  });
   Future<Transaction> updateTransaction(Transaction transaction);
   Stream<TransactionChange> watchTransactions(String accountId);
 }
