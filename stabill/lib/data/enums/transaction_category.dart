@@ -21,7 +21,7 @@ enum TransactionCategory {
   IconData get icon {
     switch (this) {
       case TransactionCategory.none:
-        return Icons.help_outline;
+        return Icons.receipt_long;
       case TransactionCategory.income:
         return Icons.attach_money;
       case TransactionCategory.housing:

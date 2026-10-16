@@ -4,10 +4,10 @@ import 'dart:async';
 
 import 'package:stabill/core/services/auth/abstract_auth_service.dart';
 import 'package:stabill/core/services/auth/auth_service.dart';
-import 'package:stabill/data/misc/transaction_change.dart';
-import 'package:stabill/data/misc/transaction_query.dart';
 import 'package:stabill/data/enums/transaction_category.dart';
 import 'package:stabill/data/enums/transaction_type.dart';
+import 'package:stabill/data/misc/transaction_change.dart';
+import 'package:stabill/data/misc/transaction_query.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/data/stored_procedures/create_account_procedure.dart';

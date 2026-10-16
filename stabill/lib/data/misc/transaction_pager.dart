@@ -40,6 +40,12 @@ class TransactionPager {
 
   Stream<List<Transaction>> get stream => _controller.stream;
 
+  int get _loadedWindowCapacity =>
+      (_pagesFetched + (_pagesFetched == 0 && isLoading ? 1 : 0)) *
+      query.pageSize;
+
+  void applyLocalChange(TransactionChange change) => _applyChange(change);
+
   void dispose() {
     unawaited(_sub.cancel());
     unawaited(_controller.close());
@@ -101,8 +107,6 @@ class TransactionPager {
     await loadNextPage();
   }
 
-  void applyLocalChange(TransactionChange change) => _applyChange(change);
-
   void _applyChange(TransactionChange change) {
     final existingIndex = _cache.indexWhere(
       (transaction) => transaction.id == change.transaction.id,
@@ -138,6 +142,19 @@ class TransactionPager {
     onStateChanged?.call();
   }
 
+  int _compareTransactions(Transaction left, Transaction right) {
+    // TODO: Resolve uncleared-first from the user's saved sort preference.
+    if (query.sort.unclearedFirst && left.isCleared != right.isCleared) {
+      return left.isCleared ? 1 : -1;
+    }
+
+    final dateComparison = query.sort.dateDescending
+        ? right.transactionDate.compareTo(left.transactionDate)
+        : left.transactionDate.compareTo(right.transactionDate);
+    if (dateComparison != 0) return dateComparison;
+    return (right.id ?? '').compareTo(left.id ?? '');
+  }
+
   bool _insertWithinLoadedWindow(Transaction transaction) {
     var insertionIndex = _cache.indexWhere(
       (existing) => _compareTransactions(transaction, existing) < 0,
@@ -154,28 +171,6 @@ class TransactionPager {
     return _cache.contains(transaction);
   }
 
-  int get _loadedWindowCapacity =>
-      (_pagesFetched + (_pagesFetched == 0 && isLoading ? 1 : 0)) *
-      query.pageSize;
-
-  void _trimToLoadedWindow() {
-    final overflow = _cache.length - _loadedWindowCapacity;
-    if (overflow > 0) _cache.removeRange(_loadedWindowCapacity, _cache.length);
-  }
-
-  int _compareTransactions(Transaction left, Transaction right) {
-    // TODO: Resolve uncleared-first from the user's saved sort preference.
-    if (query.sort.unclearedFirst && left.isCleared != right.isCleared) {
-      return left.isCleared ? 1 : -1;
-    }
-
-    final dateComparison = query.sort.dateDescending
-        ? right.transactionDate.compareTo(left.transactionDate)
-        : left.transactionDate.compareTo(right.transactionDate);
-    if (dateComparison != 0) return dateComparison;
-    return (right.id ?? '').compareTo(left.id ?? '');
-  }
-
   bool _matchesFilter(Transaction txn) {
     if (!query.filter.includeArchived && txn.isArchived) return false;
 
@@ -188,5 +183,10 @@ class TransactionPager {
         txn.category.name.toLowerCase().contains(search) ||
         txn.transactionType.label.toLowerCase().contains(search) ||
         txn.transactionType.name.toLowerCase().contains(search);
+  }
+
+  void _trimToLoadedWindow() {
+    final overflow = _cache.length - _loadedWindowCapacity;
+    if (overflow > 0) _cache.removeRange(_loadedWindowCapacity, _cache.length);
   }
 }
