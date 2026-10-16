@@ -1,4 +1,5 @@
 import 'package:stabill/data/misc/transaction_change.dart';
+import 'package:stabill/data/misc/transaction_query.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/models/transaction.dart';
@@ -95,7 +96,10 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<List<Transaction>> getTransactions(String accountId) {
+  Future<List<Transaction>> getTransactions(
+    String accountId, {
+    TransactionQuery query = const TransactionQuery(),
+  }) {
     // TODO: implement getTransactions
     throw UnimplementedError();
   }

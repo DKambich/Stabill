@@ -5,6 +5,9 @@ import 'dart:async';
 import 'package:stabill/core/services/auth/abstract_auth_service.dart';
 import 'package:stabill/core/services/auth/auth_service.dart';
 import 'package:stabill/data/misc/transaction_change.dart';
+import 'package:stabill/data/misc/transaction_query.dart';
+import 'package:stabill/data/enums/transaction_category.dart';
+import 'package:stabill/data/enums/transaction_type.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/data/stored_procedures/create_account_procedure.dart';
@@ -181,12 +184,68 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<List<Transaction>> getTransactions(String accountId) async {
-    // TODO: Implement pagination
-    var transactions = await _supabase
+  Future<List<Transaction>> getTransactions(
+    String accountId, {
+    TransactionQuery query = const TransactionQuery(),
+  }) async {
+    var builder = _supabase
         .from(TransactionsTable.tableName)
         .select()
         .eq(TransactionsTable.accountId, accountId);
+    if (!query.filter.includeArchived) {
+      builder = builder.eq(TransactionsTable.isArchived, false);
+    }
+    final search = query.filter.searchText?.trim();
+    if (search != null && search.isNotEmpty) {
+      final safeSearch = search
+          .replaceAll(RegExp(r'[,()\\]'), ' ')
+          .trim()
+          .replaceAll('%', r'\%')
+          .replaceAll('_', r'\_');
+      final normalizedSearch =
+          search.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+      final searchFilters = <String>[
+        'name.ilike.%$safeSearch%',
+        'memo.ilike.%$safeSearch%',
+      ];
+
+      for (final category in TransactionCategory.values) {
+        final normalizedName = category.name.toLowerCase();
+        final normalizedLabel =
+            category.label.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+        if (normalizedName.contains(normalizedSearch) ||
+            normalizedLabel.contains(normalizedSearch)) {
+          searchFilters.add(
+            '${TransactionsTable.transactionCategory}.eq.${category.toJson()}',
+          );
+        }
+      }
+
+      for (final type in TransactionType.values) {
+        final normalizedName = type.name.toLowerCase();
+        final normalizedLabel =
+            type.label.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+        if (normalizedName.contains(normalizedSearch) ||
+            normalizedLabel.contains(normalizedSearch)) {
+          searchFilters.add(
+            '${TransactionsTable.transactionType}.eq.${type.toJson()}',
+          );
+        }
+      }
+
+      builder = builder.or(searchFilters.join(','));
+    }
+
+    final orderedBuilder = query.sort.unclearedFirst
+        ? builder.order(TransactionsTable.isCleared, ascending: true)
+        : builder;
+    final transactions = await orderedBuilder
+        .order(
+          TransactionsTable.transactionDate,
+          ascending: !query.sort.dateDescending,
+        )
+        .order(TransactionsTable.id, ascending: false)
+        .range(query.offset, query.offset + query.pageSize - 1);
 
     return transactions.map(Transaction.fromJson).toList();
   }
