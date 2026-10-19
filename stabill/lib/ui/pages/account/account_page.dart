@@ -10,6 +10,7 @@ import 'package:stabill/config/router.dart';
 import 'package:stabill/core/services/account/account_service.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
 import 'package:stabill/core/services/transaction/transaction_service.dart';
+import 'package:stabill/data/enums/transaction_category.dart';
 import 'package:stabill/data/enums/transaction_type.dart';
 import 'package:stabill/data/misc/transaction_change.dart';
 import 'package:stabill/data/misc/transaction_filter.dart';
@@ -18,6 +19,7 @@ import 'package:stabill/data/misc/transaction_query.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/models/transaction.dart';
+import 'package:stabill/ui/dialogs/transfer_funds_dialog.dart';
 import 'package:stabill/ui/widgets/balance_text.dart';
 import 'package:stabill/ui/widgets/fallback_back_button.dart';
 
@@ -148,6 +150,11 @@ class _AccountPageState extends State<AccountPage> {
                       tooltip: 'Clear search',
                       icon: const Icon(Icons.close),
                     ),
+                  IconButton(
+                    onPressed: _showTransactionFilters,
+                    tooltip: 'Transaction filters',
+                    icon: const Icon(Icons.filter_list),
+                  ),
                 ],
                 onChanged: _onSearchChanged,
               ),
@@ -281,36 +288,9 @@ class _AccountPageState extends State<AccountPage> {
                 tooltip: "Schedule Transactions",
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: _showTransferFundsDialog,
                 icon: const Icon(Icons.swap_horiz),
-                tooltip: "Transfer Funds",
-              ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    showArchivedTransactions = !showArchivedTransactions;
-                  });
-                  _searchDebounce?.cancel();
-                  unawaited(
-                    _transactionPager.reset(
-                      newQuery: _transactionPager.query.copyWith(
-                        filter: TransactionFilter(
-                          searchText: _searchQuery.trim(),
-                          includeArchived: showArchivedTransactions,
-                        ),
-                        offset: 0,
-                      ),
-                    ),
-                  );
-                },
-                icon: Icon(
-                  showArchivedTransactions
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                ),
-                tooltip: showArchivedTransactions
-                    ? "Hide archived transactions"
-                    : "Show all transactions",
+                tooltip: 'Transfer Funds',
               ),
             ],
           ),
@@ -348,7 +328,7 @@ class _AccountPageState extends State<AccountPage> {
           searchText: _searchQuery,
           includeArchived: showArchivedTransactions,
         ),
-        pageSize: 5,
+        pageSize: 25,
       ),
       onStateChanged: _onPagerStateChanged,
     );
@@ -507,22 +487,22 @@ class _AccountPageState extends State<AccountPage> {
             ),
           ),
         const PopupMenuItem(
-          value: 'move',
-          child: Row(
-            children: [
-              Icon(Icons.swap_horiz),
-              SizedBox(width: 8),
-              Text('Move'),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
           value: 'edit',
           child: Row(
             children: [
               Icon(Icons.edit_outlined),
               SizedBox(width: 8),
               Text('Edit'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'move',
+          child: Row(
+            children: [
+              Icon(Icons.swap_horiz),
+              SizedBox(width: 8),
+              Text('Move'),
             ],
           ),
         ),
@@ -684,6 +664,7 @@ class _AccountPageState extends State<AccountPage> {
             filter: TransactionFilter(
               searchText: query.trim(),
               includeArchived: showArchivedTransactions,
+              categories: _transactionPager.query.filter.categories,
             ),
             offset: 0,
           ),
@@ -754,7 +735,8 @@ class _AccountPageState extends State<AccountPage> {
 
                   final accounts = snapshot.data!;
                   final destinations = accounts
-                      .where((account) => account.id != widget.accountId)
+                      .where((account) =>
+                          account.id != null && account.id != widget.accountId)
                       .toList();
                   if (destinations.isEmpty) {
                     return const Text('No other accounts available.');
@@ -820,11 +802,164 @@ class _AccountPageState extends State<AccountPage> {
     );
     if (destination == null || !mounted) return;
 
-    // TODO: Persist the move and refresh the transaction pager.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Moving transactions to ${destination.name} is not implemented yet',
+    final destinationId = destination.id;
+    final transactionId = transaction.id;
+    if (destinationId == null || transactionId == null) return;
+
+    final movedTransaction = transaction.copyWith(accountId: destinationId);
+    final result = await context
+        .read<TransactionService>()
+        .updateTransaction(movedTransaction);
+    if (!mounted) return;
+
+    if (result.isSuccess) {
+      _transactionPager.applyLocalChange(
+        TransactionChange(
+          type: ChangeType.update,
+          transaction: result.data!,
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Transaction moved to ${destination.name}')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to move transaction: ${result.error}')),
+      );
+    }
+  }
+
+  Future<void> _showTransactionFilters() async {
+    var includeArchived = showArchivedTransactions;
+    var selectedCategories =
+        Set<TransactionCategory>.of(_transactionPager.query.filter.categories);
+    final selectedFilters = await showModalBottomSheet<
+        ({
+          bool includeArchived,
+          Set<TransactionCategory> categories,
+        })>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.sizeOf(context).height * 0.75,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Transaction filters',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Show hidden transactions'),
+                    value: includeArchived,
+                    onChanged: (value) =>
+                        setSheetState(() => includeArchived = value),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        'Categories',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: () => setSheetState(
+                          () => selectedCategories =
+                              selectedCategories.length ==
+                                      TransactionCategory.values.length
+                                  ? <TransactionCategory>{}
+                                  : TransactionCategory.values.toSet(),
+                        ),
+                        child: Text(
+                          selectedCategories.length ==
+                                  TransactionCategory.values.length
+                              ? 'None'
+                              : 'All',
+                        ),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: TransactionCategory.values.map((category) {
+                            final isSelected =
+                                selectedCategories.contains(category);
+                            return FilterChip(
+                              avatar: Icon(category.icon, size: 18),
+                              label: Text(category.label),
+                              selected: isSelected,
+                              showCheckmark: false,
+                              onSelected: (selected) => setSheetState(() {
+                                if (selected) {
+                                  selectedCategories = {
+                                    ...selectedCategories,
+                                    category,
+                                  };
+                                } else {
+                                  selectedCategories = {
+                                    ...selectedCategories,
+                                  }..remove(category);
+                                }
+                              }),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: () => Navigator.of(sheetContext).pop((
+                          includeArchived: includeArchived,
+                          categories: Set.of(selectedCategories),
+                        )),
+                        child: const Text('Apply'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (selectedFilters == null || !mounted) return;
+
+    setState(
+      () => showArchivedTransactions = selectedFilters.includeArchived,
+    );
+    _searchDebounce?.cancel();
+    unawaited(
+      _transactionPager.reset(
+        newQuery: _transactionPager.query.copyWith(
+          filter: TransactionFilter(
+            searchText: _searchQuery.trim(),
+            includeArchived: selectedFilters.includeArchived,
+            categories: selectedFilters.categories,
+          ),
+          offset: 0,
         ),
       ),
     );
@@ -851,4 +986,9 @@ class _AccountPageState extends State<AccountPage> {
       await _handleTransactionAction(action, transaction);
     }
   }
+
+  Future<void> _showTransferFundsDialog() => showTransferFundsDialog(
+        context,
+        initialFromAccountId: widget.accountId,
+      );
 }

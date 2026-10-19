@@ -29,11 +29,10 @@ Stores user-created accounts with their respective balances.
 - UPDATE: Enable users to update accounts based on the incoming authenticated user id matching the user_id on the updated account
 - DELETE: Enable users to delete accounts based on the incoming authenticated user id matching the user_id on the deleted account
 
-
 #### Notes
 
 - This table is realtime for updates and deletes so `alter table
-  accounts replica identity full` was run to allow that
+accounts replica identity full` was run to allow that
 
 ## Stored Procedures
 
@@ -63,6 +62,18 @@ The record of the created account
 
 - Raises an exception if the account name is null or empty
 - Raises an exception if the starting balance is less than 0
+
+### **transfer_funds**
+
+Creates a cleared withdrawal in the source account and a cleared deposit in the destination account. Both inserts run in one database transaction, so either both records are created or neither is.
+
+#### Parameters
+
+- `p_from_account_id` (uuid) - The source account
+- `p_to_account_id` (uuid) - The destination account
+- `p_amount` (bigint) - Positive amount in cents
+
+The function is an invoker and relies on the account and transaction row-level security policies.
 
 # To Be Implemented
 
@@ -94,7 +105,6 @@ Stores financial transactions linked to an account.
 - UPDATE: Enable users to update transactions based on the related account belonging to the incoming authenticated user id
 - DELETE: Enable users to delete transactions based on the related account belonging to the incoming authenticated user id
 
-
 ### **Scheduled Transactions**
 
 Manages recurring transactions that automatically apply at set intervals.
@@ -115,39 +125,7 @@ Manages recurring transactions that automatically apply at set intervals.
 
 Automatically updates `current_balance` and `available_balance` on the Accounts table when a transaction is added, updated, or deleted.
 
-```sql
-CREATE OR REPLACE FUNCTION update_account_balances()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- On INSERT, add the transaction amount to the balance
-    IF TG_OP = 'INSERT' THEN
-        UPDATE accounts
-        SET available_balance = available_balance + NEW.amount,
-            current_balance = current_balance + CASE WHEN NEW.cleared THEN NEW.amount ELSE 0 END
-        WHERE id = NEW.account_id;
-
-    -- On DELETE, subtract the transaction amount
-    ELSIF TG_OP = 'DELETE' THEN
-        UPDATE accounts
-        SET available_balance = available_balance - OLD.amount,
-            current_balance = current_balance - CASE WHEN OLD.cleared THEN OLD.amount ELSE 0 END
-        WHERE id = OLD.account_id;
-
-    -- On UPDATE, adjust for changes in amount or cleared status
-    ELSIF TG_OP = 'UPDATE' THEN
-        UPDATE accounts
-        SET available_balance = available_balance - OLD.amount + NEW.amount,
-            current_balance = current_balance - (CASE WHEN OLD.cleared THEN OLD.amount ELSE 0 END) + (CASE WHEN NEW.cleared THEN NEW.amount ELSE 0 END)
-        WHERE id = NEW.account_id;
-    END IF;
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER transaction_balance_trigger
-AFTER INSERT OR DELETE OR UPDATE ON transactions
-FOR EACH ROW EXECUTE FUNCTION update_account_balances();
-```
+The trigger applies deposits and withdrawals with the correct sign. `current_balance` includes cleared and uncleared transactions; `available_balance` includes only cleared transactions. Updates that move a transaction between accounts reverse its effect on the old account and apply it to the new one. The implementation is in `migrations/20261018000000_transfer_funds.sql`.
 
 ## Edge Functions
 
@@ -156,38 +134,40 @@ FOR EACH ROW EXECUTE FUNCTION update_account_balances();
 Runs periodically to apply due scheduled transactions.
 
 ```js
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default async function apply_scheduled_transactions() {
-    const now = new Date();
-    const { data: scheduled } = await supabase
-        .from('scheduled_transactions')
-        .select('*')
-        .lte('next_application_date', now.toISOString());
+  const now = new Date();
+  const { data: scheduled } = await supabase
+    .from("scheduled_transactions")
+    .select("*")
+    .lte("next_application_date", now.toISOString());
 
-    for (const txn of scheduled) {
-        await supabase.from('transactions').insert({
-            account_id: txn.account_id,
-            name: txn.name,
-            amount: txn.amount,
-            type: txn.type,
-            cleared: txn.cleared,
-            transaction_date: txn.next_application_date
-        });
+  for (const txn of scheduled) {
+    await supabase.from("transactions").insert({
+      account_id: txn.account_id,
+      name: txn.name,
+      amount: txn.amount,
+      type: txn.type,
+      cleared: txn.cleared,
+      transaction_date: txn.next_application_date,
+    });
 
-        // Update next application date
-        let newDate = new Date(txn.next_application_date);
-        if (txn.frequency === 'Daily') newDate.setDate(newDate.getDate() + 1);
-        else if (txn.frequency === 'Weekly') newDate.setDate(newDate.getDate() + 7);
-        else if (txn.frequency === 'Monthly') newDate.setMonth(newDate.getMonth() + 1);
-        else if (txn.frequency === 'Yearly') newDate.setFullYear(newDate.getFullYear() + 1);
+    // Update next application date
+    let newDate = new Date(txn.next_application_date);
+    if (txn.frequency === "Daily") newDate.setDate(newDate.getDate() + 1);
+    else if (txn.frequency === "Weekly") newDate.setDate(newDate.getDate() + 7);
+    else if (txn.frequency === "Monthly")
+      newDate.setMonth(newDate.getMonth() + 1);
+    else if (txn.frequency === "Yearly")
+      newDate.setFullYear(newDate.getFullYear() + 1);
 
-        await supabase
-            .from('scheduled_transactions')
-            .update({ next_application_date: newDate.toISOString() })
-            .eq('id', txn.id);
-    }
+    await supabase
+      .from("scheduled_transactions")
+      .update({ next_application_date: newDate.toISOString() })
+      .eq("id", txn.id);
+  }
 }
 ```
 

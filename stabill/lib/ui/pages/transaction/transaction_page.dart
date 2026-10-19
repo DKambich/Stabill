@@ -568,6 +568,7 @@ class _TransactionPageState extends State<TransactionPage> {
       if (isVoidType) _amount = 0;
       final transaction = Transaction(
         id: isNewTransaction ? null : widget.transactionId,
+        accountId: widget.accountId,
         name: _name,
         createdAt:
             _dateTime, // TODO: use existing transaction createdAt if editing

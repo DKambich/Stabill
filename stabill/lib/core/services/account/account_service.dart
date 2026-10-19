@@ -71,6 +71,16 @@ class AccountService {
     }
   }
 
+  Future<Result<List<Account>>> getAccounts() async {
+    try {
+      final accounts = await _databaseRepository.getAccounts();
+      return Result.success(accounts);
+    } catch (error, stackTrace) {
+      debugPrint('getAccounts() failed: $error\n$stackTrace');
+      return Result.failure(error);
+    }
+  }
+
   /// Watch a single account reactively.
   Stream<Account> watchAccount(String accountId) {
     if (_accountLazy.containsKey(accountId)) {

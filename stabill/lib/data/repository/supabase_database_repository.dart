@@ -11,6 +11,7 @@ import 'package:stabill/data/misc/transaction_query.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/data/stored_procedures/create_account_procedure.dart';
+import 'package:stabill/data/stored_procedures/transfer_funds_procedure.dart';
 import 'package:stabill/data/tables/accounts_table.dart';
 import 'package:stabill/data/tables/transactions_table.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -105,6 +106,15 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Future<List<Account>> getAccounts() async {
+    final accountRecords = await _supabase
+        .from(AccountsTable.tableName)
+        .select()
+        .eq(AccountsTable.userId, _getUserId());
+    return accountRecords.map(Account.fromJson).toList();
+  }
+
+  @override
   Stream<List<Account>> getAccountsStream() {
     // TODO: On web, this is giving DartError: TypeError: Instance of 'JSArray<dynamic>': type 'List<dynamic>' is not a subtype of type 'List<Map<String, dynamic>>'
     return _supabase
@@ -195,6 +205,12 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
     if (!query.filter.includeArchived) {
       builder = builder.eq(TransactionsTable.isArchived, false);
     }
+    if (query.filter.categories.isNotEmpty) {
+      builder = builder.inFilter(
+        TransactionsTable.transactionCategory,
+        query.filter.categories.map((category) => category.toJson()).toList(),
+      );
+    }
     final search = query.filter.searchText?.trim();
     if (search != null && search.isNotEmpty) {
       final safeSearch = search
@@ -251,6 +267,22 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Future<void> transferFunds({
+    required String fromAccountId,
+    required String toAccountId,
+    required int amountInCents,
+  }) async {
+    await _supabase.rpc(
+      TransferFundsProcedure.procedureName,
+      params: TransferFundsProcedure.createParams(
+        fromAccountId: fromAccountId,
+        toAccountId: toAccountId,
+        amountInCents: amountInCents,
+      ),
+    );
+  }
+
+  @override
   Future<Transaction> updateTransaction(Transaction transaction) async {
     if (transaction.id == null) {
       throw ArgumentError('Cannot update a transaction without an id');
@@ -287,14 +319,26 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
               _ => null, // fallback for PostgresChangeEvent.all
             };
             if (type != null) {
+              if (type == ChangeType.delete) {
+                final transactionId =
+                    payload.oldRecord[TransactionsTable.id] as String?;
+                if (transactionId != null) {
+                  controller.add(
+                    TransactionChange(
+                      type: type,
+                      transactionId: transactionId,
+                    ),
+                  );
+                }
+                return;
+              }
+
+              final record = payload.newRecord;
+              if (record.isEmpty) return;
               controller.add(
                 TransactionChange(
                   type: type,
-                  transaction: Transaction.fromJson(
-                    payload.newRecord.isNotEmpty
-                        ? payload.newRecord
-                        : payload.oldRecord,
-                  ),
+                  transaction: Transaction.fromJson(record),
                 ),
               );
             }
