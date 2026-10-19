@@ -108,25 +108,30 @@ class TransactionPager {
   }
 
   void _applyChange(TransactionChange change) {
-    final existingIndex = _cache.indexWhere(
-      (transaction) => transaction.id == change.transaction.id,
-    );
-    final matchesFilter = _matchesFilter(change.transaction);
+    final changedTransaction = change.transaction;
+    final transactionId = changedTransaction?.id ?? change.transactionId;
+    if (transactionId == null) return;
+
+    final existingIndex =
+        _cache.indexWhere((transaction) => transaction.id == transactionId);
     var changed = false;
 
     switch (change.type) {
       case ChangeType.insert:
+        if (changedTransaction == null) return;
+        final matchesFilter = _matchesFilter(changedTransaction);
         if (!matchesFilter) return;
         if (existingIndex >= 0) _cache.removeAt(existingIndex);
-        changed = _insertWithinLoadedWindow(change.transaction);
+        changed = _insertWithinLoadedWindow(changedTransaction);
         break;
       case ChangeType.update:
+        if (changedTransaction == null) return;
         if (existingIndex >= 0) {
           _cache.removeAt(existingIndex);
           changed = true;
         }
-        if (matchesFilter) {
-          changed = _insertWithinLoadedWindow(change.transaction) || changed;
+        if (_matchesFilter(changedTransaction)) {
+          changed = _insertWithinLoadedWindow(changedTransaction) || changed;
         }
         break;
       case ChangeType.delete:
@@ -172,7 +177,12 @@ class TransactionPager {
   }
 
   bool _matchesFilter(Transaction txn) {
+    if (txn.accountId != accountId) return false;
     if (!query.filter.includeArchived && txn.isArchived) return false;
+    if (query.filter.categories.isNotEmpty &&
+        !query.filter.categories.contains(txn.category)) {
+      return false;
+    }
 
     final search = query.filter.searchText?.trim().toLowerCase() ?? '';
     if (search.isEmpty) return true;

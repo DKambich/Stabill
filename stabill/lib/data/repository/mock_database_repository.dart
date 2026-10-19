@@ -1,3 +1,5 @@
+import 'package:stabill/data/enums/transaction_category.dart';
+import 'package:stabill/data/enums/transaction_type.dart';
 import 'package:stabill/data/misc/transaction_change.dart';
 import 'package:stabill/data/misc/transaction_query.dart';
 import 'package:stabill/data/models/account.dart';
@@ -37,6 +39,7 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
       Transaction transaction, String accountId) async {
     var createdTransaction = Transaction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
+        accountId: accountId,
         name: transaction.name,
         createdAt: DateTime.now(),
         amount: transaction.amount,
@@ -76,6 +79,9 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Future<List<Account>> getAccounts() async => [..._accounts];
+
+  @override
   Stream<List<Account>> getAccountsStream() {
     return Stream.value([..._accounts]);
   }
@@ -105,6 +111,57 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Future<void> transferFunds({
+    required String fromAccountId,
+    required String toAccountId,
+    required int amountInCents,
+  }) async {
+    if (fromAccountId == toAccountId || amountInCents <= 0) {
+      throw ArgumentError(
+          'A transfer requires two accounts and a positive amount');
+    }
+
+    final fromIndex =
+        _accounts.indexWhere((account) => account.id == fromAccountId);
+    final toIndex =
+        _accounts.indexWhere((account) => account.id == toAccountId);
+    if (fromIndex == -1 || toIndex == -1) {
+      throw ArgumentError('Both transfer accounts must exist');
+    }
+
+    final fromAccount = _accounts[fromIndex];
+    final toAccount = _accounts[toIndex];
+    final now = DateTime.now();
+    await createTransaction(
+      Transaction(
+        name: 'Transfer to ${toAccount.name}',
+        amount: amountInCents,
+        transactionDate: now,
+        transactionType: TransactionType.withdrawal,
+        category: TransactionCategory.none,
+        isCleared: true,
+        isArchived: false,
+      ),
+      fromAccountId,
+    );
+    await createTransaction(
+      Transaction(
+        name: 'Transfer from ${fromAccount.name}',
+        amount: amountInCents,
+        transactionDate: now,
+        transactionType: TransactionType.deposit,
+        category: TransactionCategory.none,
+        isCleared: true,
+        isArchived: false,
+      ),
+      toAccountId,
+    );
+
+    _adjustAccountBalance(fromIndex, -amountInCents);
+    _adjustAccountBalance(toIndex, amountInCents);
+  }
+
+  @override
   Future<Transaction> updateTransaction(Transaction transaction) {
     // TODO: implement updateTransaction
     throw UnimplementedError();
@@ -114,5 +171,20 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   Stream<TransactionChange> watchTransactions(String accountId) {
     // TODO: implement watchTransactions
     throw UnimplementedError();
+  }
+
+  void _adjustAccountBalance(int index, int amountInCents) {
+    final account = _accounts[index];
+    final balance = account.balance ?? Balance(current: 0, available: 0);
+    _accounts[index] = Account(
+      id: account.id,
+      name: account.name,
+      balance: Balance(
+        current: balance.current + amountInCents,
+        available: balance.available + amountInCents,
+      ),
+      createdAt: account.createdAt,
+      isArchived: account.isArchived,
+    );
   }
 }

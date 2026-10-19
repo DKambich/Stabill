@@ -9,6 +9,7 @@ import 'package:stabill/core/services/account/account_service.dart';
 import 'package:stabill/core/services/navigation/navigation_service.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/balance.dart';
+import 'package:stabill/ui/dialogs/transfer_funds_dialog.dart';
 import 'package:stabill/ui/widgets/balance_text.dart';
 import 'package:stabill/ui/widgets/fallback_back_button.dart';
 
@@ -173,7 +174,7 @@ class _AccountsPageState extends State<AccountsPage> {
                 tooltip: "Schedule Transactions",
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () => showTransferFundsDialog(context),
                 icon: const Icon(Icons.swap_horiz),
                 tooltip: "Transfer Funds",
               ),

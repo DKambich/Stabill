@@ -8,6 +8,9 @@ class Transaction {
   /// Unique identifier for the transaction.
   final String? id;
 
+  /// The account that owns this transaction.
+  final String? accountId;
+
   /// The timestamp when the transaction was created.
   final DateTime? createdAt;
 
@@ -40,6 +43,7 @@ class Transaction {
 
   Transaction({
     this.id,
+    this.accountId,
     required this.name,
     this.createdAt,
     required this.amount,
@@ -56,6 +60,7 @@ class Transaction {
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
       id: json[TransactionsTable.id] as String,
+      accountId: json[TransactionsTable.accountId] as String?,
       name: json[TransactionsTable.name] as String,
       createdAt: DateTime.parse(json[TransactionsTable.createdAt] as String),
       amount: json[TransactionsTable.amount] as int,
@@ -76,6 +81,7 @@ class Transaction {
 
   Transaction copyWith({
     String? id,
+    String? accountId,
     DateTime? createdAt,
     String? name,
     int? amount,
@@ -89,6 +95,7 @@ class Transaction {
   }) {
     return Transaction(
       id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
       createdAt: createdAt ?? this.createdAt,
       name: name ?? this.name,
       amount: amount ?? this.amount,
@@ -106,6 +113,7 @@ class Transaction {
   Map<String, dynamic> toJson() {
     return {
       TransactionsTable.id: id,
+      TransactionsTable.accountId: accountId,
       TransactionsTable.name: name,
       TransactionsTable.createdAt: createdAt?.toIso8601String(),
       TransactionsTable.amount: amount,
