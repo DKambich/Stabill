@@ -38,6 +38,24 @@ class TransactionService {
     }
   }
 
+  Future<Result<bool>> transferFunds({
+    required String fromAccountId,
+    required String toAccountId,
+    required int amountInCents,
+  }) async {
+    try {
+      await _databaseRepository.transferFunds(
+        fromAccountId: fromAccountId,
+        toAccountId: toAccountId,
+        amountInCents: amountInCents,
+      );
+      return Result.success(true);
+    } catch (error, stackTrace) {
+      debugPrint('transferFunds() failed: $error\n$stackTrace');
+      return Result.failure(error);
+    }
+  }
+
   Future<Result<bool>> deleteTransaction(String transactionId) async {
     try {
       await _databaseRepository.deleteTransaction(transactionId);

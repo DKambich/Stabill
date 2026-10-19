@@ -79,10 +79,58 @@ void main() {
       setup.pager.applyLocalChange(
         TransactionChange(
           type: ChangeType.delete,
-          transaction: _transaction('newest', 3),
+          transactionId: 'newest',
         ),
       );
       expect(await _ids(setup.pager), ['middle']);
+
+      setup.pager.dispose();
+      await setup.changes.close();
+    });
+
+    test('removes transactions moved to another account', () async {
+      final setup = _createPager([_transaction('moving', 3)], pageSize: 2);
+      await setup.pager.loadNextPage();
+
+      setup.pager.applyLocalChange(
+        TransactionChange(
+          type: ChangeType.update,
+          transaction: _transaction('moving', 3, accountId: 'destination'),
+        ),
+      );
+
+      expect(await _ids(setup.pager), isEmpty);
+
+      setup.pager.dispose();
+      await setup.changes.close();
+    });
+
+    test('only caches selected categories from realtime changes', () async {
+      final setup = _createPager(
+        [_transaction('food', 3, category: TransactionCategory.food)],
+        pageSize: 2,
+        filter: const TransactionFilter(
+          categories: {TransactionCategory.food},
+        ),
+      );
+      await setup.pager.loadNextPage();
+
+      setup.pager.applyLocalChange(
+        TransactionChange(
+          type: ChangeType.insert,
+          transaction:
+              _transaction('travel', 4, category: TransactionCategory.travel),
+        ),
+      );
+      setup.pager.applyLocalChange(
+        TransactionChange(
+          type: ChangeType.insert,
+          transaction:
+              _transaction('food-new', 5, category: TransactionCategory.food),
+        ),
+      );
+
+      expect(await _ids(setup.pager), ['food-new', 'food']);
 
       setup.pager.dispose();
       await setup.changes.close();
@@ -120,14 +168,17 @@ Transaction _transaction(
   String id,
   int day, {
   bool isCleared = false,
+  String accountId = 'account',
+  TransactionCategory category = TransactionCategory.none,
 }) =>
     Transaction(
       id: id,
+      accountId: accountId,
       name: id,
       amount: 100,
       transactionDate: DateTime.utc(2026, 10, day),
       transactionType: TransactionType.deposit,
-      category: TransactionCategory.none,
+      category: category,
       isCleared: isCleared,
       isArchived: false,
     );

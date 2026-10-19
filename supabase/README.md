@@ -64,6 +64,18 @@ The record of the created account
 - Raises an exception if the account name is null or empty
 - Raises an exception if the starting balance is less than 0
 
+### **transfer_funds**
+
+Creates a cleared withdrawal in the source account and a cleared deposit in the destination account. Both inserts run in one database transaction, so either both records are created or neither is.
+
+#### Parameters
+
+- `p_from_account_id` (uuid) - The source account
+- `p_to_account_id` (uuid) - The destination account
+- `p_amount` (bigint) - Positive amount in cents
+
+The function is an invoker and relies on the account and transaction row-level security policies.
+
 # To Be Implemented
 
 ## Tables
@@ -115,39 +127,7 @@ Manages recurring transactions that automatically apply at set intervals.
 
 Automatically updates `current_balance` and `available_balance` on the Accounts table when a transaction is added, updated, or deleted.
 
-```sql
-CREATE OR REPLACE FUNCTION update_account_balances()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- On INSERT, add the transaction amount to the balance
-    IF TG_OP = 'INSERT' THEN
-        UPDATE accounts
-        SET available_balance = available_balance + NEW.amount,
-            current_balance = current_balance + CASE WHEN NEW.cleared THEN NEW.amount ELSE 0 END
-        WHERE id = NEW.account_id;
-
-    -- On DELETE, subtract the transaction amount
-    ELSIF TG_OP = 'DELETE' THEN
-        UPDATE accounts
-        SET available_balance = available_balance - OLD.amount,
-            current_balance = current_balance - CASE WHEN OLD.cleared THEN OLD.amount ELSE 0 END
-        WHERE id = OLD.account_id;
-
-    -- On UPDATE, adjust for changes in amount or cleared status
-    ELSIF TG_OP = 'UPDATE' THEN
-        UPDATE accounts
-        SET available_balance = available_balance - OLD.amount + NEW.amount,
-            current_balance = current_balance - (CASE WHEN OLD.cleared THEN OLD.amount ELSE 0 END) + (CASE WHEN NEW.cleared THEN NEW.amount ELSE 0 END)
-        WHERE id = NEW.account_id;
-    END IF;
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER transaction_balance_trigger
-AFTER INSERT OR DELETE OR UPDATE ON transactions
-FOR EACH ROW EXECUTE FUNCTION update_account_balances();
-```
+The trigger applies deposits and withdrawals with the correct sign. `current_balance` includes cleared and uncleared transactions; `available_balance` includes only cleared transactions. Updates that move a transaction between accounts reverse its effect on the old account and apply it to the new one. The implementation is in `migrations/20261018000000_transfer_funds.sql`.
 
 ## Edge Functions
 
