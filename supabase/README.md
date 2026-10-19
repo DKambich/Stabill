@@ -29,11 +29,10 @@ Stores user-created accounts with their respective balances.
 - UPDATE: Enable users to update accounts based on the incoming authenticated user id matching the user_id on the updated account
 - DELETE: Enable users to delete accounts based on the incoming authenticated user id matching the user_id on the deleted account
 
-
 #### Notes
 
 - This table is realtime for updates and deletes so `alter table
-  accounts replica identity full` was run to allow that
+accounts replica identity full` was run to allow that
 
 ## Stored Procedures
 
@@ -106,7 +105,6 @@ Stores financial transactions linked to an account.
 - UPDATE: Enable users to update transactions based on the related account belonging to the incoming authenticated user id
 - DELETE: Enable users to delete transactions based on the related account belonging to the incoming authenticated user id
 
-
 ### **Scheduled Transactions**
 
 Manages recurring transactions that automatically apply at set intervals.
@@ -136,38 +134,40 @@ The trigger applies deposits and withdrawals with the correct sign. `current_bal
 Runs periodically to apply due scheduled transactions.
 
 ```js
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default async function apply_scheduled_transactions() {
-    const now = new Date();
-    const { data: scheduled } = await supabase
-        .from('scheduled_transactions')
-        .select('*')
-        .lte('next_application_date', now.toISOString());
+  const now = new Date();
+  const { data: scheduled } = await supabase
+    .from("scheduled_transactions")
+    .select("*")
+    .lte("next_application_date", now.toISOString());
 
-    for (const txn of scheduled) {
-        await supabase.from('transactions').insert({
-            account_id: txn.account_id,
-            name: txn.name,
-            amount: txn.amount,
-            type: txn.type,
-            cleared: txn.cleared,
-            transaction_date: txn.next_application_date
-        });
+  for (const txn of scheduled) {
+    await supabase.from("transactions").insert({
+      account_id: txn.account_id,
+      name: txn.name,
+      amount: txn.amount,
+      type: txn.type,
+      cleared: txn.cleared,
+      transaction_date: txn.next_application_date,
+    });
 
-        // Update next application date
-        let newDate = new Date(txn.next_application_date);
-        if (txn.frequency === 'Daily') newDate.setDate(newDate.getDate() + 1);
-        else if (txn.frequency === 'Weekly') newDate.setDate(newDate.getDate() + 7);
-        else if (txn.frequency === 'Monthly') newDate.setMonth(newDate.getMonth() + 1);
-        else if (txn.frequency === 'Yearly') newDate.setFullYear(newDate.getFullYear() + 1);
+    // Update next application date
+    let newDate = new Date(txn.next_application_date);
+    if (txn.frequency === "Daily") newDate.setDate(newDate.getDate() + 1);
+    else if (txn.frequency === "Weekly") newDate.setDate(newDate.getDate() + 7);
+    else if (txn.frequency === "Monthly")
+      newDate.setMonth(newDate.getMonth() + 1);
+    else if (txn.frequency === "Yearly")
+      newDate.setFullYear(newDate.getFullYear() + 1);
 
-        await supabase
-            .from('scheduled_transactions')
-            .update({ next_application_date: newDate.toISOString() })
-            .eq('id', txn.id);
-    }
+    await supabase
+      .from("scheduled_transactions")
+      .update({ next_application_date: newDate.toISOString() })
+      .eq("id", txn.id);
+  }
 }
 ```
 

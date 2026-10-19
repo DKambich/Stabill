@@ -64,22 +64,6 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<void> transferFunds({
-    required String fromAccountId,
-    required String toAccountId,
-    required int amountInCents,
-  }) async {
-    await _supabase.rpc(
-      TransferFundsProcedure.procedureName,
-      params: TransferFundsProcedure.createParams(
-        fromAccountId: fromAccountId,
-        toAccountId: toAccountId,
-        amountInCents: amountInCents,
-      ),
-    );
-  }
-
-  @override
   Future<void> deleteAccount(String accountId) async {
     if (accountId.isEmpty) {
       throw ArgumentError('Cannot delete an account without an id');
@@ -111,15 +95,6 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<List<Account>> getAccounts() async {
-    final accountRecords = await _supabase
-        .from(AccountsTable.tableName)
-        .select()
-        .eq(AccountsTable.userId, _getUserId());
-    return accountRecords.map(Account.fromJson).toList();
-  }
-
-  @override
   Stream<Account> getAccountAsStream(String accountId) {
     return _supabase
         .from(AccountsTable.tableName)
@@ -128,6 +103,15 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
         .map<Account>(
           (accountRecords) => Account.fromJson(accountRecords.first),
         );
+  }
+
+  @override
+  Future<List<Account>> getAccounts() async {
+    final accountRecords = await _supabase
+        .from(AccountsTable.tableName)
+        .select()
+        .eq(AccountsTable.userId, _getUserId());
+    return accountRecords.map(Account.fromJson).toList();
   }
 
   @override
@@ -280,6 +264,22 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
         .range(query.offset, query.offset + query.pageSize - 1);
 
     return transactions.map(Transaction.fromJson).toList();
+  }
+
+  @override
+  Future<void> transferFunds({
+    required String fromAccountId,
+    required String toAccountId,
+    required int amountInCents,
+  }) async {
+    await _supabase.rpc(
+      TransferFundsProcedure.procedureName,
+      params: TransferFundsProcedure.createParams(
+        fromAccountId: fromAccountId,
+        toAccountId: toAccountId,
+        amountInCents: amountInCents,
+      ),
+    );
   }
 
   @override

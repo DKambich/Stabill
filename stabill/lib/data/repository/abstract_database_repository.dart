@@ -7,19 +7,14 @@ abstract class AbstractDatabaseRepository {
   Future<Account> createAccount(Account account);
   Future<Transaction> createTransaction(
       Transaction transaction, String accountId);
-  Future<void> transferFunds({
-    required String fromAccountId,
-    required String toAccountId,
-    required int amountInCents,
-  });
   Future<void> deleteAccount(String accountId);
   Future<void> deleteTransaction(String transactionId);
   Future<Account> getAccount(String accountId);
-  Future<List<Account>> getAccounts();
   Stream<Account> getAccountAsStream(String accountId);
+  Future<List<Account>> getAccounts();
   Stream<List<Account>> getAccountsStream();
-
   Future<Transaction> getTransaction(String transactionId);
+
   // TODO: Change this, maybe return the unsubscribe function to be called?
   Function getTransactionChanges(
     String accountId, {
@@ -30,6 +25,11 @@ abstract class AbstractDatabaseRepository {
   Future<List<Transaction>> getTransactions(
     String accountId, {
     TransactionQuery query = const TransactionQuery(),
+  });
+  Future<void> transferFunds({
+    required String fromAccountId,
+    required String toAccountId,
+    required int amountInCents,
   });
   Future<Transaction> updateTransaction(Transaction transaction);
   Stream<TransactionChange> watchTransactions(String accountId);

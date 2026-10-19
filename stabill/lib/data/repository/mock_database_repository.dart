@@ -73,13 +73,13 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<List<Account>> getAccounts() async => [..._accounts];
-
-  @override
   Stream<Account> getAccountAsStream(String accountId) {
     // TODO: implement getAccountAsStream
     throw UnimplementedError();
   }
+
+  @override
+  Future<List<Account>> getAccounts() async => [..._accounts];
 
   @override
   Stream<List<Account>> getAccountsStream() {
