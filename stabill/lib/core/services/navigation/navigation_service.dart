@@ -11,6 +11,18 @@ class NavigationService {
 
   RouterConfig<RouteMatchList> get router => _router;
 
+  void finishTransactionEdit(
+    String accountId,
+    Transaction transaction,
+  ) {
+    _router.go(
+      Routes.transaction(accountId, transaction.id!),
+      extra: transaction,
+    );
+  }
+
+  void goToAccount(String accountId) => _router.go(Routes.account(accountId));
+
   Future<void> navigateBack({
     String fallbackRoute = Routes.home,
   }) async {
@@ -24,8 +36,6 @@ class NavigationService {
   Future<void> navigateToAccount(String accountId) async =>
       _router.navigate(Routes.account(accountId));
 
-  void goToAccount(String accountId) => _router.go(Routes.account(accountId));
-
   Future<void> navigateToAccounts() async => _router.navigate(Routes.accounts);
 
   Future<void> navigateToAddTransaction(String accountId) async =>
@@ -38,16 +48,6 @@ class NavigationService {
   }) async {
     _router.go(
       Routes.editTransaction(accountId, transactionId),
-      extra: transaction,
-    );
-  }
-
-  void finishTransactionEdit(
-    String accountId,
-    Transaction transaction,
-  ) {
-    _router.go(
-      Routes.transaction(accountId, transaction.id!),
       extra: transaction,
     );
   }

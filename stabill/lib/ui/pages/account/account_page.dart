@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
@@ -19,6 +21,7 @@ import 'package:stabill/data/misc/transaction_query.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/balance.dart';
 import 'package:stabill/data/models/transaction.dart';
+import 'package:stabill/ui/dialogs/balance_correction_dialog.dart';
 import 'package:stabill/ui/dialogs/transfer_funds_dialog.dart';
 import 'package:stabill/ui/widgets/balance_text.dart';
 import 'package:stabill/ui/widgets/fallback_back_button.dart';
@@ -283,6 +286,11 @@ class _AccountPageState extends State<AccountPage> {
           child: Row(
             children: [
               IconButton(
+                onPressed: _correctBalance,
+                icon: const Icon(Icons.price_change),
+                tooltip: 'Correct balance',
+              ),
+              IconButton(
                 onPressed: () {},
                 icon: const Icon(Icons.schedule),
                 tooltip: "Schedule Transactions",
@@ -342,6 +350,14 @@ class _AccountPageState extends State<AccountPage> {
     Transaction transaction,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final showTransactionMenu = kIsWeb ||
+        switch (defaultTargetPlatform) {
+          TargetPlatform.linux ||
+          TargetPlatform.macOS ||
+          TargetPlatform.windows =>
+            true,
+          _ => false,
+        };
 
     return GestureDetector(
       onLongPressStart: (details) => _showTransactionMenu(
@@ -353,9 +369,11 @@ class _AccountPageState extends State<AccountPage> {
         margin: const EdgeInsets.all(4),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => context
-              .read<NavigationService>()
-              .navigateToTransaction(widget.accountId, transaction.id ?? ''),
+          onTap: () => context.read<NavigationService>().navigateToTransaction(
+                widget.accountId,
+                transaction.id ?? '',
+                transaction: transaction,
+              ),
           child: ListTile(
             minVerticalPadding: 16,
             leading: CircleAvatar(
@@ -431,15 +449,17 @@ class _AccountPageState extends State<AccountPage> {
                   minFontSize: 12,
                   maxFontSize: 16,
                 ),
-                const SizedBox(width: 8),
-                PopupMenuButton<String>(
-                  tooltip: 'Transaction actions',
-                  padding: EdgeInsets.zero,
-                  onSelected: (action) =>
-                      _handleTransactionAction(action, transaction),
-                  itemBuilder: (context) =>
-                      _buildTransactionMenuItems(context, transaction),
-                ),
+                if (showTransactionMenu) ...[
+                  const SizedBox(width: 8),
+                  PopupMenuButton<String>(
+                    tooltip: 'Transaction actions',
+                    padding: EdgeInsets.zero,
+                    onSelected: (action) =>
+                        _handleTransactionAction(action, transaction),
+                    itemBuilder: (context) =>
+                        _buildTransactionMenuItems(context, transaction),
+                  ),
+                ],
               ],
             ),
           ),
@@ -561,6 +581,26 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  Future<void> _correctBalance() async {
+    final targetBalanceInCents = await showBalanceCorrectionDialog(context);
+    if (targetBalanceInCents == null || !mounted) return;
+
+    final result = await context.read<AccountService>().correctBalance(
+          accountId: widget.accountId,
+          targetBalanceInCents: targetBalanceInCents,
+        );
+    if (!mounted) return;
+
+    final message = result.isFailure
+        ? 'Failed to correct balance: ${result.error}'
+        : result.data == true
+            ? 'Balance corrected'
+            : 'Account already has that balance';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   Future<void> _handleTransactionAction(
     String action,
     Transaction transaction,
@@ -577,9 +617,11 @@ class _AccountPageState extends State<AccountPage> {
       case 'edit':
         final transactionId = transaction.id;
         if (transactionId != null) {
-          await context
-              .read<NavigationService>()
-              .navigateToTransaction(widget.accountId, transactionId);
+          await context.read<NavigationService>().navigateToEditTransaction(
+                widget.accountId,
+                transactionId,
+                transaction: transaction,
+              );
         }
       case 'delete':
         await _confirmDeleteTransaction(transaction);
