@@ -8,6 +8,8 @@ import 'package:stabill/ui/pages/account/account_page.dart';
 import 'package:stabill/ui/pages/accounts/accounts_page.dart';
 import 'package:stabill/ui/pages/auth/sign_in_page.dart';
 import 'package:stabill/ui/pages/home/home_page.dart';
+import 'package:stabill/ui/pages/settings/account_order_settings_page.dart';
+import 'package:stabill/ui/pages/settings/settings_page.dart';
 import 'package:stabill/ui/pages/transaction/transaction_page.dart';
 
 final router = GoRouter(
@@ -30,6 +32,18 @@ final router = GoRouter(
     GoRoute(
       path: Routes.accounts,
       builder: (context, state) => AccountsPage(),
+    ),
+    GoRoute(
+      path: Routes.archivedAccounts,
+      builder: (context, state) => AccountsPage(showArchivedAccounts: true),
+    ),
+    GoRoute(
+      path: Routes.settings,
+      builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: Routes.accountSettings,
+      builder: (context, state) => const AccountOrderSettingsPage(),
     ),
     GoRoute(
       path: RoutePatterns.account,
@@ -79,6 +93,9 @@ class Routes {
   static const String signIn = '/signin';
   static const String home = '/';
   static const String accounts = '/accounts';
+  static const String archivedAccounts = '/accounts/archived';
+  static const String settings = '/settings';
+  static const String accountSettings = '/settings/accounts';
 
   // Dynamic routes
   static String account(String accountId) =>
