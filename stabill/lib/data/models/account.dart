@@ -19,12 +19,16 @@ class Account {
   /// Indicates whether the account is archived (inactive).
   final bool isArchived;
 
+  /// Position of this account in the user's account list.
+  final int orderIndex;
+
   Account({
     this.id,
     required this.name,
     this.balance,
     this.createdAt,
     required this.isArchived,
+    this.orderIndex = 2147483647,
   });
 
   /// Creates an [Account] from a JSON object.
@@ -38,6 +42,8 @@ class Account {
       ),
       createdAt: DateTime.parse(json[AccountsTable.createdAt] as String),
       isArchived: json[AccountsTable.isArchived] as bool,
+      orderIndex:
+          (json[AccountsTable.orderIndex] as num?)?.toInt() ?? 2147483647,
     );
   }
 
@@ -50,6 +56,7 @@ class Account {
       AccountsTable.availableBalance: balance?.available,
       AccountsTable.createdAt: createdAt?.toIso8601String(),
       AccountsTable.isArchived: isArchived,
+      AccountsTable.orderIndex: orderIndex,
     };
   }
 
