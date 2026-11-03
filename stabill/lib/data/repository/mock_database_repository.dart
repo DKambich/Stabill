@@ -162,6 +162,40 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Future<bool> correctAccountBalance({
+    required String accountId,
+    required int targetBalanceInCents,
+  }) async {
+    final accountIndex =
+        _accounts.indexWhere((account) => account.id == accountId);
+    if (accountIndex == -1) {
+      throw ArgumentError('Account does not exist');
+    }
+
+    final account = _accounts[accountIndex];
+    final currentBalance = account.balance?.current ?? 0;
+    final adjustment = targetBalanceInCents - currentBalance;
+    if (adjustment == 0) return false;
+
+    await createTransaction(
+      Transaction(
+        name: 'Balance correction',
+        amount: adjustment.abs(),
+        transactionDate: DateTime.now(),
+        transactionType: adjustment > 0
+            ? TransactionType.deposit
+            : TransactionType.withdrawal,
+        category: TransactionCategory.other,
+        isCleared: true,
+        isArchived: false,
+      ),
+      accountId,
+    );
+    _adjustAccountBalance(accountIndex, adjustment);
+    return true;
+  }
+
+  @override
   Future<Transaction> updateTransaction(Transaction transaction) {
     // TODO: implement updateTransaction
     throw UnimplementedError();

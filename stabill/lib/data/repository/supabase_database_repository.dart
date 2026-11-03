@@ -10,6 +10,7 @@ import 'package:stabill/data/misc/transaction_change.dart';
 import 'package:stabill/data/misc/transaction_query.dart';
 import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/transaction.dart';
+import 'package:stabill/data/stored_procedures/correct_account_balance_procedure.dart';
 import 'package:stabill/data/stored_procedures/create_account_procedure.dart';
 import 'package:stabill/data/stored_procedures/transfer_funds_procedure.dart';
 import 'package:stabill/data/tables/accounts_table.dart';
@@ -278,6 +279,20 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
         fromAccountId: fromAccountId,
         toAccountId: toAccountId,
         amountInCents: amountInCents,
+      ),
+    );
+  }
+
+  @override
+  Future<bool> correctAccountBalance({
+    required String accountId,
+    required int targetBalanceInCents,
+  }) async {
+    return _supabase.rpc<bool>(
+      CorrectAccountBalanceProcedure.procedureName,
+      params: CorrectAccountBalanceProcedure.createParams(
+        accountId: accountId,
+        targetBalanceInCents: targetBalanceInCents,
       ),
     );
   }
