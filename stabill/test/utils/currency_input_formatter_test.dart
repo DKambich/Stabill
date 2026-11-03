@@ -23,6 +23,12 @@ void main() {
       expect(CurrencyFormat.parseCents('-1.23'), isNull);
     });
 
+    test('parses signed target balances into cents', () {
+      expect(CurrencyFormat.parseSignedCents('123.45'), 12345);
+      expect(CurrencyFormat.parseSignedCents('-123.45'), -12345);
+      expect(CurrencyFormat.parseSignedCents('-'), isNull);
+    });
+
     test('formats typed digits and moves the caret to the end', () {
       const oldValue = TextEditingValue(
         text: '1.23',
@@ -38,6 +44,34 @@ void main() {
       expect(result.text, CurrencyFormat.formatCents(1234));
       expect(result.selection,
           TextSelection.collapsed(offset: result.text.length));
+    });
+
+    test('preserves a negative sign while entering a negative balance', () {
+      const formatter = CurrencyInputFormatter(
+        includeCurrencySymbol: false,
+        allowNegative: true,
+      );
+      const oldValue = TextEditingValue.empty;
+      const signValue = TextEditingValue(
+        text: '-',
+        selection: TextSelection.collapsed(offset: 1),
+      );
+      const zeroValue = TextEditingValue(
+        text: '-0',
+        selection: TextSelection.collapsed(offset: 2),
+      );
+      const oneValue = TextEditingValue(
+        text: '-01',
+        selection: TextSelection.collapsed(offset: 3),
+      );
+
+      final signResult = formatter.formatEditUpdate(oldValue, signValue);
+      final zeroResult = formatter.formatEditUpdate(signResult, zeroValue);
+      final oneResult = formatter.formatEditUpdate(zeroResult, oneValue);
+
+      expect(signResult.text, '-');
+      expect(zeroResult.text, '-');
+      expect(oneResult.text, '-0.01');
     });
   });
 }

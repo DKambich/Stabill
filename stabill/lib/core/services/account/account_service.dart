@@ -71,6 +71,22 @@ class AccountService {
     }
   }
 
+  Future<Result<bool>> correctBalance({
+    required String accountId,
+    required int targetBalanceInCents,
+  }) async {
+    try {
+      final corrected = await _databaseRepository.correctAccountBalance(
+        accountId: accountId,
+        targetBalanceInCents: targetBalanceInCents,
+      );
+      return Result.success(corrected);
+    } catch (error, stackTrace) {
+      debugPrint('correctBalance() failed: $error\n$stackTrace');
+      return Result.failure(error);
+    }
+  }
+
   Future<Result<List<Account>>> getAccounts() async {
     try {
       final accounts = await _databaseRepository.getAccounts();

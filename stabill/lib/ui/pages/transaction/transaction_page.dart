@@ -16,8 +16,14 @@ import 'package:stabill/utils/currency_input_formatter.dart';
 class TransactionPage extends StatefulWidget {
   final String accountId;
   final String? transactionId;
+  final Transaction? initialTransaction;
+  final bool initiallyEditing;
   const TransactionPage(
-      {super.key, required this.accountId, this.transactionId});
+      {super.key,
+      required this.accountId,
+      this.transactionId,
+      this.initialTransaction,
+      this.initiallyEditing = false});
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -39,7 +45,7 @@ class _TransactionPageState extends State<TransactionPage> {
   String? _memo;
   bool _isCleared = false;
   bool _isArchived = false;
-  bool _isEditing = false;
+  late bool _isEditing;
   bool _isLoading = false;
   bool _loadFailed = false;
   bool _hasUnsavedChanges = false;
@@ -59,11 +65,9 @@ class _TransactionPageState extends State<TransactionPage> {
 
     // Keep the route mounted until the user confirms discarding edits.
     return PopScope(
-      canPop: !_hasUnsavedChanges || _discardApproved,
+      canPop: (!_hasUnsavedChanges && !_isEditing) || _discardApproved,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _hasUnsavedChanges) {
-          _confirmDiscardAndNavigate();
-        }
+        if (!didPop) _handleBack();
       },
       child: Scaffold(
         appBar: AppBar(
@@ -86,10 +90,7 @@ class _TransactionPageState extends State<TransactionPage> {
               IconButton(
                 icon: const Icon(Icons.edit),
                 tooltip: 'Edit transaction',
-                onPressed: () => setState(() {
-                  _isEditing = true;
-                  _hasUnsavedChanges = false;
-                }),
+                onPressed: _openEdit,
               ),
             if (!isNewTransaction && _isEditing)
               IconButton(
@@ -129,14 +130,43 @@ class _TransactionPageState extends State<TransactionPage> {
                                   const EdgeInsets.symmetric(vertical: 8.0),
                               children: [
                                 TextFormField(
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     labelText: 'Name',
                                     border: OutlineInputBorder(),
                                     prefixIcon: Icon(Icons.label),
+                                    enabledBorder: isEditable
+                                        ? null
+                                        : OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: theme.colorScheme.onSurface
+                                                  .withValues(alpha: 0.12),
+                                            ),
+                                          ),
+                                    focusedBorder: isEditable
+                                        ? null
+                                        : OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: theme.colorScheme.onSurface
+                                                  .withValues(alpha: 0.12),
+                                            ),
+                                          ),
+                                    labelStyle: isEditable
+                                        ? null
+                                        : TextStyle(color: disabledColor),
+                                    floatingLabelStyle: isEditable
+                                        ? null
+                                        : TextStyle(color: disabledColor),
+                                    prefixIconColor:
+                                        isEditable ? null : disabledColor,
                                   ),
                                   controller: _nameController,
                                   autofocus: isNewTransaction,
-                                  enabled: isEditable,
+                                  readOnly: !isEditable,
+                                  style: isEditable
+                                      ? null
+                                      : theme.textTheme.bodyLarge?.copyWith(
+                                          color: disabledColor,
+                                        ),
                                   validator: (value) =>
                                       value == null || value.isEmpty
                                           ? 'Enter a name'
@@ -145,16 +175,50 @@ class _TransactionPageState extends State<TransactionPage> {
                                 ),
                                 const SizedBox(height: 16),
                                 TextFormField(
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     labelText: 'Amount',
                                     border: OutlineInputBorder(),
+                                    prefixIcon: Icon(Icons.attach_money),
+                                    enabledBorder: isEditable && !isVoidType
+                                        ? null
+                                        : OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: theme.colorScheme.onSurface
+                                                  .withValues(alpha: 0.12),
+                                            ),
+                                          ),
+                                    focusedBorder: isEditable && !isVoidType
+                                        ? null
+                                        : OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: theme.colorScheme.onSurface
+                                                  .withValues(alpha: 0.12),
+                                            ),
+                                          ),
+                                    labelStyle: isEditable && !isVoidType
+                                        ? null
+                                        : TextStyle(color: disabledColor),
+                                    floatingLabelStyle:
+                                        isEditable && !isVoidType
+                                            ? null
+                                            : TextStyle(color: disabledColor),
+                                    prefixIconColor: isEditable && !isVoidType
+                                        ? null
+                                        : disabledColor,
                                   ),
                                   controller: _amountController,
                                   keyboardType: TextInputType.number,
                                   inputFormatters: const [
-                                    CurrencyInputFormatter()
+                                    CurrencyInputFormatter(
+                                      includeCurrencySymbol: false,
+                                    )
                                   ],
-                                  enabled: isEditable && !isVoidType,
+                                  readOnly: !isEditable || isVoidType,
+                                  style: isEditable && !isVoidType
+                                      ? null
+                                      : theme.textTheme.bodyLarge?.copyWith(
+                                          color: disabledColor,
+                                        ),
                                   validator: (value) {
                                     if (isVoidType) return null;
                                     if (value == null || value.isEmpty) {
@@ -297,14 +361,33 @@ class _TransactionPageState extends State<TransactionPage> {
   @override
   void initState() {
     super.initState();
+    _isEditing = widget.initiallyEditing;
     if (!isNewTransaction) {
-      _isLoading = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadTransaction();
-      });
+      final transaction = widget.initialTransaction;
+      if (transaction != null && transaction.id == widget.transactionId) {
+        _originalTransaction = transaction;
+        _applyTransaction(transaction);
+      } else {
+        _isLoading = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _loadTransaction();
+        });
+      }
     } else {
-      _amountController.text = CurrencyFormat.formatCents(_amount);
+      _amountController.text = CurrencyFormat.formatCents(
+        _amount,
+        includeCurrencySymbol: false,
+      );
       _nameController.text = _name;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant TransactionPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initiallyEditing != widget.initiallyEditing) {
+      _isEditing = widget.initiallyEditing;
+      if (!_isEditing) _hasUnsavedChanges = false;
     }
   }
 
@@ -312,7 +395,10 @@ class _TransactionPageState extends State<TransactionPage> {
     _name = transaction.name;
     _nameController.text = transaction.name;
     _amount = transaction.amount;
-    _amountController.text = CurrencyFormat.formatCents(transaction.amount);
+    _amountController.text = CurrencyFormat.formatCents(
+      transaction.amount,
+      includeCurrencySymbol: false,
+    );
     _dateTime = transaction.transactionDate;
     _transactionType = transaction.transactionType;
     _transactionCategory = transaction.category;
@@ -401,8 +487,10 @@ class _TransactionPageState extends State<TransactionPage> {
                         ? newSelection.first
                         : TransactionType.deposit;
                     if (isVoidType) _amount = 0;
-                    _amountController.text =
-                        CurrencyFormat.formatCents(_amount);
+                    _amountController.text = CurrencyFormat.formatCents(
+                      _amount,
+                      includeCurrencySymbol: false,
+                    );
                   })
               : null,
           showSelectedIcon: false,
@@ -428,9 +516,11 @@ class _TransactionPageState extends State<TransactionPage> {
 
     setState(() {
       _applyTransaction(transaction);
-      _isEditing = false;
       _hasUnsavedChanges = false;
     });
+    context
+        .read<NavigationService>()
+        .finishTransactionEdit(widget.accountId, transaction);
   }
 
   Future<void> _confirmDiscardAndNavigate() async {
@@ -492,9 +582,25 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   void _navigateBack() {
-    context
-        .read<NavigationService>()
-        .navigateBack(fallbackRoute: Routes.account(widget.accountId));
+    if (!isNewTransaction && _isEditing) {
+      context.read<NavigationService>().goToAccount(widget.accountId);
+      return;
+    }
+
+    context.read<NavigationService>().navigateBack(
+          fallbackRoute: Routes.account(widget.accountId),
+        );
+  }
+
+  void _openEdit() {
+    final transaction = _originalTransaction;
+    if (transaction == null) return;
+
+    context.read<NavigationService>().navigateToEditTransaction(
+          widget.accountId,
+          transaction.id!,
+          transaction: transaction,
+        );
   }
 
   Future<void> _pickDateTime(BuildContext context) async {
@@ -597,10 +703,20 @@ class _TransactionPageState extends State<TransactionPage> {
           );
           setState(() {
             _hasUnsavedChanges = false;
-            _discardApproved = true;
+            _discardApproved = false;
+            if (!isNewTransaction) {
+              _originalTransaction = transaction;
+            }
           });
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) _navigateBack();
+            if (!mounted) return;
+            if (isNewTransaction) {
+              _navigateBack();
+            } else {
+              context
+                  .read<NavigationService>()
+                  .finishTransactionEdit(widget.accountId, transaction);
+            }
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
