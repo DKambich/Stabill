@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/providers/auth_provider.dart';
 import 'package:stabill/ui/pages/account/account_page.dart';
 import 'package:stabill/ui/pages/accounts/accounts_page.dart';
@@ -44,15 +45,16 @@ final router = GoRouter(
         final transactionId =
             state.pathParameters[RoutePathParameter.transaction];
         if (transactionId == 'add') {
-          return TransactionPage(
-            accountId: accountId,
-          );
-        } else {
-          return TransactionPage(
-            accountId: accountId,
-            transactionId: transactionId,
-          );
+          return TransactionPage(accountId: accountId);
         }
+        final transaction =
+            state.extra is Transaction ? state.extra! as Transaction : null;
+        return TransactionPage(
+          accountId: accountId,
+          transactionId: transactionId,
+          initialTransaction: transaction,
+          initiallyEditing: state.uri.queryParameters['mode'] == 'edit',
+        );
       },
     )
   ],
@@ -85,6 +87,9 @@ class Routes {
   static String addTransaction(String accountId) =>
       transaction(accountId, 'add');
 
+  static String editTransaction(String accountId, String transactionId) =>
+      '${transaction(accountId, transactionId)}?mode=edit';
+
   static String transaction(String accountId, String transactionId) =>
       RoutePatterns.transaction
           .replaceAll(RoutePatterns.accountToken, accountId)
@@ -92,5 +97,5 @@ class Routes {
 }
 
 extension GoRouteExtension on GoRouter {
-  navigate<T>(String route) => kIsWeb ? go(route) : push(route);
+  void navigate<T>(String route) => kIsWeb ? go(route) : push(route);
 }
