@@ -12,6 +12,7 @@ import 'package:stabill/data/models/account.dart';
 import 'package:stabill/data/models/transaction.dart';
 import 'package:stabill/data/stored_procedures/correct_account_balance_procedure.dart';
 import 'package:stabill/data/stored_procedures/create_account_procedure.dart';
+import 'package:stabill/data/stored_procedures/reorder_accounts_procedure.dart';
 import 'package:stabill/data/stored_procedures/transfer_funds_procedure.dart';
 import 'package:stabill/data/tables/accounts_table.dart';
 import 'package:stabill/data/tables/transactions_table.dart';
@@ -69,8 +70,10 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
     if (accountId.isEmpty) {
       throw ArgumentError('Cannot delete an account without an id');
     }
-    // TODO: implement actual delete logic
-    throw UnimplementedError();
+    await _supabase
+        .from(AccountsTable.tableName)
+        .delete()
+        .eq(AccountsTable.id, accountId);
   }
 
   @override
@@ -96,6 +99,45 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Future<Account> updateAccountName(String accountId, String name) async {
+    if (accountId.isEmpty) {
+      throw ArgumentError('Cannot update an account without an id');
+    }
+    final updatedAccount = await _supabase
+        .from(AccountsTable.tableName)
+        .update({AccountsTable.name: name})
+        .eq(AccountsTable.id, accountId)
+        .select()
+        .single();
+    return Account.fromJson(updatedAccount);
+  }
+
+  @override
+  Future<Account> setAccountArchived(
+    String accountId,
+    bool isArchived,
+  ) async {
+    if (accountId.isEmpty) {
+      throw ArgumentError('Cannot update an account without an id');
+    }
+    final updatedAccount = await _supabase
+        .from(AccountsTable.tableName)
+        .update({AccountsTable.isArchived: isArchived})
+        .eq(AccountsTable.id, accountId)
+        .select()
+        .single();
+    return Account.fromJson(updatedAccount);
+  }
+
+  @override
+  Future<void> reorderAccounts(List<String> accountIds) async {
+    await _supabase.rpc(
+      ReorderAccountsProcedure.procedureName,
+      params: ReorderAccountsProcedure.createParams(accountIds),
+    );
+  }
+
+  @override
   Stream<Account> getAccountAsStream(String accountId) {
     return _supabase
         .from(AccountsTable.tableName)
@@ -111,7 +153,8 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
     final accountRecords = await _supabase
         .from(AccountsTable.tableName)
         .select()
-        .eq(AccountsTable.userId, _getUserId());
+        .eq(AccountsTable.userId, _getUserId())
+        .order(AccountsTable.orderIndex);
     return accountRecords.map(Account.fromJson).toList();
   }
 
@@ -122,6 +165,7 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
         .from(AccountsTable.tableName)
         .stream(primaryKey: [AccountsTable.id])
         .eq(AccountsTable.userId, _getUserId())
+        .order(AccountsTable.orderIndex)
         .map(
           (accountRecords) => accountRecords.map(Account.fromJson).toList(),
         );

@@ -11,6 +11,9 @@ abstract class AbstractDatabaseRepository {
   Future<void> deleteTransaction(String transactionId);
   Future<Account> getAccount(String accountId);
   Stream<Account> getAccountAsStream(String accountId);
+  Future<Account> updateAccountName(String accountId, String name);
+  Future<Account> setAccountArchived(String accountId, bool isArchived);
+  Future<void> reorderAccounts(List<String> accountIds);
   Future<List<Account>> getAccounts();
   Stream<List<Account>> getAccountsStream();
   Future<Transaction> getTransaction(String transactionId);

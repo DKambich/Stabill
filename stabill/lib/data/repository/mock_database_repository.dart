@@ -23,6 +23,7 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
           available: account.balance?.current ?? 0),
       createdAt: DateTime.now(),
       isArchived: false,
+        orderIndex: _accounts.length,
     );
 
     // TODO: Add a related transaction to the list of transactions
@@ -70,6 +71,62 @@ class MockDatabaseRepository implements AbstractDatabaseRepository {
   Future<Account> getAccount(String accountId) async {
     var account = _accounts.firstWhere((account) => account.id == accountId);
     return account;
+  }
+
+  @override
+  Future<Account> updateAccountName(String accountId, String name) async {
+    final index = _accounts.indexWhere((account) => account.id == accountId);
+    if (index == -1) throw ArgumentError('Account not found');
+
+    final account = _accounts[index];
+    final updatedAccount = Account(
+      id: account.id,
+      name: name,
+      balance: account.balance,
+      createdAt: account.createdAt,
+      isArchived: account.isArchived,
+      orderIndex: account.orderIndex,
+    );
+    _accounts[index] = updatedAccount;
+    return updatedAccount;
+  }
+
+  @override
+  Future<Account> setAccountArchived(String accountId, bool isArchived) async {
+    final index = _accounts.indexWhere((account) => account.id == accountId);
+    if (index == -1) throw ArgumentError('Account not found');
+
+    final account = _accounts[index];
+    final updatedAccount = Account(
+      id: account.id,
+      name: account.name,
+      balance: account.balance,
+      createdAt: account.createdAt,
+      isArchived: isArchived,
+      orderIndex: account.orderIndex,
+    );
+    _accounts[index] = updatedAccount;
+    return updatedAccount;
+  }
+
+  @override
+  Future<void> reorderAccounts(List<String> accountIds) async {
+    for (var orderIndex = 0; orderIndex < accountIds.length; orderIndex++) {
+      final accountIndex = _accounts.indexWhere(
+        (account) => account.id == accountIds[orderIndex],
+      );
+      if (accountIndex == -1) continue;
+
+      final account = _accounts[accountIndex];
+      _accounts[accountIndex] = Account(
+        id: account.id,
+        name: account.name,
+        balance: account.balance,
+        createdAt: account.createdAt,
+        isArchived: account.isArchived,
+        orderIndex: orderIndex,
+      );
+    }
   }
 
   @override
