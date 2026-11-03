@@ -35,8 +35,7 @@ final router = GoRouter(
     ),
     GoRoute(
       path: Routes.archivedAccounts,
-      builder: (context, state) =>
-          AccountsPage(showArchivedAccounts: true),
+      builder: (context, state) => AccountsPage(showArchivedAccounts: true),
     ),
     GoRoute(
       path: Routes.settings,

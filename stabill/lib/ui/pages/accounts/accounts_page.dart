@@ -42,9 +42,8 @@ class _AccountsPageState extends State<AccountsPage> {
               widget.showArchivedAccounts ? 'Archived accounts' : 'Accounts',
             ),
             leading: AdaptiveBackButton(
-              fallbackRoute: widget.showArchivedAccounts
-                  ? Routes.accounts
-                  : Routes.home,
+              fallbackRoute:
+                  widget.showArchivedAccounts ? Routes.accounts : Routes.home,
             ),
             actions: [
               IconButton(
@@ -75,67 +74,72 @@ class _AccountsPageState extends State<AccountsPage> {
                 : PreferredSize(
                     preferredSize: const Size.fromHeight(64),
                     child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: StreamBuilder<Balance>(
-                  stream: balanceStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Text("Loading");
-                    }
+                      padding: const EdgeInsets.all(8.0),
+                      child: StreamBuilder<Balance>(
+                        stream: balanceStream,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Text("Loading");
+                          }
 
-                    if (snapshot.hasError) {
-                      return Column(
-                        children: [
-                          Text(snapshot.connectionState.toString()),
-                          Text("Error: ${snapshot.error}"),
-                        ],
-                      );
-                    }
+                          if (snapshot.hasError) {
+                            return Column(
+                              children: [
+                                Text(snapshot.connectionState.toString()),
+                                Text("Error: ${snapshot.error}"),
+                              ],
+                            );
+                          }
 
-                    if (snapshot.connectionState == ConnectionState.active &&
-                        !snapshot.hasData) {
-                      return Text("Oops no data!");
-                    }
+                          if (snapshot.connectionState ==
+                                  ConnectionState.active &&
+                              !snapshot.hasData) {
+                            return Text("Oops no data!");
+                          }
 
-                    Balance balance = snapshot.data!;
+                          Balance balance = snapshot.data!;
 
-                    return Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                          return Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: [
-                                  BalanceText(
-                                    balance: balance.availableInDollars,
-                                    maxFontSize: 18,
-                                    group: textGroup,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        BalanceText(
+                                          balance: balance.availableInDollars,
+                                          maxFontSize: 18,
+                                          group: textGroup,
+                                        ),
+                                        const Text("Available")
+                                      ],
+                                    ),
                                   ),
-                                  const Text("Available")
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        BalanceText(
+                                          balance: balance.currentInDollars,
+                                          maxFontSize: 18,
+                                          group: textGroup,
+                                        ),
+                                        const Text("Current")
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  BalanceText(
-                                    balance: balance.currentInDollars,
-                                    maxFontSize: 18,
-                                    group: textGroup,
-                                  ),
-                                  const Text("Current")
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
           ),
@@ -174,7 +178,7 @@ class _AccountsPageState extends State<AccountsPage> {
               }),
         ],
       ),
-        floatingActionButton: !widget.showArchivedAccounts && showActions
+      floatingActionButton: !widget.showArchivedAccounts && showActions
           ? FloatingActionButton(
               onPressed: _addAccount,
               elevation: 1,
@@ -182,33 +186,33 @@ class _AccountsPageState extends State<AccountsPage> {
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
-        bottomNavigationBar: widget.showArchivedAccounts
+      bottomNavigationBar: widget.showArchivedAccounts
           ? null
           : AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        height: showActions
-            ? kBottomNavigationBarHeight +
-                kFloatingActionButtonMargin // TODO: Decide if this is the correct height
-            : 0,
-        child: BottomAppBar(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          elevation: 45,
-          child: Row(
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.schedule),
-                tooltip: "Schedule Transactions",
+              duration: const Duration(milliseconds: 200),
+              height: showActions
+                  ? kBottomNavigationBarHeight +
+                      kFloatingActionButtonMargin // TODO: Decide if this is the correct height
+                  : 0,
+              child: BottomAppBar(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                elevation: 45,
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.schedule),
+                      tooltip: "Schedule Transactions",
+                    ),
+                    IconButton(
+                      onPressed: () => showTransferFundsDialog(context),
+                      icon: const Icon(Icons.swap_horiz),
+                      tooltip: "Transfer Funds",
+                    ),
+                  ],
+                ),
               ),
-              IconButton(
-                onPressed: () => showTransferFundsDialog(context),
-                icon: const Icon(Icons.swap_horiz),
-                tooltip: "Transfer Funds",
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -225,11 +229,11 @@ class _AccountsPageState extends State<AccountsPage> {
     var accountService = context.read<AccountService>();
     balanceStream = accountService.watchTotalBalance();
     accountStream = accountService.watchAccounts().map(
-      (accounts) => accounts
-        .where((account) =>
-          account.isArchived == widget.showArchivedAccounts)
-        .toList(),
-    );
+          (accounts) => accounts
+              .where((account) =>
+                  account.isArchived == widget.showArchivedAccounts)
+              .toList(),
+        );
 
     _controller.addListener(_onScroll);
   }
@@ -254,6 +258,48 @@ class _AccountsPageState extends State<AccountsPage> {
       ),
     );
   }
+
+  List<PopupMenuEntry<String>> _buildAccountMenuItems(
+    BuildContext context,
+    Account account,
+  ) =>
+      [
+        const PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined),
+              SizedBox(width: 8),
+              Text('Edit name'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: account.isArchived ? 'unarchive' : 'archive',
+          child: Row(
+            children: [
+              Icon(
+                account.isArchived
+                    ? Icons.unarchive_outlined
+                    : Icons.archive_outlined,
+              ),
+              const SizedBox(width: 8),
+              Text(account.isArchived ? 'Unarchive' : 'Archive'),
+            ],
+          ),
+        ),
+        if (account.isArchived)
+          const PopupMenuItem(
+            value: 'delete',
+            child: Row(
+              children: [
+                Icon(Icons.delete_outline),
+                SizedBox(width: 8),
+                Text('Delete permanently'),
+              ],
+            ),
+          ),
+      ];
 
   Widget _buildAccountTile(
     BuildContext context,
@@ -325,7 +371,7 @@ class _AccountsPageState extends State<AccountsPage> {
                     action,
                     account,
                   ),
-                    itemBuilder: (context) =>
+                  itemBuilder: (context) =>
                       _buildAccountMenuItems(context, account),
                 ),
               ],
@@ -360,60 +406,6 @@ class _AccountsPageState extends State<AccountsPage> {
         ],
       );
 
-  List<PopupMenuEntry<String>> _buildAccountMenuItems(
-    BuildContext context,
-    Account account,
-  ) => [
-        const PopupMenuItem(
-          value: 'edit',
-          child: Row(
-            children: [
-              Icon(Icons.edit_outlined),
-              SizedBox(width: 8),
-              Text('Edit name'),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: account.isArchived ? 'unarchive' : 'archive',
-          child: Row(
-            children: [
-              Icon(
-                account.isArchived
-                    ? Icons.unarchive_outlined
-                    : Icons.archive_outlined,
-              ),
-              const SizedBox(width: 8),
-              Text(account.isArchived ? 'Unarchive' : 'Archive'),
-            ],
-          ),
-        ),
-        if (account.isArchived)
-          const PopupMenuItem(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete_outline),
-                SizedBox(width: 8),
-                Text('Delete permanently'),
-              ],
-            ),
-          ),
-      ];
-
-  Future<void> _handleAccountAction(String action, Account account) async {
-    switch (action) {
-      case 'edit':
-        await _editAccountName(account);
-      case 'archive':
-        await _setAccountArchived(account, isArchived: true);
-      case 'unarchive':
-        await _setAccountArchived(account, isArchived: false);
-      case 'delete':
-        await _confirmDeleteAccount(account);
-    }
-  }
-
   Future<void> _confirmDeleteAccount(Account account) async {
     final accountId = account.id;
     if (accountId == null) return;
@@ -443,7 +435,8 @@ class _AccountsPageState extends State<AccountsPage> {
     );
     if (confirmed != true || !mounted) return;
 
-    final result = await context.read<AccountService>().deleteAccount(accountId);
+    final result =
+        await context.read<AccountService>().deleteAccount(accountId);
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -452,32 +445,6 @@ class _AccountsPageState extends State<AccountsPage> {
           result.isSuccess
               ? 'Account deleted'
               : 'Failed to delete account: ${result.error}',
-        ),
-      ),
-    );
-  }
-
-  Future<void> _setAccountArchived(
-    Account account, {
-    required bool isArchived,
-  }) async {
-    final accountId = account.id;
-    if (accountId == null) return;
-
-    final result = await context.read<AccountService>().setAccountArchived(
-          accountId: accountId,
-          isArchived: isArchived,
-        );
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          result.isSuccess
-              ? isArchived
-                  ? 'Account archived'
-                  : 'Account unarchived'
-              : 'Failed to ${isArchived ? 'archive' : 'unarchive'} account: ${result.error}',
         ),
       ),
     );
@@ -510,6 +477,63 @@ class _AccountsPageState extends State<AccountsPage> {
     );
   }
 
+  void _goToAccount(String accountId) {
+    context.read<NavigationService>().navigateToAccount(accountId);
+  }
+
+  Future<void> _handleAccountAction(String action, Account account) async {
+    switch (action) {
+      case 'edit':
+        await _editAccountName(account);
+      case 'archive':
+        await _setAccountArchived(account, isArchived: true);
+      case 'unarchive':
+        await _setAccountArchived(account, isArchived: false);
+      case 'delete':
+        await _confirmDeleteAccount(account);
+    }
+  }
+
+  void _onScroll() {
+    var showActions = switch (_controller.position.userScrollDirection) {
+      == ScrollDirection.forward => true,
+      == ScrollDirection.reverse => false,
+      _ => null
+    };
+
+    if (showActions != null) {
+      setState(() {
+        this.showActions = showActions;
+      });
+    }
+  }
+
+  Future<void> _setAccountArchived(
+    Account account, {
+    required bool isArchived,
+  }) async {
+    final accountId = account.id;
+    if (accountId == null) return;
+
+    final result = await context.read<AccountService>().setAccountArchived(
+          accountId: accountId,
+          isArchived: isArchived,
+        );
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result.isSuccess
+              ? isArchived
+                  ? 'Account archived'
+                  : 'Account unarchived'
+              : 'Failed to ${isArchived ? 'archive' : 'unarchive'} account: ${result.error}',
+        ),
+      ),
+    );
+  }
+
   Future<void> _showAccountMenu(
     BuildContext menuContext,
     Account account,
@@ -529,24 +553,6 @@ class _AccountsPageState extends State<AccountsPage> {
 
     if (action != null && mounted) {
       await _handleAccountAction(action, account);
-    }
-  }
-
-  void _goToAccount(String accountId) {
-    context.read<NavigationService>().navigateToAccount(accountId);
-  }
-
-  void _onScroll() {
-    var showActions = switch (_controller.position.userScrollDirection) {
-      == ScrollDirection.forward => true,
-      == ScrollDirection.reverse => false,
-      _ => null
-    };
-
-    if (showActions != null) {
-      setState(() {
-        this.showActions = showActions;
-      });
     }
   }
 }

@@ -24,12 +24,6 @@ class _EditAccountNameDialogState extends State<_EditAccountNameDialog> {
   late final _nameController = TextEditingController(text: widget.accountName);
 
   @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Edit account name'),
@@ -64,6 +58,12 @@ class _EditAccountNameDialogState extends State<_EditAccountNameDialog> {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
   void _submit() {

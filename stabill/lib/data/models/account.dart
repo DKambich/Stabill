@@ -42,8 +42,8 @@ class Account {
       ),
       createdAt: DateTime.parse(json[AccountsTable.createdAt] as String),
       isArchived: json[AccountsTable.isArchived] as bool,
-        orderIndex: (json[AccountsTable.orderIndex] as num?)?.toInt() ??
-          2147483647,
+      orderIndex:
+          (json[AccountsTable.orderIndex] as num?)?.toInt() ?? 2147483647,
     );
   }
 

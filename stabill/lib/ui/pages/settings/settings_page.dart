@@ -21,9 +21,8 @@ class SettingsPage extends StatelessWidget {
             title: const Text('Accounts'),
             subtitle: const Text('Reorder accounts'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context
-                .read<NavigationService>()
-                .navigateToAccountSettings(),
+            onTap: () =>
+                context.read<NavigationService>().navigateToAccountSettings(),
           ),
         ],
       ),

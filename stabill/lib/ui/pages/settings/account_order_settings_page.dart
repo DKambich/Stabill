@@ -20,12 +20,6 @@ class _AccountOrderSettingsPageState extends State<AccountOrderSettingsPage> {
   Object? _loadError;
 
   @override
-  void initState() {
-    super.initState();
-    _loadAccounts();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -44,6 +38,12 @@ class _AccountOrderSettingsPageState extends State<AccountOrderSettingsPage> {
       ),
       body: _buildBody(),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAccounts();
   }
 
   Widget _buildBody() {
@@ -144,7 +144,8 @@ class _AccountOrderSettingsPageState extends State<AccountOrderSettingsPage> {
 
     if (result.isFailure) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save account order: ${result.error}')),
+        SnackBar(
+            content: Text('Failed to save account order: ${result.error}')),
       );
     }
   }

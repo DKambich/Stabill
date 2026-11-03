@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stabill/utils/currency_format.dart';
 import 'package:stabill/utils/currency_input_formatter.dart';
 
-Future<({String name, int startingBalanceInCents})?>
-    showCreateAccountDialog(BuildContext context) {
+Future<({String name, int startingBalanceInCents})?> showCreateAccountDialog(
+    BuildContext context) {
   return showDialog<({String name, int startingBalanceInCents})>(
     context: context,
     builder: (_) => const _CreateAccountDialog(),
@@ -23,13 +23,6 @@ class _CreateAccountDialogState extends State<_CreateAccountDialog> {
   final _balanceController = TextEditingController(text: '0.00');
 
   int? _startingBalanceInCents;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _balanceController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +88,13 @@ class _CreateAccountDialogState extends State<_CreateAccountDialog> {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _balanceController.dispose();
+    super.dispose();
   }
 
   void _submit() {

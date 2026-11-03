@@ -24,6 +24,20 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
   final AbstractAuthService _authService = AuthService.instance;
   @override
+  Future<bool> correctAccountBalance({
+    required String accountId,
+    required int targetBalanceInCents,
+  }) async {
+    return _supabase.rpc<bool>(
+      CorrectAccountBalanceProcedure.procedureName,
+      params: CorrectAccountBalanceProcedure.createParams(
+        accountId: accountId,
+        targetBalanceInCents: targetBalanceInCents,
+      ),
+    );
+  }
+
+  @override
   Future<Account> createAccount(Account account) async {
     var userId = _getUserId();
     try {
@@ -95,45 +109,6 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
           .select()
           .eq(AccountsTable.id, accountId)
           .single(),
-    );
-  }
-
-  @override
-  Future<Account> updateAccountName(String accountId, String name) async {
-    if (accountId.isEmpty) {
-      throw ArgumentError('Cannot update an account without an id');
-    }
-    final updatedAccount = await _supabase
-        .from(AccountsTable.tableName)
-        .update({AccountsTable.name: name})
-        .eq(AccountsTable.id, accountId)
-        .select()
-        .single();
-    return Account.fromJson(updatedAccount);
-  }
-
-  @override
-  Future<Account> setAccountArchived(
-    String accountId,
-    bool isArchived,
-  ) async {
-    if (accountId.isEmpty) {
-      throw ArgumentError('Cannot update an account without an id');
-    }
-    final updatedAccount = await _supabase
-        .from(AccountsTable.tableName)
-        .update({AccountsTable.isArchived: isArchived})
-        .eq(AccountsTable.id, accountId)
-        .select()
-        .single();
-    return Account.fromJson(updatedAccount);
-  }
-
-  @override
-  Future<void> reorderAccounts(List<String> accountIds) async {
-    await _supabase.rpc(
-      ReorderAccountsProcedure.procedureName,
-      params: ReorderAccountsProcedure.createParams(accountIds),
     );
   }
 
@@ -312,6 +287,31 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
+  Future<void> reorderAccounts(List<String> accountIds) async {
+    await _supabase.rpc(
+      ReorderAccountsProcedure.procedureName,
+      params: ReorderAccountsProcedure.createParams(accountIds),
+    );
+  }
+
+  @override
+  Future<Account> setAccountArchived(
+    String accountId,
+    bool isArchived,
+  ) async {
+    if (accountId.isEmpty) {
+      throw ArgumentError('Cannot update an account without an id');
+    }
+    final updatedAccount = await _supabase
+        .from(AccountsTable.tableName)
+        .update({AccountsTable.isArchived: isArchived})
+        .eq(AccountsTable.id, accountId)
+        .select()
+        .single();
+    return Account.fromJson(updatedAccount);
+  }
+
+  @override
   Future<void> transferFunds({
     required String fromAccountId,
     required String toAccountId,
@@ -328,17 +328,17 @@ class SupabaseDatabaseRepository implements AbstractDatabaseRepository {
   }
 
   @override
-  Future<bool> correctAccountBalance({
-    required String accountId,
-    required int targetBalanceInCents,
-  }) async {
-    return _supabase.rpc<bool>(
-      CorrectAccountBalanceProcedure.procedureName,
-      params: CorrectAccountBalanceProcedure.createParams(
-        accountId: accountId,
-        targetBalanceInCents: targetBalanceInCents,
-      ),
-    );
+  Future<Account> updateAccountName(String accountId, String name) async {
+    if (accountId.isEmpty) {
+      throw ArgumentError('Cannot update an account without an id');
+    }
+    final updatedAccount = await _supabase
+        .from(AccountsTable.tableName)
+        .update({AccountsTable.name: name})
+        .eq(AccountsTable.id, accountId)
+        .select()
+        .single();
+    return Account.fromJson(updatedAccount);
   }
 
   @override
