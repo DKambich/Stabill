@@ -65,7 +65,7 @@ The record of the created account
 
 ### **transfer_funds**
 
-Creates a cleared withdrawal in the source account and a cleared deposit in the destination account. Both inserts run in one database transaction, so either both records are created or neither is.
+Creates a cleared withdrawal in the source account and a cleared deposit in the destination account. The withdrawal is named `Transfer to {destination account name}` and the deposit is named `Transfer from {source account name}`. Both inserts run in one database transaction, so either both records are created or neither is.
 
 #### Parameters
 
@@ -73,7 +73,198 @@ Creates a cleared withdrawal in the source account and a cleared deposit in the 
 - `p_to_account_id` (uuid) - The destination account
 - `p_amount` (bigint) - Positive amount in cents
 
-The function is an invoker and relies on the account and transaction row-level security policies.
+#### Outputs
+
+Returns `void`.
+
+#### Exceptions
+
+- Raises an exception if the source and destination accounts are the same
+- Raises an exception if the amount is null or less than or equal to zero
+- Raises an exception if either account cannot be found or accessed
+
+The function runs as the caller and relies on the account and transaction row-level security policies. A transaction trigger updates account balances; the function does not change balances directly.
+
+#### Implementation
+
+```sql
+create or replace function public.transfer_funds(
+  p_from_account_id uuid,
+  p_to_account_id uuid,
+  p_amount bigint
+)
+returns void
+language plpgsql
+security invoker
+set search_path = public, pg_temp
+as $$
+declare
+  v_transfer_date timestamptz := now();
+  v_from_account_name text;
+  v_to_account_name text;
+begin
+  if p_from_account_id = p_to_account_id then
+    raise exception 'Transfer accounts must be different';
+  end if;
+
+  if p_amount is null or p_amount <= 0 then
+    raise exception 'Transfer amount must be greater than zero';
+  end if;
+
+  select name into v_from_account_name
+  from public.accounts
+  where id = p_from_account_id;
+  if not found then
+    raise exception 'Source account not found';
+  end if;
+
+  select name into v_to_account_name
+  from public.accounts
+  where id = p_to_account_id;
+  if not found then
+    raise exception 'Destination account not found';
+  end if;
+
+  insert into public.transactions (
+    account_id, name, amount, transaction_date,
+    transaction_type, transaction_category, is_cleared, is_archived
+  ) values (
+    p_from_account_id,
+    'Transfer to ' || v_to_account_name,
+    p_amount,
+    v_transfer_date,
+    'withdrawal',
+    'none',
+    true,
+    false
+  );
+
+  insert into public.transactions (
+    account_id, name, amount, transaction_date,
+    transaction_type, transaction_category, is_cleared, is_archived
+  ) values (
+    p_to_account_id,
+    'Transfer from ' || v_from_account_name,
+    p_amount,
+    v_transfer_date,
+    'deposit',
+    'none',
+    true,
+    false
+  );
+end;
+$$;
+```
+
+### **correct_account_balance**
+
+Corrects an account to a target current balance by creating one cleared deposit or withdrawal for the difference. The target is expressed in cents and may be negative. The function locks the account row while reading its current balance, so concurrent corrections are serialized. If the account already has the target balance, no transaction is created and the function returns `false`.
+
+#### Parameters
+
+- `p_account_id` (uuid) - The account to correct
+- `p_target_balance` (bigint) - The target current balance in cents
+
+#### Outputs
+
+Returns `true` when a balance-correction transaction is created, or `false` when no correction is needed.
+
+The function runs as the caller and relies on account and transaction row-level security policies. A transaction trigger must update `current_balance` and `available_balance`; the function does not update account balances directly.
+
+#### Implementation
+
+```sql
+create or replace function public.correct_account_balance(
+  p_account_id uuid,
+  p_target_balance bigint
+)
+returns boolean
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_current_balance bigint;
+  v_adjustment bigint;
+  v_adjustment_date timestamptz := now();
+begin
+  if p_account_id is null then
+    raise exception 'Account id is required';
+  end if;
+
+  if p_target_balance is null then
+    raise exception 'Target balance is required';
+  end if;
+
+  if p_target_balance < -2147483648
+     or p_target_balance > 2147483647 then
+    raise exception 'Target balance is outside the supported range';
+  end if;
+
+  select current_balance into v_current_balance
+  from public.accounts
+  where id = p_account_id
+  for update;
+
+  if not found then
+    raise exception 'Account not found';
+  end if;
+
+  v_adjustment := p_target_balance - v_current_balance;
+
+  if v_adjustment = 0 then
+    return false;
+  end if;
+
+  if v_adjustment > 0 then
+    insert into public.transactions (
+      account_id,
+      name,
+      amount,
+      transaction_date,
+      transaction_type,
+      transaction_category,
+      is_cleared,
+      is_archived
+    ) values (
+      p_account_id,
+      'Balance correction',
+      v_adjustment,
+      v_adjustment_date,
+      'deposit',
+      'other',
+      true,
+      false
+    );
+  else
+    insert into public.transactions (
+      account_id,
+      name,
+      amount,
+      transaction_date,
+      transaction_type,
+      transaction_category,
+      is_cleared,
+      is_archived
+    ) values (
+      p_account_id,
+      'Balance correction',
+      abs(v_adjustment),
+      v_adjustment_date,
+      'withdrawal',
+      'other',
+      true,
+      false
+    );
+  end if;
+
+  return true;
+end;
+$$;
+
+grant execute on function public.correct_account_balance(uuid, bigint)
+  to authenticated;
+```
 
 # To Be Implemented
 

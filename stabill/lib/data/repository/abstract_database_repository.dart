@@ -31,6 +31,10 @@ abstract class AbstractDatabaseRepository {
     required String toAccountId,
     required int amountInCents,
   });
+  Future<bool> correctAccountBalance({
+    required String accountId,
+    required int targetBalanceInCents,
+  });
   Future<Transaction> updateTransaction(Transaction transaction);
   Stream<TransactionChange> watchTransactions(String accountId);
 }
