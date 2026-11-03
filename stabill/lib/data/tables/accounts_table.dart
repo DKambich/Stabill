@@ -8,7 +8,6 @@ class AccountsTable {
   static const String availableBalance = 'available_balance';
   static const String createdAt = 'created_at';
   static const String isArchived = 'is_archived';
-  static const String orderIndex = 'order_index';
 
   static List<String> get columns => [
         id,
@@ -18,6 +17,5 @@ class AccountsTable {
         availableBalance,
         createdAt,
         isArchived,
-        orderIndex,
       ];
 }

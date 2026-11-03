@@ -21,7 +21,6 @@ Stores user-created accounts with their respective balances.
 - `current_balance` (integer) - The current balance (includes cleared and pending transactions) of the account in cents.
 - `available_balance` (integer) - The available balance (only includes cleared transactions) of the account in cents.
 - `is_archived` (boolean) - Whether the account is archived
-- `order_index` (integer) - The user's display order for the account
 
 #### RLS Policies
 
@@ -34,8 +33,6 @@ Stores user-created accounts with their respective balances.
 
 - This table is realtime for updates and deletes so `alter table
 accounts replica identity full` was run to allow that
-- Deleting an account relies on the existing foreign-key cascade to remove its
-  related transactions; the account DELETE policy controls access.
 
 ## Stored Procedures
 
@@ -65,48 +62,6 @@ The record of the created account
 
 - Raises an exception if the account name is null or empty
 - Raises an exception if the starting balance is less than 0
-
-### **reorder_accounts**
-
-Updates the display order for the supplied account IDs. The function runs as
-the caller, so the accounts UPDATE RLS policy controls which rows can change.
-The account IDs are passed as a JSON array through the `jsonb` parameter.
-
-Run this in the Supabase SQL editor:
-
-```sql
-create or replace function public.reorder_accounts(p_account_ids jsonb)
-returns void
-language plpgsql
-security invoker
-set search_path = ''
-as $$
-declare
-  v_account_id uuid;
-  v_order_index integer := 0;
-begin
-  if jsonb_typeof(p_account_ids) <> 'array' then
-    raise exception 'Account IDs must be a JSON array';
-  end if;
-
-  for v_account_id in
-    select item.value::uuid
-    from jsonb_array_elements_text(p_account_ids) with ordinality
-      as item(value, position)
-    order by item.position
-  loop
-    update public.accounts
-    set order_index = v_order_index
-    where id = v_account_id;
-
-    v_order_index := v_order_index + 1;
-  end loop;
-end;
-$$;
-
-revoke all on function public.reorder_accounts(jsonb) from public;
-grant execute on function public.reorder_accounts(jsonb) to authenticated;
-```
 
 ### **transfer_funds**
 
@@ -314,6 +269,10 @@ grant execute on function public.correct_account_balance(uuid, bigint)
 # To Be Implemented
 
 ## Tables
+
+### **Accounts**
+
+- `order_index` (INTEGER) - Custom ordering for UI.
 
 ### **Transactions**
 

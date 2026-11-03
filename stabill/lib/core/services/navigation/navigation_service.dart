@@ -38,14 +38,8 @@ class NavigationService {
 
   Future<void> navigateToAccounts() async => _router.navigate(Routes.accounts);
 
-  Future<void> navigateToAccountSettings() async =>
-      _router.navigate(Routes.accountSettings);
-
   Future<void> navigateToAddTransaction(String accountId) async =>
       _router.navigate(Routes.addTransaction(accountId));
-
-  Future<void> navigateToArchivedAccounts() async =>
-      _router.navigate(Routes.archivedAccounts);
 
   Future<void> navigateToEditTransaction(
     String accountId,
@@ -59,8 +53,6 @@ class NavigationService {
   }
 
   Future<void> navigateToHome() async => _router.navigate(Routes.home);
-
-  Future<void> navigateToSettings() async => _router.navigate(Routes.settings);
 
   Future<void> navigateToSignIn() async => _router.navigate(Routes.signIn);
 

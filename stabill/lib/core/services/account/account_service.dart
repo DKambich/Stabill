@@ -20,22 +20,6 @@ class AccountService {
     );
   }
 
-  Future<Result<bool>> correctBalance({
-    required String accountId,
-    required int targetBalanceInCents,
-  }) async {
-    try {
-      final corrected = await _databaseRepository.correctAccountBalance(
-        accountId: accountId,
-        targetBalanceInCents: targetBalanceInCents,
-      );
-      return Result.success(corrected);
-    } catch (error, stackTrace) {
-      debugPrint('correctBalance() failed: $error\n$stackTrace');
-      return Result.failure(error);
-    }
-  }
-
   /// Creates a new account with the given [accountName] and [startingBalance].
   Future<Result<Account>> createAccount(
     String accountName,
@@ -87,52 +71,28 @@ class AccountService {
     }
   }
 
+  Future<Result<bool>> correctBalance({
+    required String accountId,
+    required int targetBalanceInCents,
+  }) async {
+    try {
+      final corrected = await _databaseRepository.correctAccountBalance(
+        accountId: accountId,
+        targetBalanceInCents: targetBalanceInCents,
+      );
+      return Result.success(corrected);
+    } catch (error, stackTrace) {
+      debugPrint('correctBalance() failed: $error\n$stackTrace');
+      return Result.failure(error);
+    }
+  }
+
   Future<Result<List<Account>>> getAccounts() async {
     try {
       final accounts = await _databaseRepository.getAccounts();
-      return Result.success(_sortAccounts(accounts));
+      return Result.success(accounts);
     } catch (error, stackTrace) {
       debugPrint('getAccounts() failed: $error\n$stackTrace');
-      return Result.failure(error);
-    }
-  }
-
-  Future<Result<void>> reorderAccounts(List<String> accountIds) async {
-    try {
-      await _databaseRepository.reorderAccounts(accountIds);
-      return Result.success(null);
-    } catch (error, stackTrace) {
-      debugPrint('reorderAccounts() failed: $error\n$stackTrace');
-      return Result.failure(error);
-    }
-  }
-
-  Future<Result<Account>> setAccountArchived({
-    required String accountId,
-    required bool isArchived,
-  }) async {
-    try {
-      final account = await _databaseRepository.setAccountArchived(
-        accountId,
-        isArchived,
-      );
-      return Result.success(account);
-    } catch (error, stackTrace) {
-      debugPrint('setAccountArchived() failed: $error\n$stackTrace');
-      return Result.failure(error);
-    }
-  }
-
-  Future<Result<Account>> updateAccountName({
-    required String accountId,
-    required String name,
-  }) async {
-    try {
-      final account =
-          await _databaseRepository.updateAccountName(accountId, name.trim());
-      return Result.success(account);
-    } catch (error, stackTrace) {
-      debugPrint('updateAccountName() failed: $error\n$stackTrace');
       return Result.failure(error);
     }
   }
@@ -150,21 +110,22 @@ class AccountService {
   }
 
   /// Watch all accounts reactively.
-  Stream<List<Account>> watchAccounts() =>
-      _accountsLazy.stream.map(_sortAccounts);
+  Stream<List<Account>> watchAccounts() => _accountsLazy.stream;
 
   /// Watch the total balance across all accounts reactively.
   Stream<Balance> watchTotalBalance() {
     return _accountsLazy.stream
         .map(
-          (accounts) => accounts.where((account) => !account.isArchived).fold(
-                Balance(current: 0, available: 0),
-                (balance, account) => Balance(
-                  current: balance.current + (account.balance?.current ?? 0),
-                  available:
-                      balance.available + (account.balance?.available ?? 0),
-                ),
-              ),
+          (accounts) => Balance(
+            current: accounts.fold(
+              0,
+              (curr, acc) => curr + (acc.balance?.current ?? 0),
+            ),
+            available: accounts.fold(
+              0,
+              (avail, acc) => avail + (acc.balance?.available ?? 0),
+            ),
+          ),
         )
         .distinct(
           (prev, next) =>
@@ -189,21 +150,5 @@ class AccountService {
         return Stream.error(error, stackTrace);
       },
     );
-  }
-
-  List<Account> _sortAccounts(Iterable<Account> accounts) {
-    final sortedAccounts = List<Account>.of(accounts);
-    sortedAccounts.sort((left, right) {
-      final order = left.orderIndex.compareTo(right.orderIndex);
-      if (order != 0) return order;
-      final leftCreatedAt = left.createdAt;
-      final rightCreatedAt = right.createdAt;
-      if (leftCreatedAt != null && rightCreatedAt != null) {
-        final createdAtOrder = leftCreatedAt.compareTo(rightCreatedAt);
-        if (createdAtOrder != 0) return createdAtOrder;
-      }
-      return (left.id ?? '').compareTo(right.id ?? '');
-    });
-    return sortedAccounts;
   }
 }
