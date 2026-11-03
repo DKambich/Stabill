@@ -23,14 +23,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         appBar: AppBar(
           title: Text("Home Page"),
-          actions: [
-            IconButton(
-              onPressed: () =>
-                  context.read<NavigationService>().navigateToSettings(),
-              tooltip: 'Settings',
-              icon: const Icon(Icons.settings_outlined),
-            ),
-          ],
         ),
         body: Center(
           child: Column(
